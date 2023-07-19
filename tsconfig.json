@@ -3,6 +3,7 @@
   "compilerOptions": {
     "target": "ESNext",
     "useDefineForClassFields": true,
+    "allowSyntheticDefaultImports": true,
     "module": "ESNext",
     "resolveJsonModule": true,
     "baseUrl": ".",

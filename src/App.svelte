@@ -1,4 +1,5 @@
 <script lang="ts">
+  import './index.css';
   import Login from '$components/Login/index.svelte';
   import ServerSidebar from '$components/ServerSidebar/index.svelte';
   import MainContent from '$components/MainContent/index.svelte';
@@ -15,18 +16,18 @@
         dir: fs.BaseDirectory.AppData,
       });
 
-      await invoke('set_session_token', { token });
+      await invoke('login_with_token', { token });
       invoke('run_client');
     } else {
       show = 'login';
     }
 
     event.listen<ReadyPayload>('ready', (event) => {
-      show = 'main';
       users.set(event.payload.users);
       servers.set(event.payload.servers);
       channels.set(event.payload.channels);
       emojis.set(event.payload.emojis);
+      show = 'main';
     });
   });
 </script>
@@ -35,7 +36,7 @@
   {#if show === 'login'}
     <Login />
   {:else if show === 'main'}
-    <div class="grid-container">
+    <span class="grid-container">
       <span class="server-sidebar-container">
         <ServerSidebar />
       </span>
@@ -48,6 +49,6 @@
       <span class="right-sidebar-container">
         <MembersList />
       </span>
-    </div>
+    </span>
   {/if}
 {/if}

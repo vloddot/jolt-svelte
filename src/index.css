@@ -1,21 +1,29 @@
-.grid-container {
-  display: grid;
-  grid-template-areas:
-    'server-sidebar channel-bar main-content right-sidebar';
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-.server-sidebar-container {
-  grid-area: server-sidebar;
-}
+@layer components {
+  .grid-container {
+    display: grid;
+    grid-template-areas: 'server-sidebar channel-bar main-content right-sidebar';
+    grid-template-columns: 64px 256px 1fr 256px;
+  }
 
-.channel-bar-container {
-  grid-area: channel-bar;
-}
+  .server-sidebar-container {
+    grid-area: server-sidebar;
+    @apply h-screen flex flex-col m-0 bg-gray-900 shadow-lg;
+  }
 
-.main-content-container {
-  grid-area: main-content;
-}
+  .channel-bar-container {
+    grid-area: channel-bar;
+    @apply h-screen flex flex-col m-0 bg-gray-800 text-white;
+  }
 
-.right-sidebar-container {
-  grid-area: right-sidebar;
+  .main-content-container {
+    grid-area: main-content;
+  }
+
+  .right-sidebar-container {
+    grid-area: right-sidebar;
+  }
 }

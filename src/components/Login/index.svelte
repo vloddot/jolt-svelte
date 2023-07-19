@@ -3,7 +3,7 @@
 
   let email: string;
   let password: string;
-  let error: string | undefined;
+  let error: string | undefined = undefined;
 
   async function login() {
     try {

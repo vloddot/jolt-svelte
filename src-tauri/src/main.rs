@@ -11,7 +11,15 @@ use reywen_http::driver::Method;
 use tauri::Manager;
 
 use reywen::{
-    structures::{channels::channel::Channel, server::server::Server, users::user::User},
+    client::methods::message::DataQueryMessages,
+    structures::{
+        channels::{
+            channel::Channel,
+            message::{BulkMessageResponse2, MessageSort},
+        },
+        server::server::Server,
+        users::user::User,
+    },
     websocket::data::WebSocketEvent,
 };
 
@@ -29,14 +37,16 @@ impl Deref for Client {
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 async fn login(
-    global_client: tauri::State<'_, Client>,
+    client: tauri::State<'_, Client>,
     email: String,
     password: String,
 ) -> Result<String, String> {
-    let mut client = global_client.lock().await;
+    let mut client = client.lock().await;
     client.http.content_type = Some("application/json".to_string());
 
-    let result = client
+    // TODO: Better error handling
+
+    let body: HashMap<String, serde_json::Value> = client
         .http
         .set_url("https://api.revolt.chat")
         .request(
@@ -44,26 +54,27 @@ async fn login(
             "/auth/session/login",
             Some(&format!(r#"{{"email":{email:?},"password":{password:?}}}"#)),
         )
-        .await;
+        .await
+        .map_err(|err| format!("Failed to login: {err:?}"))?;
 
-    let body: HashMap<String, serde_json::Value> =
-        result.map_err(|err| format!("Failed to login: {err:?}"))?;
+    if let Some(serde_json::Value::String(token)) = body.get("token") {
+        *client = reywen::client::Client::from_token(token, false)
+            .map_err(|err| format!("Failed to initialize client: {err:?}"))?;
 
-    let Some(serde_json::Value::String(token)) = body.get("token") else {
-        return Err(String::from("Invalid JSON schema: `token` not found"));
-    };
+        drop(client);
 
-    *client = reywen::client::Client::from_token(token, false)
-        .map_err(|err| format!("Failed to initialize client: {err:?}"))?;
-    drop(client);
-
-    Ok(token.clone())
+        Ok(token.clone())
+    } else if body.get("ticket").is_some() {
+        // TODO
+        Err(String::from("MFA not supported"))
+    } else {
+        Err(String::from("Invalid JSON schema of response: {body:?}"))
+    }
 }
 
 #[tauri::command]
 async fn fetch_user(client: tauri::State<'_, Client>, user: &str) -> Result<User, String> {
     client
-        .0
         .lock()
         .await
         .user_fetch(user)
@@ -74,7 +85,6 @@ async fn fetch_user(client: tauri::State<'_, Client>, user: &str) -> Result<User
 #[tauri::command]
 async fn fetch_server(client: tauri::State<'_, Client>, server: &str) -> Result<Server, String> {
     client
-        .0
         .lock()
         .await
         .server_fetch(server)
@@ -85,7 +95,6 @@ async fn fetch_server(client: tauri::State<'_, Client>, server: &str) -> Result<
 #[tauri::command]
 async fn fetch_channel(client: tauri::State<'_, Client>, channel: &str) -> Result<Channel, String> {
     client
-        .0
         .lock()
         .await
         .channel_fetch(channel)
@@ -94,8 +103,27 @@ async fn fetch_channel(client: tauri::State<'_, Client>, channel: &str) -> Resul
 }
 
 #[tauri::command]
-async fn set_session_token(client: tauri::State<'_, Client>, token: &str) -> Result<(), String> {
-    *client.0.lock().await =
+async fn fetch_messages(
+    client: tauri::State<'_, Client>,
+    channel: &str,
+    limit: Option<i64>,
+) -> Result<BulkMessageResponse2, String> {
+    client
+        .lock()
+        .await
+        .message_query(
+            channel,
+            &DataQueryMessages::new()
+                .set_limit(limit.unwrap_or(50))
+                .set_sort(MessageSort::Latest),
+        )
+        .await
+        .map_err(|err| format!("Fetch error: {err:?}"))
+}
+
+#[tauri::command]
+async fn login_with_token(client: tauri::State<'_, Client>, token: &str) -> Result<(), String> {
+    *client.lock().await =
         reywen::client::Client::from_token(token, false).map_err(|err| format!("{err:?}"))?;
 
     Ok(())
@@ -107,7 +135,7 @@ async fn run_client<R: tauri::Runtime>(
     client: tauri::State<'_, Client>,
 ) -> Result<(), ()> {
     loop {
-        let (mut read, _) = client.0.lock().await.websocket.dual_async().await;
+        let (mut read, _) = client.lock().await.websocket.dual_async().await;
 
         while let Some(event) = read.next().await {
             match event {
@@ -133,7 +161,8 @@ fn main() {
             fetch_user,
             fetch_server,
             fetch_channel,
-            set_session_token,
+            fetch_messages,
+            login_with_token,
             run_client
         ])
         .run(tauri::generate_context!())

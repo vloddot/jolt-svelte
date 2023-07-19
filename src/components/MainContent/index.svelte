@@ -1,12 +1,9 @@
 <script>
-  import Home from "./Home.svelte";
-  import Server from "./Server.svelte";
-  import { currentServerIndex } from "$lib/stores";
+    import { currentServerID } from '$lib/stores';
+    import Messages from './Messages.svelte';
 
 </script>
 
-{#if $currentServerIndex === null}
-  <Home />
-{:else}
-  <Server index={$currentServerIndex} />
+{#if $currentServerID !== null}
+  <Messages />
 {/if}
