@@ -3,6 +3,21 @@
   import { channels as channelStore, currentServerID, servers } from '$lib/stores';
   import { fetchUser, generateDicebearAvatar, getIconURL } from '$lib/helpers';
 
+  function channelIcon(channel: Exclude<Channel, { channel_type: 'DirectMessage' | 'SavedMessages' }>): string {
+    if (channel.icon !== undefined) {
+      return getIconURL(channel.icon);
+    }
+
+    switch (channel.channel_type) {
+      case 'Group':
+        return '/group.svg';
+      case 'TextChannel':
+        return '/hashtag.svg';
+      case 'VoiceChannel':
+        return '/headset.svg';
+    }
+  }
+
   $: channels = $currentServerID === null
     ? $channelStore.filter((channel) => channel.channel_type === 'DirectMessage' && channel.active)
     : $servers.find(({ _id }) => _id === $currentServerID).channels.map((id) => $channelStore.find((channel) => channel._id === id));
@@ -12,7 +27,7 @@
   {#each channels as channel}
     {#if channel !== undefined}
       {#if channel.channel_type === 'DirectMessage'}
-        {#await fetchUser(channel.recipients[1]) then user}
+        {#await fetchUser(channel.recipients[0]) then user}
           <ChannelComponent
             src={user.avatar === undefined
               ? generateDicebearAvatar()
@@ -29,7 +44,7 @@
         {/await}
       {:else if channel.channel_type === 'TextChannel' || channel.channel_type === 'VoiceChannel' || channel.channel_type === 'Group'}
         <ChannelComponent
-          src={channel.icon === undefined ? '/hashtag.svg' : getIconURL(channel.icon)}
+          src={channelIcon(channel)}
           name={channel.name}
           width="24"
           height="24"

@@ -11,7 +11,16 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@tauri-apps/api": "^1.4.0"
+    "@tauri-apps/api": "^1.4.0",
+    "@types/marked": "^5.0.1",
+    "rehype-prism": "^2.2.2",
+    "rehype-stringify": "^9.0.3",
+    "remark-breaks": "^3.0.3",
+    "remark-gfm": "^3.0.1",
+    "remark-math": "^5.1.1",
+    "remark-parse": "^10.0.2",
+    "remark-rehype": "^10.1.0",
+    "unified": "^10.1.2"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^2.0.0",

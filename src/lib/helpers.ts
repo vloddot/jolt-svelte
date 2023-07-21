@@ -4,7 +4,6 @@ export function getIconURL(icon: AutumnFile): string {
   return `https://autumn.revolt.chat/${icon.tag}/${icon._id}`;
 }
 
-
 export function generateDicebearAvatar(): string {
   return `https://avatars.dicebear.com/api/open-peeps/${Math.round(Math.random() * 99)}.svg`;
 }

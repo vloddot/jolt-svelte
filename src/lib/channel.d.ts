@@ -1,3 +1,5 @@
+type ChannelType = Pick<Channel, 'channel_type'>;
+
 type Channel =
   | {
       channel_type: 'SavedMessages';

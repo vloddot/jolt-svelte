@@ -2326,8 +2326,6 @@ checksum = "e5ea92a5b6195c6ef2a0295ea818b312502c6fc94dde986c5553242e18fd4ce2"
 [[package]]
 name = "reywen"
 version = "0.1.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83b52ef9171e27147cc937077631d1507d9a0e3d7ab79dec30e7c138e5385439"
 dependencies = [
  "futures-util",
  "indexmap 2.0.0",
@@ -2345,8 +2343,6 @@ dependencies = [
 [[package]]
 name = "reywen_http"
 version = "0.1.13"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c1c8fcd14b569d9f3af5e739e276226f003f9983c705a24168caca6076fcf684"
 dependencies = [
  "hyper",
  "hyper-rustls",
@@ -2356,6 +2352,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tokio",
+ "urlencoding",
 ]
 
 [[package]]
@@ -3491,6 +3488,12 @@ dependencies = [
  "percent-encoding",
  "serde",
 ]
+
+[[package]]
+name = "urlencoding"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e8db7427f936968176eaa7cdf81b7f98b980b18495ec28f1b5791ac3bfe3eea9"
 
 [[package]]
 name = "utf-8"

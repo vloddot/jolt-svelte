@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer components {
+  body {
+    @apply bg-gray-700 text-white;
+  }
+
   .grid-container {
     display: grid;
     grid-template-areas: 'server-sidebar channel-bar main-content right-sidebar';
@@ -11,19 +15,21 @@
 
   .server-sidebar-container {
     grid-area: server-sidebar;
-    @apply h-screen flex flex-col m-0 bg-gray-900 shadow-lg;
+    @apply h-screen flex flex-col m-0 bg-gray-900 shadow-lg overflow-y-scroll;
   }
 
   .channel-bar-container {
     grid-area: channel-bar;
-    @apply h-screen flex flex-col m-0 bg-gray-800 text-white;
+    @apply h-screen flex flex-col m-0 bg-gray-800 overflow-y-scroll;
   }
 
   .main-content-container {
     grid-area: main-content;
+    @apply whitespace-pre-wrap h-screen;
   }
 
   .right-sidebar-container {
     grid-area: right-sidebar;
+    @apply overflow-y-scroll h-screen;
   }
 }

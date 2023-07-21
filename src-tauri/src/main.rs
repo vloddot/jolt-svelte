@@ -11,14 +11,14 @@ use reywen_http::driver::Method;
 use tauri::Manager;
 
 use reywen::{
-    client::methods::message::DataQueryMessages,
+    client::methods::message::{DataMessageSend, DataQueryMessages},
     structures::{
         channels::{
-            channel::Channel,
-            message::{BulkMessageResponse2, MessageSort},
+            message::{BulkMessageResponse2, Message, MessageSort},
+            Channel,
         },
-        server::server::Server,
-        users::user::User,
+        server::Server,
+        users::User,
     },
     websocket::data::WebSocketEvent,
 };
@@ -77,7 +77,8 @@ async fn fetch_user(client: tauri::State<'_, Client>, user: &str) -> Result<User
     client
         .lock()
         .await
-        .user_fetch(user)
+        .http
+        .request::<User>(Method::GET, &format!("/users/{user}"), None)
         .await
         .map_err(|err| format!("Fetch error: {err:?}"))
 }
@@ -115,10 +116,25 @@ async fn fetch_messages(
             channel,
             &DataQueryMessages::new()
                 .set_limit(limit.unwrap_or(50))
-                .set_sort(MessageSort::Latest),
+                .set_sort(MessageSort::Latest)
+                .set_include_users(true),
         )
         .await
         .map_err(|err| format!("Fetch error: {err:?}"))
+}
+
+#[tauri::command]
+async fn send_message(
+    client: tauri::State<'_, Client>,
+    channel: &str,
+    content: &str,
+) -> Result<Message, String> {
+    client
+        .lock()
+        .await
+        .message_send(channel, &DataMessageSend::new().set_content(content))
+        .await
+        .map_err(|err| format!("Error sending message: {err:?}"))
 }
 
 #[tauri::command]
@@ -145,6 +161,13 @@ async fn run_client<R: tauri::Runtime>(
                 WebSocketEvent::Message { message } => {
                     let _ = app.emit_all("message", message);
                 }
+                // WebSocketEvent::UserUpdate { user_id, data, clear } => {
+                //     if let Ok(User { username, ..}) = fetch_user(client, &user_id).await {
+                //         if username.as_str() == "tame" {
+                //             println!("tame changed {data:?} and cleared {clear:?}");
+                //         }
+                //     }
+                // }
                 _ => {}
             }
         }
@@ -162,6 +185,7 @@ fn main() {
             fetch_server,
             fetch_channel,
             fetch_messages,
+            send_message,
             login_with_token,
             run_client
         ])
