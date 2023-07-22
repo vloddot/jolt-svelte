@@ -20,6 +20,7 @@
       }
     },
     "bundle": {
+      "category": "Entertainment",
       "active": true,
       "targets": "all",
       "identifier": "com.vloddot.jolt",
