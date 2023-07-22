@@ -1459,7 +1459,7 @@ version = "0.1.0"
 dependencies = [
  "futures-util",
  "reywen",
- "reywen_http",
+ "reywen_http 0.1.13",
  "serde",
  "serde_json",
  "tauri",
@@ -2332,7 +2332,7 @@ dependencies = [
  "iso8601-timestamp",
  "num_enum 0.6.1",
  "rand 0.8.5",
- "reywen_http",
+ "reywen_http 0.1.13 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde",
  "serde_json",
  "tokio",
@@ -2353,6 +2353,22 @@ dependencies = [
  "serde_json",
  "tokio",
  "urlencoding",
+]
+
+[[package]]
+name = "reywen_http"
+version = "0.1.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c1c8fcd14b569d9f3af5e739e276226f003f9983c705a24168caca6076fcf684"
+dependencies = [
+ "hyper",
+ "hyper-rustls",
+ "hyper-timeout",
+ "hyper-tls",
+ "main",
+ "serde",
+ "serde_json",
+ "tokio",
 ]
 
 [[package]]
