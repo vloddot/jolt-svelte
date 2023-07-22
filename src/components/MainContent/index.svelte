@@ -2,9 +2,9 @@
   import { channels, currentChannelID, currentServerID, servers } from '$lib/stores';
   import Messages from './Messages/index.svelte';
 
-  $: server = $servers.find(({ _id }) => _id === $currentServerID) || $servers[0];
-  $: channel_id = server.channels.find((id) => id === $currentChannelID) || server.channels[0];
-  $: channel = $channels.find((channel) => channel._id === channel_id);
+  $: server = $servers?.find(({ _id }) => _id === $currentServerID) || $servers?.[0];
+  $: channel_id = server?.channels.find((id) => id === $currentChannelID) || server?.channels[0];
+  $: channel = $channels?.find((channel) => channel._id === channel_id);
 </script>
 
 {#if channel !== undefined}

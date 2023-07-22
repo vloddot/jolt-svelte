@@ -19,8 +19,8 @@
   }
 
   $: channels = $currentServerID === null
-    ? $channelStore.filter((channel) => channel.channel_type === 'DirectMessage' && channel.active)
-    : $servers.find(({ _id }) => _id === $currentServerID).channels.map((id) => $channelStore.find((channel) => channel._id === id));
+    ? $channelStore?.filter((channel) => channel.channel_type === 'DirectMessage' && channel.active)
+    : $servers?.find(({ _id }) => _id === $currentServerID)?.channels.map((id) => $channelStore?.find((channel) => channel._id === id));
 </script>
 
 {#if channels !== undefined}

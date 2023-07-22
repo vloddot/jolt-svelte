@@ -1,5 +1,6 @@
 <script lang="ts">
   import { fs, invoke } from '@tauri-apps/api';
+  import './index.css';
 
   let email: string;
   let password: string;

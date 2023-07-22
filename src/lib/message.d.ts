@@ -1,20 +1,8 @@
-type BulkMessageResponse = {
-  messages?: Message[];
-  users?: User[];
-  members?: Member[];
-};
+type SystemMessage = unknown;
 
-type SystemMessage = {
+type MessageInteractions = unknown;
 
-};
-
-type MessageInteractions = {
-
-};
-
-type Masquerade = {
-
-};
+type Masquerade = unknown;
 
 type Message = {
   _id: string;

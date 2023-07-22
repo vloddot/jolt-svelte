@@ -1,6 +1,10 @@
-import { invoke } from "@tauri-apps/api";
+import { invoke } from '@tauri-apps/api';
 
-export function getIconURL(icon: AutumnFile): string {
+export function getIconURL(icon?: AutumnFile): string {
+  if (icon === undefined) {
+    return generateDicebearAvatar();
+  }
+
   return `https://autumn.revolt.chat/${icon.tag}/${icon._id}`;
 }
 

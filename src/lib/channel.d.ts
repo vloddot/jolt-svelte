@@ -1,5 +1,3 @@
-type ChannelType = Pick<Channel, 'channel_type'>;
-
 type Channel =
   | {
       channel_type: 'SavedMessages';
@@ -53,4 +51,17 @@ type Category = {
   id: string;
   title: string;
   channels: string[];
+};
+
+type MemberCompositeKey = {
+  server: string;
+  user: string;
+};
+
+type Member = {
+  _id: MemberCompositeKey;
+  joined_at: string;
+  nickname?: string;
+  avatar?: AutumnFile;
+  timeout?: string;
 };
