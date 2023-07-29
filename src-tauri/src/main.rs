@@ -3,16 +3,21 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::{collections::HashMap, ops::Deref};
+use std::ops::Deref;
 
-use futures_util::StreamExt;
+use futures_util::{SinkExt, StreamExt};
 
-use reywen_http::driver::Method;
+use serde::{Deserialize, Serialize};
 use tauri::Manager;
 
 use reywen::{
     client::methods::message::{DataMessageSend, DataQueryMessages},
     structures::{
+        authentication::{
+            login::{DataLogin, ResponseLogin},
+            mfa::{MFAMethod, MFAResponse},
+            session::Session,
+        },
         channels::{
             message::{BulkMessageResponse2, Message, MessageSort},
             Channel,
@@ -20,8 +25,20 @@ use reywen::{
         server::Server,
         users::User,
     },
-    websocket::data::WebSocketEvent,
+    websocket::data::{WebSocketEvent, WebSocketSend},
 };
+
+#[cfg(target_os = "windows")]
+const PLATFORM: &str = "Windows";
+
+#[cfg(target_os = "darwin")]
+const PLATFORM: &str = "macOS";
+
+#[cfg(target_os = "linux")]
+const PLATFORM: &str = "Linux";
+
+#[cfg(not(any(target_os = "windows", target_os = "darwin", target_os = "linux")))]
+const PLATFORM: &str = "Unknown Device";
 
 #[derive(Debug)]
 struct Client(tokio::sync::Mutex<reywen::client::Client>);
@@ -34,42 +51,90 @@ impl Deref for Client {
     }
 }
 
+#[derive(Serialize, Deserialize)]
+#[serde(tag = "type")]
+enum LoginPayload {
+    Success(Session),
+    Mfa {
+        ticket: String,
+        allowed_methods: Vec<MFAMethod>,
+    },
+}
+
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 async fn login(
     client: tauri::State<'_, Client>,
     email: String,
     password: String,
-) -> Result<String, String> {
-    let mut client = client.lock().await;
-    client.http.content_type = Some("application/json".to_string());
+) -> Result<LoginPayload, String> {
+    match reywen::client::Client::session_login(
+        &DataLogin::Email {
+            email,
+            password,
+            friendly_name: Some(format!("Jolt client on {PLATFORM}")),
+        },
+        None,
+    )
+    .await
+    .map_err(|err| format!("Unable to login: {err:?}"))?
+    {
+        ResponseLogin::Success(session) => {
+            login_with_token(client, &session.token).await?;
 
-    // TODO: Better error handling
+            Ok(LoginPayload::Success(session))
+        }
+        ResponseLogin::MFA {
+            ticket,
+            allowed_methods,
+        } => Ok(LoginPayload::Mfa {
+            ticket,
+            allowed_methods,
+        }),
+        ResponseLogin::Disabled { user_id } => {
+            Err(format!("Account with user ID {user_id} is disabled."))
+        }
+    }
+}
 
-    let body: HashMap<String, serde_json::Value> = client
-        .http
-        .set_url("https://api.revolt.chat")
-        .request(
-            Method::POST,
-            "/auth/session/login",
-            Some(&format!(r#"{{"email":{email:?},"password":{password:?}}}"#)),
+#[tauri::command]
+async fn login_mfa(
+    client: tauri::State<'_, Client>,
+    mfa_ticket: String,
+    mfa_response: MFAResponse,
+) -> Result<Session, String> {
+    let session =
+        match reywen::client::Client::session_login(
+            &DataLogin::MFA {
+                mfa_ticket,
+                mfa_response: Some(mfa_response),
+                friendly_name: Some(format!("Jolt client on {PLATFORM}")),
+            },
+            None,
         )
         .await
-        .map_err(|err| format!("Failed to login: {err:?}"))?;
+        .map_err(|err| format!("Unable to login: {err:?}"))?
+        {
+            ResponseLogin::Success(session) => session,
+            ResponseLogin::MFA { .. } => return Err(String::from(
+                "Could not log in through MFA; server requires MFA again, please try again later.",
+            )),
+            ResponseLogin::Disabled { user_id } => {
+                return Err(format!("User with ID {user_id} is disabled."));
+            }
+        };
 
-    if let Some(serde_json::Value::String(token)) = body.get("token") {
-        *client = reywen::client::Client::from_token(token, false)
-            .map_err(|err| format!("Failed to initialize client: {err:?}"))?;
+    login_with_token(client, &session.token).await?;
 
-        drop(client);
+    Ok(session)
+}
 
-        Ok(token.clone())
-    } else if body.get("ticket").is_some() {
-        // TODO
-        Err(String::from("MFA not supported"))
-    } else {
-        Err(String::from("Invalid JSON schema of response: {body:?}"))
-    }
+#[tauri::command]
+async fn login_with_token(client: tauri::State<'_, Client>, token: &str) -> Result<(), String> {
+    *client.lock().await = reywen::client::Client::from_token(token, false)
+        .map_err(|err| format!("Failed to initialize client: {err:?}"))?;
+
+    Ok(())
 }
 
 #[tauri::command]
@@ -77,8 +142,7 @@ async fn fetch_user(client: tauri::State<'_, Client>, user: &str) -> Result<User
     client
         .lock()
         .await
-        .http
-        .request::<User>(Method::GET, &format!("/users/{user}"), None)
+        .user_fetch(user)
         .await
         .map_err(|err| format!("Fetch error: {err:?}"))
 }
@@ -138,11 +202,22 @@ async fn send_message(
 }
 
 #[tauri::command]
-async fn login_with_token(client: tauri::State<'_, Client>, token: &str) -> Result<(), String> {
-    *client.lock().await =
-        reywen::client::Client::from_token(token, false).map_err(|err| format!("{err:?}"))?;
+async fn start_typing(client: tauri::State<'_, Client>, channel: String) -> Result<(), ()> {
+    let (_, write) = client.lock().await.websocket.dual_async().await;
+
+    let _ = write
+        .lock()
+        .await
+        .send(WebSocketSend::BeginTyping { channel }.into())
+        .await;
 
     Ok(())
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+struct TypingPayload {
+    channel_id: String,
+    user_id: String,
 }
 
 #[tauri::command]
@@ -151,25 +226,53 @@ async fn run_client<R: tauri::Runtime>(
     client: tauri::State<'_, Client>,
 ) -> Result<(), ()> {
     loop {
-        let (mut read, _) = client.lock().await.websocket.dual_async().await;
+        let (mut read, write) = client.lock().await.websocket.dual_async().await;
 
         while let Some(event) = read.next().await {
-            match event {
-                WebSocketEvent::Ready { .. } => {
-                    let _ = app.emit_all("ready", event);
+            let app = app.clone();
+            let write = std::sync::Arc::clone(&write);
+
+            tokio::spawn(async move {
+                match event {
+                    WebSocketEvent::Ready { .. } => {
+                        let _ = app.emit_all("ready", event);
+
+                        let _ = write.lock().await.send(WebSocketSend::ping(0).into()).await;
+                    }
+                    WebSocketEvent::Message { message } => {
+                        let _ = app.emit_all("message", message);
+                    }
+                    WebSocketEvent::Pong { .. } => {
+                        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                        let _ = write.lock().await.send(WebSocketSend::ping(0).into()).await;
+                    }
+                    WebSocketEvent::ChannelStartTyping {
+                        channel_id,
+                        user_id,
+                    } => {
+                        let _ = app.emit_all(
+                            "channel_start_typing",
+                            TypingPayload {
+                                channel_id,
+                                user_id,
+                            },
+                        );
+                    }
+                    WebSocketEvent::ChannelStopTyping {
+                        channel_id,
+                        user_id,
+                    } => {
+                        let _ = app.emit_all(
+                            "channel_stop_typing",
+                            TypingPayload {
+                                channel_id,
+                                user_id,
+                            },
+                        );
+                    }
+                    _ => {}
                 }
-                WebSocketEvent::Message { message } => {
-                    let _ = app.emit_all("message", message);
-                }
-                // WebSocketEvent::UserUpdate { user_id, data, clear } => {
-                //     if let Ok(User { username, ..}) = fetch_user(client, &user_id).await {
-                //         if username.as_str() == "tame" {
-                //             println!("tame changed {data:?} and cleared {clear:?}");
-                //         }
-                //     }
-                // }
-                _ => {}
-            }
+            });
         }
     }
 }
@@ -181,12 +284,14 @@ fn main() {
         )))
         .invoke_handler(tauri::generate_handler![
             login,
+            login_with_token,
+            login_mfa,
             fetch_user,
             fetch_server,
             fetch_channel,
             fetch_messages,
             send_message,
-            login_with_token,
+            start_typing,
             run_client
         ])
         .run(tauri::generate_context!())

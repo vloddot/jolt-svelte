@@ -11,9 +11,16 @@
   <span class="sidebar-tooltip group-hover:scale-100">
     {name}
   </span>
-  <span tabindex="0" role="link" on:click={() => currentServerID.set(id)} on:keydown>
+  <span
+    tabindex="0"
+    role="link"
+    aria-label={name}
+    on:click={() => currentServerID.set(id)}
+    on:keydown={(event) => event.key === 'Enter' && currentServerID.set(id)}
+  >
     {#if icon === undefined}
-      <span class="sidebar-icon group-hover:rounded-xl group-hover:bg-green-600 group-hover:text-white"
+      <span
+        class="sidebar-icon group-hover:rounded-xl group-hover:bg-green-600 group-hover:text-white"
         >{name
           .split(' ')
           .slice(0, 2)

@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api';
+import xxhash from 'xxhashjs';
 
-export function getIconURL(icon?: AutumnFile): string {
+export function getAutumnURL(icon?: AutumnFile): string {
   if (icon === undefined) {
     return generateDicebearAvatar();
   }
@@ -9,7 +10,9 @@ export function getIconURL(icon?: AutumnFile): string {
 }
 
 export function generateDicebearAvatar(): string {
-  return `https://avatars.dicebear.com/api/open-peeps/${Math.round(Math.random() * 99)}.svg`;
+  const DICEBEAR_AVATAR = `https://avatars.dicebear.com/api/open-peeps`;
+
+  return `${DICEBEAR_AVATAR}/${Math.round(Math.random() * 99)}.svg`;
 }
 
 export function fetchUser(user: string): Promise<User> {
