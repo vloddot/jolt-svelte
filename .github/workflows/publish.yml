@@ -18,6 +18,8 @@ jobs:
           node-version: 16
       - name: setup pnpm
         uses: pnpm/action-setup@v2.4.0
+        with:
+          version: 8.5.1
       - name: get version
         run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
       - name: create release
