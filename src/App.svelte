@@ -1,7 +1,7 @@
 <script lang="ts">
   import './index.css';
   import Login from '$components/Login/index.svelte';
-  import ServerSidebar from '$components/ServerSidebar/index.svelte';
+  import ServerSidebar from '$components/Sidebar/index.svelte';
   import MainContent from '$components/MainContent/index.svelte';
   import ChannelBar from '$components/ChannelBar/index.svelte';
   import MembersList from '$components/MembersList/index.svelte';
@@ -9,8 +9,10 @@
   import { event, fs, invoke } from '@tauri-apps/api';
   import { onMount } from 'svelte';
 
+  // View to show.
   let show: 'main' | 'login' | null = null;
   onMount(async () => {
+    // `user_token` is saved in `AppData` for sessions that are saved.
     if (await fs.exists('user_token', { dir: fs.BaseDirectory.AppData })) {
       const token = await fs.readTextFile('user_token', {
         dir: fs.BaseDirectory.AppData,

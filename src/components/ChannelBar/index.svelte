@@ -1,22 +1,23 @@
 <script lang="ts">
   import ChannelComponent from './Channel.svelte';
   import { channels as channelStore, currentServerID, servers, session } from '$lib/stores';
-  import { fetchUser, generateDicebearAvatar, getAutumnURL } from '$lib/helpers';
+  import { fetchUser, getAutumnURL } from '$lib/helpers';
 
-  function channelIcon(
-    channel: Exclude<Channel, { channel_type: 'DirectMessage' | 'SavedMessages' }>
-  ): string {
-    if (channel.icon !== undefined) {
-      return getAutumnURL(channel.icon);
+  function getChannelIcon({
+    icon,
+    channel_type,
+  }: Exclude<Channel, { channel_type: 'DirectMessage' | 'SavedMessages' }>): string {
+    if (icon !== undefined) {
+      return getAutumnURL(icon);
     }
 
-    switch (channel.channel_type) {
+    switch (channel_type) {
       case 'Group':
         return '/group.svg';
       case 'TextChannel':
-        return '/hashtag.svg';
+        return '/hash.svg';
       case 'VoiceChannel':
-        return '/headset.svg';
+        return '/volume.svg';
     }
   }
 
@@ -36,9 +37,7 @@
       {#if channel.channel_type === 'DirectMessage'}
         {#await fetchUser(channel.recipients[0] === $session?.user_id ? channel.recipients[1] : channel.recipients[0]) then user}
           <ChannelComponent
-            src={user.avatar === undefined
-              ? generateDicebearAvatar()
-              : getAutumnURL(user.avatar)}
+            src={user.avatar === undefined ? '/user.svg' : getAutumnURL(user.avatar)}
             name={user.username}
             width="32"
             height="32"
@@ -47,7 +46,7 @@
           />
         {:catch}
           <ChannelComponent
-            src={generateDicebearAvatar()}
+            src="/user.svg"
             name="<Unknown User>"
             alt="Unknown User"
             width="32"
@@ -58,7 +57,7 @@
         {/await}
       {:else if channel.channel_type === 'TextChannel' || channel.channel_type === 'VoiceChannel' || channel.channel_type === 'Group'}
         <ChannelComponent
-          src={channelIcon(channel)}
+          src={getChannelIcon(channel)}
           name={channel.name}
           width="24"
           height="24"

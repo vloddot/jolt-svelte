@@ -1,9 +1,19 @@
-#![warn(clippy::all, clippy::pedantic, clippy::style, clippy::nursery)]
+//! Binary for the Jolt app.
+//! This binary contains commands for management of login, web socket connection and doing other requests.
+
+#![warn(
+    clippy::all,
+    clippy::pedantic,
+    clippy::style,
+    clippy::nursery,
+    clippy::unwrap_used,
+    clippy::expect_used
+)]
 #![allow(clippy::used_underscore_binding)]
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::ops::Deref;
+use core::ops::Deref;
 
 use futures_util::{SinkExt, StreamExt};
 
@@ -28,18 +38,37 @@ use reywen::{
     websocket::data::{WebSocketEvent, WebSocketSend},
 };
 
-#[cfg(target_os = "windows")]
-const PLATFORM: &str = "Windows";
+/// Session friendly name to be used for login.
+macro_rules! session_friendly_name {
+    () => {{
+        #[cfg(target_os = "windows")]
+        const PLATFORM: &str = "Windows";
 
-#[cfg(target_os = "darwin")]
-const PLATFORM: &str = "macOS";
+        #[cfg(target_os = "darwin")]
+        const PLATFORM: &str = "macOS";
 
-#[cfg(target_os = "linux")]
-const PLATFORM: &str = "Linux";
+        #[cfg(target_os = "linux")]
+        const PLATFORM: &str = "Linux";
 
-#[cfg(not(any(target_os = "windows", target_os = "darwin", target_os = "linux")))]
-const PLATFORM: &str = "Unknown Device";
+        #[cfg(not(any(target_os = "windows", target_os = "darwin", target_os = "linux")))]
+        const PLATFORM: &str = "Unknown Device";
 
+        format!("Jolt desktop client on {}", PLATFORM)
+    }};
+}
+
+/// Payload containing a `channel_id` and a `user_id` for another user that emitted
+/// the `BeginTyping` or `EndTyping` websocket event.
+#[derive(Serialize, Deserialize, Clone)]
+struct TypingPayload {
+    /// Channel ID where typing began or ended.
+    channel_id: String,
+
+    /// User ID of the user that began or ended typing.
+    user_id: String,
+}
+
+/// `tauri::State` wrapper for `reywen::client::Client` to be used globally.
 #[derive(Debug)]
 struct Client(tokio::sync::Mutex<reywen::client::Client>);
 
@@ -51,28 +80,67 @@ impl Deref for Client {
     }
 }
 
+/// Payload to be sent back when logging in.
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
 enum LoginPayload {
+    /// User has logged in.
     Success(Session),
+
+    /// MFA is required to log in.
     Mfa {
+        /// MFA ticket.
         ticket: String,
+
+        /// Allowed MFA methods.
         allowed_methods: Vec<MFAMethod>,
     },
 }
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
+/// Log user in.
+///
+/// # Errors
+///
+/// This function will return an error if login fails or the account is disabled.
 #[tauri::command]
 async fn login(
     client: tauri::State<'_, Client>,
     email: String,
     password: String,
+    mfa_response: Option<MFAResponse>,
+    mfa_ticket: Option<String>,
 ) -> Result<LoginPayload, String> {
+    if let Some(mfa_ticket) = mfa_ticket {
+        return match reywen::client::Client::session_login(
+            &DataLogin::MFA {
+                mfa_ticket,
+                mfa_response,
+                friendly_name: Some(session_friendly_name!()),
+            },
+            None,
+        )
+        .await
+        .map_err(|err| format!("Unable to login: {err:?}"))?
+        {
+            ResponseLogin::Success(session) => Ok(LoginPayload::Success(session)),
+            ResponseLogin::MFA {
+                ticket,
+                allowed_methods,
+            } => Ok(LoginPayload::Mfa {
+                ticket,
+                allowed_methods,
+            }),
+            ResponseLogin::Disabled { user_id } => {
+                Err(format!("Account with user ID {user_id} is disabled."))
+            }
+        };
+    }
+
     match reywen::client::Client::session_login(
         &DataLogin::Email {
             email,
             password,
-            friendly_name: Some(format!("Jolt client on {PLATFORM}")),
+            friendly_name: Some(session_friendly_name!()),
         },
         None,
     )
@@ -85,50 +153,43 @@ async fn login(
             Ok(LoginPayload::Success(session))
         }
         ResponseLogin::MFA {
-            ticket,
-            allowed_methods,
-        } => Ok(LoginPayload::Mfa {
-            ticket,
-            allowed_methods,
-        }),
+            ticket: mfa_ticket, ..
+        } => {
+            match reywen::client::Client::session_login(
+                &DataLogin::MFA {
+                    mfa_ticket,
+                    mfa_response,
+                    friendly_name: Some(session_friendly_name!()),
+                },
+                None,
+            )
+            .await
+            .map_err(|err| format!("Unable to login: {err:?}"))?
+            {
+                ResponseLogin::Success(session) => {
+                    login_with_token(client, &session.token).await?;
+
+                    Ok(LoginPayload::Success(session))
+                }
+                ResponseLogin::MFA {
+                    ticket,
+                    allowed_methods,
+                } => Ok(LoginPayload::Mfa {
+                    ticket,
+                    allowed_methods,
+                }),
+                ResponseLogin::Disabled { user_id } => {
+                    Err(format!("Account with user ID {user_id} is disabled."))
+                }
+            }
+        }
         ResponseLogin::Disabled { user_id } => {
             Err(format!("Account with user ID {user_id} is disabled."))
         }
     }
 }
 
-#[tauri::command]
-async fn login_mfa(
-    client: tauri::State<'_, Client>,
-    mfa_ticket: String,
-    mfa_response: MFAResponse,
-) -> Result<Session, String> {
-    let session =
-        match reywen::client::Client::session_login(
-            &DataLogin::MFA {
-                mfa_ticket,
-                mfa_response: Some(mfa_response),
-                friendly_name: Some(format!("Jolt client on {PLATFORM}")),
-            },
-            None,
-        )
-        .await
-        .map_err(|err| format!("Unable to login: {err:?}"))?
-        {
-            ResponseLogin::Success(session) => session,
-            ResponseLogin::MFA { .. } => return Err(String::from(
-                "Could not log in through MFA; server requires MFA again, please try again later.",
-            )),
-            ResponseLogin::Disabled { user_id } => {
-                return Err(format!("User with ID {user_id} is disabled."));
-            }
-        };
-
-    login_with_token(client, &session.token).await?;
-
-    Ok(session)
-}
-
+/// Login with session token.
 #[tauri::command]
 async fn login_with_token(client: tauri::State<'_, Client>, token: &str) -> Result<(), String> {
     *client.lock().await = reywen::client::Client::from_token(token, false)
@@ -137,6 +198,7 @@ async fn login_with_token(client: tauri::State<'_, Client>, token: &str) -> Resu
     Ok(())
 }
 
+/// Fetch a user from ID.
 #[tauri::command]
 async fn fetch_user(client: tauri::State<'_, Client>, user: &str) -> Result<User, String> {
     client
@@ -147,6 +209,7 @@ async fn fetch_user(client: tauri::State<'_, Client>, user: &str) -> Result<User
         .map_err(|err| format!("Fetch error: {err:?}"))
 }
 
+/// Fetch a server from ID.
 #[tauri::command]
 async fn fetch_server(client: tauri::State<'_, Client>, server: &str) -> Result<Server, String> {
     client
@@ -157,6 +220,7 @@ async fn fetch_server(client: tauri::State<'_, Client>, server: &str) -> Result<
         .map_err(|err| format!("Fetch error: {err:?}"))
 }
 
+/// Fetch a channel from ID.
 #[tauri::command]
 async fn fetch_channel(client: tauri::State<'_, Client>, channel: &str) -> Result<Channel, String> {
     client
@@ -167,6 +231,7 @@ async fn fetch_channel(client: tauri::State<'_, Client>, channel: &str) -> Resul
         .map_err(|err| format!("Fetch error: {err:?}"))
 }
 
+/// Fetch a bulk amount of messages.
 #[tauri::command]
 async fn fetch_messages(
     client: tauri::State<'_, Client>,
@@ -187,6 +252,7 @@ async fn fetch_messages(
         .map_err(|err| format!("Fetch error: {err:?}"))
 }
 
+/// Send a message to `channel`.
 #[tauri::command]
 async fn send_message(
     client: tauri::State<'_, Client>,
@@ -201,6 +267,7 @@ async fn send_message(
         .map_err(|err| format!("Error sending message: {err:?}"))
 }
 
+/// Send a `BeginTyping` event to WebSocket using `channel` (id).
 #[tauri::command]
 async fn start_typing(client: tauri::State<'_, Client>, channel: String) -> Result<(), ()> {
     let (_, write) = client.lock().await.websocket.dual_async().await;
@@ -214,12 +281,7 @@ async fn start_typing(client: tauri::State<'_, Client>, channel: String) -> Resu
     Ok(())
 }
 
-#[derive(Serialize, Deserialize, Clone)]
-struct TypingPayload {
-    channel_id: String,
-    user_id: String,
-}
-
+/// Run client event loop.
 #[tauri::command]
 async fn run_client<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
@@ -278,6 +340,7 @@ async fn run_client<R: tauri::Runtime>(
 }
 
 fn main() {
+    #[allow(clippy::expect_used)]
     tauri::Builder::default()
         .manage(Client(tokio::sync::Mutex::new(
             reywen::client::Client::new(),
@@ -285,7 +348,6 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             login,
             login_with_token,
-            login_mfa,
             fetch_user,
             fetch_server,
             fetch_channel,

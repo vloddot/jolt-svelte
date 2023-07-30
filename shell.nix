@@ -1,7 +1,7 @@
 let
   pkgs = import <nixpkgs> { };
 
-  libraries = with pkgs;[
+  libraries = with pkgs; [
     webkitgtk
     gtk3
     cairo

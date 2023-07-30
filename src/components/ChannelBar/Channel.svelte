@@ -1,12 +1,45 @@
 <script lang="ts">
   import { currentChannelID } from '$lib/stores';
 
+  /**
+   * Whether the element is rounded or not.
+   * @type {boolean}
+   */
   export let rounded: boolean = false;
-  export let src: string;
+
+  /**
+   * Image URL to show alongside channel name.
+   * @type {string}
+   */
+  export let src: string | undefined;
+
+  /**
+   * Image width.
+   * @type {string}
+   */
   export let width: string | undefined;
+
+  /**
+   * Image height.
+   * @type {string}
+   */
   export let height: string | undefined;
+
+  /**
+   * Channel name.
+   * @type {string}
+   */
   export let name: string;
+
+  /**
+   * Alternate text for image.
+   */
   export let alt: string | undefined = name;
+
+  /**
+   * Channel ID.
+   * @type {string}
+   */
   export let id: string;
 </script>
 
@@ -15,9 +48,7 @@
   tabindex="0"
   role="link"
   on:click={() => currentChannelID.set(id)}
-  on:keydown
-  on:keypress
-  on:keyup
+  on:keydown={(event) => event.key === 'Enter' && currentChannelID.set(id)}
 >
   <img {src} {alt} {width} {height} class:rounded-3xl={rounded} class="inline aspect-square" />
   {name}

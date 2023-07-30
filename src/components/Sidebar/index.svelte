@@ -4,5 +4,5 @@
 </script>
 
 {#each $servers ?? [] as server}
-  <Icon name={server.name} icon={server.icon} id={server._id} />
+  <Icon tooltip={server.name} icon={server.icon} id={server._id} />
 {/each}

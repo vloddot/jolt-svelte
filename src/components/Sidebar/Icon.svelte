@@ -1,27 +1,40 @@
 <script lang="ts">
+    import { getAutumnURL } from '$lib/helpers';
   import { currentServerID } from '$lib/stores';
   import './index.css';
 
-  export let name: string;
+  /**
+   * Tooltip for icon.
+   */
+
+  export let tooltip: string;
+  
+  /**
+   * Icon to show.
+   */
   export let icon: AutumnFile | undefined;
+
+  /**
+   * Item ID.
+   */
   export let id: string;
 </script>
 
 <div class="group m-0">
   <span class="sidebar-tooltip group-hover:scale-100">
-    {name}
+    {tooltip}
   </span>
   <span
     tabindex="0"
     role="link"
-    aria-label={name}
+    aria-label={tooltip}
     on:click={() => currentServerID.set(id)}
     on:keydown={(event) => event.key === 'Enter' && currentServerID.set(id)}
   >
     {#if icon === undefined}
       <span
         class="sidebar-icon group-hover:rounded-xl group-hover:bg-green-600 group-hover:text-white"
-        >{name
+        >{tooltip
           .split(' ')
           .slice(0, 2)
           .map((s) => s[0])
@@ -30,8 +43,8 @@
     {:else}
       <img
         class="sidebar-icon group-hover:rounded-xl group-hover:bg-green-600 group-hover:text-white"
-        src={`https://autumn.revolt.chat/${icon.tag}/${icon._id}`}
-        alt={name}
+        src={getAutumnURL(icon)}
+        alt={tooltip}
       />
     {/if}
   </span>

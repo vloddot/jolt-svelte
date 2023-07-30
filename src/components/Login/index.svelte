@@ -1,91 +1,126 @@
 <script lang="ts">
   import { fs, invoke } from '@tauri-apps/api';
   import './index.css';
-  import { session } from '$lib/stores';
 
-  let email: string;
-  let password: string;
+  // current email input
+  let email: string = '';
+
+  // current password input
+  let password: string = '';
+
+  // current session token input
+  let sessionToken: string = '';
+
+  // error text to display
   let error: string | undefined = undefined;
+
+  // MFA ticket to store for later
   let mfaTicket: string | undefined = undefined;
-  let mfaMethods: [MFAMethod, string][] | undefined = undefined;
+
+  // MFA Methods with their input fields' values
+  let mfaMethods: [MFAMethod, string][] = [
+    ['Totp', ''],
+    ['Recovery', ''],
+  ];
 
   async function login() {
+    const token = sessionToken.trim();
+    if (token !== '') {
+      
+    }
+
+    let mfaResponse:
+      | { totp_code: string }
+      | { recovery_code: string }
+      | { password: string }
+      | undefined = undefined;
+
+    const totp_code = mfaMethods.find(([method]) => method === 'Totp')?.[1].trim();
+    const recovery_code = mfaMethods.find(([method]) => method === 'Recovery')?.[1].trim();
+    const mfaPassword = mfaMethods.find(([method]) => method === 'Password')?.[1].trim();
+
+    if (totp_code !== undefined) {
+      if (totp_code !== '') {
+        mfaResponse = { totp_code };
+      }
+    } else if (recovery_code !== undefined) {
+      if (recovery_code !== '') {
+        mfaResponse = { recovery_code };
+      }
+    } else if (mfaPassword !== undefined) {
+      if (mfaPassword !== '') {
+        mfaResponse = { password: mfaPassword };
+      }
+    }
+
     let payload: LoginPayload;
     try {
-      payload = await invoke<LoginPayload>('login', { email, password });
-    } catch (e: any) {
-      error = e;
-      return;
-    }
-
-    if (payload.type === 'Success') {
-      await fs.writeTextFile('user_token', payload.token, { dir: fs.BaseDirectory.AppData });
-      invoke('run_client');
-    } else if (payload.type === 'Mfa') {
-      mfaTicket = payload.ticket;
-      mfaMethods = payload.allowed_methods.map((method) => [method, '']);
-    }
-  }
-
-  async function loginMfa(method: MFAMethod, value: string) {
-    let mfaResponse: Partial<Record<'totp_code' | 'recovery_code' | 'password', string>> = {};
-
-    switch (method) {
-      case 'Totp':
-        mfaResponse.totp_code = value;
-        break;
-      case 'Recovery':
-        mfaResponse.recovery_code = value;
-        break;
-      case 'Password':
-        mfaResponse.password = value;
-        break;
-    }
-
-    let mfaSession: Session;
-    try {
-      mfaSession = await invoke<Session>('login_mfa', {
-        mfaTicket,
+      payload = await invoke<LoginPayload>('login', {
+        email,
+        password,
         mfaResponse,
+        mfaTicket,
       });
     } catch (e: any) {
       error = e;
       return;
     }
 
-    session.set(mfaSession);
+    if (payload.type === 'Success') {
+      // save user token for conrurrent sessions
+      await fs.writeTextFile('user_token', payload.token, { dir: fs.BaseDirectory.AppData });
+      invoke('run_client');
+    } else if (payload.type === 'Mfa') {
+      mfaTicket = payload.ticket;
+      mfaMethods = payload.allowed_methods.map((method) => [method, '']);
 
-    await fs.writeTextFile('user_token', mfaSession.token, {
-      dir: fs.BaseDirectory.AppData,
-    });
+      if (mfaResponse !== undefined) {
+        error =
+          'MFA method is not allowed. The following methods are allowed: ' +
+          payload.allowed_methods.join(',');
+      }
+    }
+  }
 
+  async function loginWithSessionToken() {
+    await fs.writeTextFile('user_token', sessionToken, { dir: fs.BaseDirectory.AppData });
+    await invoke('login_with_token', { token: sessionToken });
     invoke('run_client');
   }
 
-  function displayMethod(method: MFAMethod): string {
-    return {
-      Totp: 'TOTP',
-      Recovery: 'Recovery Code',
-      Password: 'Password',
-    }[method];
+  function displayMfaMethod(method: string): string {
+    return (
+      {
+        Totp: 'MFA TOTP',
+        Recovery: 'MFA Recovery Code',
+        Password: 'Password',
+      }[method] ?? 'Unknown MFA Method'
+    );
   }
 </script>
 
-<form on:submit|preventDefault={login}>
-  <input type="email" placeholder="Email" bind:value={email} />
-  <input type="password" placeholder="Password" bind:value={password} />
-  <button type="submit">Login</button>
-</form>
+<div class="w-full h-full flex items-center flex-col justify-center relative">
+  <div class="rounded-xl relative flex flex-col items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm px-6 pt-12 pb-6 max-w-[90%] mb-auto">
+    <form class="flex flex-col" on:submit|preventDefault={login}>
+      <input type="email" placeholder="Email" bind:value={email} />
+      <input type="password" placeholder="Password" bind:value={password} />
 
-{#if error}
-  <p>{error}</p>
-{/if}
+      {#each mfaMethods as [method, value]}
+        <input type="text" placeholder={displayMfaMethod(method)} bind:value />
+      {/each}
 
-{#if mfaMethods !== undefined}
-  {#each mfaMethods as [method, value]}
-    <form on:submit|preventDefault={() => loginMfa(method, value)}>
-      <input type="text" placeholder={displayMethod(method)} bind:value />
-      <button type="submit">Login with {displayMethod(method)}</button>
+      <button type="submit">Login</button>
     </form>
-  {/each}
-{/if}
+
+      -- OR --
+
+    <form class="flex flex-col" on:submit={loginWithSessionToken}>
+      <input type="text" placeholder="Session token" bind:value={sessionToken} />
+      <button type="submit">Login with Session Token</button>
+    </form>
+
+    {#if error}
+      <p>{error}</p>
+    {/if}
+  </div>
+</div>
