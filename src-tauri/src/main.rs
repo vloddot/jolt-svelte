@@ -3,16 +3,19 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::{collections::HashMap, ops::Deref};
+use std::ops::Deref;
 
 use futures_util::StreamExt;
 
-use reywen_http::driver::Method;
 use tauri::Manager;
 
 use reywen::{
     client::methods::message::{DataMessageSend, DataQueryMessages},
     structures::{
+        authentication::{
+            login::{DataLogin, ResponseLogin},
+            session::Session,
+        },
         channels::{
             message::{BulkMessageResponse2, Message, MessageSort},
             Channel,
@@ -41,34 +44,27 @@ async fn login(
     email: String,
     password: String,
 ) -> Result<String, String> {
-    let mut client = client.lock().await;
-    client.http.content_type = Some("application/json".to_string());
+    match reywen::client::Client::session_login(
+        &DataLogin::Email {
+            email,
+            password,
+            friendly_name: None,
+        },
+        None,
+    )
+    .await
+    .map_err(|err| format!("Failed to login: {err:?}"))?
+    {
+        ResponseLogin::Success(Session { token, .. }) => {
+            login_with_token(client, &token).await?;
 
-    // TODO: Better error handling
-
-    let body: HashMap<String, serde_json::Value> = client
-        .http
-        .set_url("https://api.revolt.chat")
-        .request(
-            Method::POST,
-            "/auth/session/login",
-            Some(&format!(r#"{{"email":{email:?},"password":{password:?}}}"#)),
-        )
-        .await
-        .map_err(|err| format!("Failed to login: {err:?}"))?;
-
-    if let Some(serde_json::Value::String(token)) = body.get("token") {
-        *client = reywen::client::Client::from_token(token, false)
-            .map_err(|err| format!("Failed to initialize client: {err:?}"))?;
-
-        drop(client);
-
-        Ok(token.clone())
-    } else if body.get("ticket").is_some() {
+            Ok(token)
+        }
         // TODO
-        Err(String::from("MFA not supported"))
-    } else {
-        Err(String::from("Invalid JSON schema of response: {body:?}"))
+        ResponseLogin::MFA { .. } => Err(String::from("MFA not supported")),
+        ResponseLogin::Disabled { user_id } => {
+            Err(format!("Account with user ID {user_id} is disabled."))
+        }
     }
 }
 
@@ -77,8 +73,7 @@ async fn fetch_user(client: tauri::State<'_, Client>, user: &str) -> Result<User
     client
         .lock()
         .await
-        .http
-        .request::<User>(Method::GET, &format!("/users/{user}"), None)
+        .user_fetch(user)
         .await
         .map_err(|err| format!("Fetch error: {err:?}"))
 }
@@ -139,8 +134,8 @@ async fn send_message(
 
 #[tauri::command]
 async fn login_with_token(client: tauri::State<'_, Client>, token: &str) -> Result<(), String> {
-    *client.lock().await =
-        reywen::client::Client::from_token(token, false).map_err(|err| format!("{err:?}"))?;
+    *client.lock().await = reywen::client::Client::from_token(token, false)
+        .map_err(|err| format!("Failed to initialize client: {err:?}"))?;
 
     Ok(())
 }
@@ -161,13 +156,6 @@ async fn run_client<R: tauri::Runtime>(
                 WebSocketEvent::Message { message } => {
                     let _ = app.emit_all("message", message);
                 }
-                // WebSocketEvent::UserUpdate { user_id, data, clear } => {
-                //     if let Ok(User { username, ..}) = fetch_user(client, &user_id).await {
-                //         if username.as_str() == "tame" {
-                //             println!("tame changed {data:?} and cleared {clear:?}");
-                //         }
-                //     }
-                // }
                 _ => {}
             }
         }
