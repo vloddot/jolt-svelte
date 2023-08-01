@@ -1,6 +1,6 @@
 # Jolt
 
-Custom [Revolt](https://revolt.chat) client for desktop machines made in Tauri and Svelte.
+Custom [Revolt](https://www.github.com/revoltchat) client for desktop machines made in Tauri and Svelte.
 
 ## Build
 
