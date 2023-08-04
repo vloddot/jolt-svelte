@@ -1,7 +1,7 @@
 # Jolt
 
 Acceleration is defined to be the rate of change of speed.
-"Jerk" (yes that's true) is defined to be the rate if change of acceleration.
+"Jerk" (yes that's true) is defined to be the rate of change of acceleration.
 "Jolt" is defined to be the rate of change of jerk.
 
 Custom [Revolt](https://www.github.com/revoltchat) client for desktop machines made in Tauri and Svelte.
