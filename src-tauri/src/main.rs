@@ -38,6 +38,8 @@ use reywen::{
     websocket::data::{WebSocketEvent, WebSocketSend},
 };
 
+const APP_NAME: &str = "Jolt";
+
 /// Session friendly name to be used for login.
 macro_rules! session_friendly_name {
     () => {{
@@ -53,7 +55,11 @@ macro_rules! session_friendly_name {
         #[cfg(not(any(target_os = "windows", target_os = "darwin", target_os = "linux")))]
         const PLATFORM: &str = "Unknown Device";
 
-        format!("Jolt desktop client on {}", PLATFORM)
+        format!(
+            "{app_name} desktop client on {platform}",
+            app_name = $crate::APP_NAME,
+            platform = PLATFORM
+        )
     }};
 }
 
@@ -97,6 +103,13 @@ enum LoginPayload {
     },
 }
 
+#[derive(Serialize, Deserialize)]
+#[serde(tag = "type")]
+enum LoginError {
+    AccountDisabled { user_id: String },
+    DeltaError(String),
+}
+
 /// Log user in.
 ///
 /// # Errors
@@ -109,7 +122,7 @@ async fn login(
     password: String,
     mfa_response: Option<MFAResponse>,
     mfa_ticket: Option<String>,
-) -> Result<LoginPayload, String> {
+) -> Result<LoginPayload, LoginError> {
     if let Some(mfa_ticket) = mfa_ticket {
         return match reywen::client::Client::session_login(
             &DataLogin::MFA {
@@ -120,7 +133,7 @@ async fn login(
             None,
         )
         .await
-        .map_err(|err| format!("Unable to login: {err:?}"))?
+        .map_err(|err| LoginError::DeltaError(format!("{err:?}")))?
         {
             ResponseLogin::Success(session) => Ok(LoginPayload::Success(session)),
             ResponseLogin::MFA {
@@ -130,9 +143,7 @@ async fn login(
                 ticket,
                 allowed_methods,
             }),
-            ResponseLogin::Disabled { user_id } => {
-                Err(format!("Account with user ID {user_id} is disabled."))
-            }
+            ResponseLogin::Disabled { user_id } => Err(LoginError::AccountDisabled { user_id }),
         };
     }
 
@@ -145,12 +156,14 @@ async fn login(
         None,
     )
     .await
-    .map_err(|err| format!("Unable to login: {err:?}"))?
+    .map_err(|err| LoginError::DeltaError(format!("{err:?}")))?
     {
         ResponseLogin::Success(session) => {
-            login_with_token(client, &session.token).await?;
-
-            Ok(LoginPayload::Success(session))
+            if let Err(error) = login_with_token(client, &session.token).await {
+                Err(LoginError::DeltaError(error))
+            } else {
+                Ok(LoginPayload::Success(session))
+            }
         }
         ResponseLogin::MFA {
             ticket: mfa_ticket, ..
@@ -164,12 +177,14 @@ async fn login(
                 None,
             )
             .await
-            .map_err(|err| format!("Unable to login: {err:?}"))?
+            .map_err(|err| LoginError::DeltaError(format!("{err:?}")))?
             {
                 ResponseLogin::Success(session) => {
-                    login_with_token(client, &session.token).await?;
-
-                    Ok(LoginPayload::Success(session))
+                    if let Err(error) = login_with_token(client, &session.token).await {
+                        Err(LoginError::DeltaError(error))
+                    } else {
+                        Ok(LoginPayload::Success(session))
+                    }
                 }
                 ResponseLogin::MFA {
                     ticket,
@@ -178,22 +193,18 @@ async fn login(
                     ticket,
                     allowed_methods,
                 }),
-                ResponseLogin::Disabled { user_id } => {
-                    Err(format!("Account with user ID {user_id} is disabled."))
-                }
+                ResponseLogin::Disabled { user_id } => Err(LoginError::AccountDisabled { user_id }),
             }
         }
-        ResponseLogin::Disabled { user_id } => {
-            Err(format!("Account with user ID {user_id} is disabled."))
-        }
+        ResponseLogin::Disabled { user_id } => Err(LoginError::AccountDisabled { user_id }),
     }
 }
 
 /// Login with session token.
 #[tauri::command]
 async fn login_with_token(client: tauri::State<'_, Client>, token: &str) -> Result<(), String> {
-    *client.lock().await = reywen::client::Client::from_token(token, false)
-        .map_err(|err| format!("Failed to initialize client: {err:?}"))?;
+    *client.lock().await =
+        reywen::client::Client::from_token(token, false).map_err(|err| format!("{err:?}"))?;
 
     Ok(())
 }
@@ -206,7 +217,7 @@ async fn fetch_user(client: tauri::State<'_, Client>, user: &str) -> Result<User
         .await
         .user_fetch(user)
         .await
-        .map_err(|err| format!("Fetch error: {err:?}"))
+        .map_err(|err| format!("{err:?}"))
 }
 
 /// Fetch a server from ID.
@@ -217,7 +228,7 @@ async fn fetch_server(client: tauri::State<'_, Client>, server: &str) -> Result<
         .await
         .server_fetch(server)
         .await
-        .map_err(|err| format!("Fetch error: {err:?}"))
+        .map_err(|err| format!("{err:?}"))
 }
 
 /// Fetch a channel from ID.
@@ -228,7 +239,7 @@ async fn fetch_channel(client: tauri::State<'_, Client>, channel: &str) -> Resul
         .await
         .channel_fetch(channel)
         .await
-        .map_err(|err| format!("Fetch error: {err:?}"))
+        .map_err(|err| format!("{err:?}"))
 }
 
 /// Fetch a bulk amount of messages.
@@ -249,7 +260,7 @@ async fn fetch_messages(
                 .set_include_users(true),
         )
         .await
-        .map_err(|err| format!("Fetch error: {err:?}"))
+        .map_err(|err| format!("{err:?}"))
 }
 
 /// Send a message to `channel`.
@@ -257,14 +268,14 @@ async fn fetch_messages(
 async fn send_message(
     client: tauri::State<'_, Client>,
     channel: &str,
-    content: &str,
+    data_message_send: DataMessageSend,
 ) -> Result<Message, String> {
     client
         .lock()
         .await
-        .message_send(channel, &DataMessageSend::new().set_content(content))
+        .message_send(channel, &data_message_send)
         .await
-        .map_err(|err| format!("Error sending message: {err:?}"))
+        .map_err(|err| format!("{err:?}"))
 }
 
 /// Send a `BeginTyping` event to WebSocket using `channel` (id).

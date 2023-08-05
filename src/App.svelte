@@ -8,9 +8,13 @@
   import { channels, emojis, servers, users } from '$lib/stores';
   import { event, fs, invoke } from '@tauri-apps/api';
   import { onMount } from 'svelte';
+  import Modal from '$components/Modal.svelte';
 
   // View to show.
   let show: 'main' | 'login' | null = null;
+
+  let modalError: string | null = null;
+
   onMount(async () => {
     // `user_token` is saved in `AppData` for sessions that are saved.
     if (await fs.exists('user_token', { dir: fs.BaseDirectory.AppData })) {
@@ -18,8 +22,9 @@
         dir: fs.BaseDirectory.AppData,
       });
 
-      await invoke('login_with_token', { token });
-      invoke('run_client');
+      invoke('login_with_token', { token })
+        .then(() => invoke('run_client'))
+        .catch((err) => (modalError = err));
     } else {
       show = 'login';
     }
@@ -33,6 +38,11 @@
     });
   });
 </script>
+
+<Modal showModal={modalError !== null}>
+  <h2 slot="header">Error</h2>
+  <div>{modalError}</div>
+</Modal>
 
 {#if show !== null}
   {#if show === 'login'}

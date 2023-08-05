@@ -1,10 +1,3 @@
-type Role = {
-  name: string;
-  colour?: string;
-  hoist: boolean;
-  rank: number;
-};
-
 type AutumnFileMetadata =
   | {
       type: 'File';
@@ -47,3 +40,4 @@ type WebPushSubscription = {
 };
 
 type MFAMethod = 'Totp' | 'Recovery' | 'Password';
+

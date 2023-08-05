@@ -9,7 +9,7 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
 
-        libraries = with pkgs;[
+        libraries = with pkgs; [
           webkitgtk
           gtk3
           cairo

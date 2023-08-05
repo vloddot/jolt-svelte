@@ -2,39 +2,49 @@
   import { event, invoke } from '@tauri-apps/api';
   import MessageComponent from './Message.svelte';
   import { onMount, setContext } from 'svelte';
-  import { session } from '$lib/stores';
-  import { key } from './messagePayload';
+  import { bulkMessageInfoKey, repliesKey } from './sharedData';
   import { writable } from 'svelte/store';
+  import type { Reply } from './sharedData';
 
   /**
    * Which channel to show messages from.
    */
   export let channel: Exclude<Channel, { channel_type: 'VoiceChannel' }>;
 
-  let messageQueryPayload = writable<BulkMessagePayload>({
+  let bulkMessagesInfo = writable<BulkMessagePayload>({
     members: [],
     messages: [],
     users: [],
   });
 
-  // `messageQueryPayload` contains info about users and members that are helpful.
-  setContext(key, messageQueryPayload);
+  let replies = writable<Reply[]>([]);
 
-  let messageInputNode: HTMLInputElement;
-  let messageInput: string;
+  // `bulkMessageInfo` contains info about users and members that are helpful.
+  setContext(bulkMessageInfoKey, bulkMessagesInfo);
 
-  // let usersTyping: string[] = [];
+  // `replies` contains the current user's replies that will be sent.
+  setContext(repliesKey, replies);
 
-  $: invoke<BulkMessagePayload>('fetch_messages', { channel: channel._id }).then((response) => {
-    messageQueryPayload.set(response);
-  });
+  let messageInputNode: HTMLTextAreaElement;
 
-  onMount(async () => {
+  $: {
+    invoke<BulkMessagePayload>('fetch_messages', { channel: channel._id }).then((response) => {
+      bulkMessagesInfo.set(response);
+    });
+    replies.set([]);
+  }
+
+  onMount(() => {
     event.listen<Message>('message', ({ payload: message }) => {
       if (message.channel === channel._id) {
-        messageQueryPayload.set({
-          ...$messageQueryPayload,
-          messages: [...($messageQueryPayload.messages ?? []), message],
+        bulkMessagesInfo.set({
+          ...$bulkMessagesInfo,
+          messages: [
+            message,
+            ...(Array.isArray($bulkMessagesInfo)
+              ? $bulkMessagesInfo
+              : $bulkMessagesInfo.messages ?? []),
+          ],
         });
       }
     });
@@ -61,8 +71,18 @@
   });
 
   async function sendMessage() {
+    const dataMessageSend: DataMessageSend = {
+      content: messageInputNode.value,
+      replies: $replies.map(({ message: { _id }, mention }) => ({
+        id: _id,
+        mention,
+      })),
+    };
+
+    replies.set([]);
     messageInputNode.value = '';
-    await invoke<Message>('send_message', { channel: channel._id, content: messageInput });
+
+    await invoke<Message>('send_message', { channel: channel._id, dataMessageSend });
   }
 
   async function startTyping() {
@@ -70,24 +90,32 @@
   }
 </script>
 
-{#if $messageQueryPayload !== undefined}
+{#if $bulkMessagesInfo !== undefined}
   <div class="flex flex-col h-full overflow-x-hidden overflow-y-scroll">
-    {#each [...($messageQueryPayload.messages ?? [])].reverse() as message}
+    {#each [...(Array.isArray($bulkMessagesInfo) ? $bulkMessagesInfo : $bulkMessagesInfo.messages ?? [])].reverse() as message}
       <div class="hover:bg-gray-800">
         <MessageComponent {message} />
       </div>
     {/each}
+    {#each $replies as reply}
+      replying to
+      {#if Array.isArray($bulkMessagesInfo)}
+        {reply.message._id}
+      {:else}
+        {$bulkMessagesInfo.users?.find(({ _id }) => _id === reply.message.author)?._id ?? '<Unknown User>'}
+      {/if}
+      {#if reply.mention}
+        with mention
+      {/if}
+    {/each}
+    <form on:submit|preventDefault={sendMessage}>
+      <textarea
+        on:input={startTyping}
+        bind:this={messageInputNode}
+        class="resize-none rounded-xl bg-gray-500 w-full"
+      />
+
+      <button type="submit">Send</button>
+    </form>
   </div>
 {/if}
-
-<!-- {#each usersTyping as user}
-  {user} is typing.
-{/each} -->
-<form on:submit|preventDefault={sendMessage}>
-  <input
-    bind:value={messageInput}
-    on:input={startTyping}
-    bind:this={messageInputNode}
-    class="bg-gray-500"
-  />
-</form>

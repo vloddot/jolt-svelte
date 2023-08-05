@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { key } from './messagePayload';
+  import { bulkMessageInfoKey, repliesKey } from './sharedData';
   import { getAutumnURL } from '$lib/helpers';
   import { currentServerID } from '$lib/stores';
   import { getContext } from 'svelte';
@@ -10,37 +10,124 @@
    */
   export let message: Message;
 
-  const messageQueryPayload = getContext<Writable<Required<BulkMessagePayload>>>(key);
+  const bulkMessageInfo = getContext<Writable<BulkMessagePayload>>(bulkMessageInfoKey);
+  const replies = getContext<Writable<Reply[]>>(repliesKey);
 
-  $: author = $messageQueryPayload.users.find((user) => user._id === message.author);
-  $: member = $messageQueryPayload.members?.find(
-    (member) => member._id.server === $currentServerID && member._id.user === author?._id
-  );
+  interface Controls {
+    src: string;
+    alt: string;
+    ariaLabel?: string;
+    onclick: (event: MouseEvent) => unknown;
+  }
+
+  function pushReply(_: MouseEvent) {
+    if ($replies.some((reply) => reply.id === message._id)) {
+      return;
+    }
+
+    console.log(message);
+
+    replies.set([...$replies, { id: message._id, mention: true }]);
+  }
+
+  const controls: Controls[] = [
+    {
+      src: '/reply.svg',
+      alt: 'Reply',
+      onclick: pushReply,
+    },
+  ];
+
+  $: author = !Array.isArray($bulkMessageInfo)
+    ? $bulkMessageInfo.users?.find((user) => user._id === message.author)
+    : undefined;
+
+  $: member = !Array.isArray($bulkMessageInfo)
+    ? $bulkMessageInfo.members?.find(
+        (member) => member._id.server === $currentServerID && member._id.user === author?._id
+      )
+    : undefined;
 
   $: displayUsername = member?.nickname ?? author?.username ?? '<Unknown User>';
   $: displayAvatar = member?.avatar ?? author?.avatar;
 </script>
 
-<img
-  alt={displayUsername}
-  src={displayAvatar === undefined ? '/user.svg' : getAutumnURL(displayAvatar)}
-  width="24"
-  height="24"
-  class="rounded-3xl inline"
-/>
-{displayUsername}
+<div role="listitem" class="group m-4">
+  <div class="flex">
+    <img
+      alt={`${displayUsername}'s avatar'`}
+      src={displayAvatar === undefined ? '/user.svg' : getAutumnURL(displayAvatar)}
+      width="24"
+      height="24"
+      class="rounded-3xl inline"
+    />
 
-{message.content}
-
-{#if message.attachments}
-  {#each message.attachments as attachment}
-    {#if attachment.content_type.startsWith('image')}
-      <img src={getAutumnURL(attachment)} alt={attachment.filename} />
-    {:else if attachment.content_type.startsWith('video')}
-      <video controls>
-        <source src={getAutumnURL(attachment)} type={attachment.content_type} />
-        <track kind="captions" />
-      </video>
+    {displayUsername}
+    {#if message.edited}
+      <span class="text-gray-500">(edited)</span>
     {/if}
-  {/each}
-{/if}
+
+    <div class="flex-1" />
+
+    <span class="hidden group-hover:block">
+      {#each controls as { src, ariaLabel, alt, onclick }}
+        <button aria-label={ariaLabel ?? alt} on:click={onclick}>
+          <img width="16" height="16" {src} {alt} />
+        </button>
+      {/each}
+    </span>
+  </div>
+
+  {#if message.content}
+    {message.content}
+  {/if}
+
+  {#if message.attachments}
+    {#each message.attachments as attachment}
+      {#if attachment.metadata.type === 'Image'}
+        <img src={getAutumnURL(attachment)} alt={attachment.filename} />
+      {:else if attachment.metadata.type === 'Video'}
+        <!-- svelte-ignore a11y-media-has-caption -->
+        <video controls>
+          <source src={getAutumnURL(attachment)} />
+        </video>
+      {:else if attachment.metadata.type === 'Audio'}
+        <audio controls>
+          <source src={getAutumnURL(attachment)} />
+          Your browser does not support the &lt;audio&gt; element.
+        </audio>
+      {:else if attachment.metadata.type === 'File'}
+        File ({attachment.filename})
+      {:else if attachment.metadata.type === 'Text'}
+        {#await fetch(getAutumnURL(attachment)) then response}
+          {#await response.text() then text}
+            {text}
+          {/await}
+        {:catch error}
+          Unable to download the file: {error}
+        {/await}
+      {/if}
+    {/each}
+  {/if}
+
+  {#if message.embeds}
+    {#each message.embeds as embed}
+      {#if embed.type === 'Website'}
+        {#if embed.special}
+          {console.log(embed.special)}
+        {/if}
+      {:else if embed.type === 'Image'}
+        <!-- svelte-ignore a11y-missing-attribute -->
+        <img src={embed.url} width={embed.width} height={embed.height} />
+      {:else if embed.type === 'Video'}
+        <!-- svelte-ignore a11y-media-has-caption -->
+        <video controls>
+          <source src={embed.url} width={embed.width} height={embed.height} />
+          Your browser does not support the &lt;video&gt; element.
+        </video>
+      {:else}
+        Hewwo, {JSON.stringify(embed)}
+      {/if}
+    {/each}
+  {/if}
+</div>

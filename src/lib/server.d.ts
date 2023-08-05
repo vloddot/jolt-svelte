@@ -15,3 +15,10 @@ type Server = {
   analytics: boolean;
   discoverable: boolean;
 };
+
+type Role = {
+  name: string;
+  colour?: string;
+  hoist: boolean;
+  rank: number;
+};

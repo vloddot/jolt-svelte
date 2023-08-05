@@ -1459,6 +1459,7 @@ version = "0.2.0"
 dependencies = [
  "futures-util",
  "reywen",
+ "reywen_http",
  "serde",
  "serde_json",
  "tauri",
@@ -2319,9 +2320,9 @@ checksum = "e5ea92a5b6195c6ef2a0295ea818b312502c6fc94dde986c5553242e18fd4ce2"
 
 [[package]]
 name = "reywen"
-version = "0.1.18"
+version = "0.1.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "80fe59dd34dadb2848491be936f989e4e8660149b30b85cbcce2fa39634b2427"
+checksum = "3e20e9e24587b68c46c23d15f961869368fe29f075b38a79ccd8ddb021d1614a"
 dependencies = [
  "futures-util",
  "indexmap 2.0.0",

@@ -5,11 +5,13 @@ type ReadyPayload = {
   emojis: Emoji[];
 };
 
-type BulkMessagePayload = {
-  messages?: Message[];
-  users?: User[];
-  members?: Member[];
-};
+type BulkMessagePayload =
+  | {
+      messages?: Message[];
+      users?: User[];
+      members?: Member[];
+    }
+  | Message[];
 
 type LoginPayload =
   | (Session & {
