@@ -26,7 +26,9 @@
   async function login() {
     const token = sessionToken.trim();
     if (token !== '') {
-      
+      await invoke('login_with_token', { token });
+      invoke('run_client');
+      return;
     }
 
     let mfaResponse:
