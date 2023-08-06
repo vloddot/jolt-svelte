@@ -72,7 +72,7 @@
 
   async function sendMessage() {
     const dataMessageSend: DataMessageSend = {
-      content: messageInputNode.value,
+      content: messageInputNode.value.trim(),
       replies: $replies.map(({ message: { _id }, mention }) => ({
         id: _id,
         mention,

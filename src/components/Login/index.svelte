@@ -51,24 +51,21 @@
       mfaTicket,
     })
       .then(async (payload) => {
-        if (payload.type === 'Success') {
+        if (payload.result === 'Success') {
           try {
             saveSession(payload);
           } finally {
             invoke('run_client');
           }
-        } else if (payload.type === 'Mfa') {
+        } else if (payload.result === 'Mfa') {
           mfaTicket = payload.ticket;
           mfaMethods = payload.allowed_methods.map((method) => [method, '']);
-
-          if (mfaResponse !== undefined) {
-            error =
-              'MFA method is not allowed. The following methods are allowed: ' +
-              payload.allowed_methods.join(',');
-          }
+          error = 'Invalid MFA method/code';
+        } else if (payload.result === 'Disabled') {
+          error = `Account ${payload.user_id} is disabled.`;
         }
       })
-      .catch(({ error: err }) => {
+      .catch((err) => {
         error = err;
         return;
       });
@@ -98,11 +95,6 @@
   }
 </script>
 
-<Modal showModal={error !== undefined}>
-  <h1 slot="header">Error</h1>
-  {error}
-</Modal>
-
 <div class="w-full h-full flex items-center flex-col justify-center relative">
   <div
     class="rounded-xl relative flex flex-col items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm px-6 pt-12 pb-6 max-w-[90%] mb-auto"
@@ -124,5 +116,9 @@
       <input type="text" placeholder="Session token" bind:value={sessionToken} />
       <button type="submit">Login with Session Token</button>
     </form>
+
+    {#if error}
+      {error}
+    {/if}
   </div>
 </div>

@@ -15,12 +15,16 @@ type BulkMessagePayload =
 
 type LoginPayload =
   | (Session & {
-      type: 'Success';
+      result: 'Success';
     })
   | {
-      type: 'Mfa';
+      result: 'Mfa';
       ticket: string;
       allowed_methods: MFAMethod[];
+    }
+  | {
+      result: 'Disabled';
+      user_id: string;
     };
 
 type ChannelTypingPayload = {

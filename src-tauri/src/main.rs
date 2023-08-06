@@ -23,13 +23,9 @@ use tauri::Manager;
 use reywen::{
     client::methods::message::{DataMessageSend, DataQueryMessages},
     structures::{
-        authentication::{
-            login::{DataLogin, ResponseLogin},
-            mfa::{MFAMethod, MFAResponse},
-            session::Session,
-        },
+        authentication::{login::ResponseLogin, mfa::MFAResponse},
         channels::{
-            message::{BulkMessageResponse2, Message, MessageSort},
+            message::{BulkMessageResponse, Message, MessageSort},
             Channel,
         },
         server::Server,
@@ -86,30 +82,6 @@ impl Deref for Client {
     }
 }
 
-/// Payload to be sent back when logging in.
-#[derive(Serialize, Deserialize)]
-#[serde(tag = "type")]
-enum LoginPayload {
-    /// User has logged in.
-    Success(Session),
-
-    /// MFA is required to log in.
-    Mfa {
-        /// MFA ticket.
-        ticket: String,
-
-        /// Allowed MFA methods.
-        allowed_methods: Vec<MFAMethod>,
-    },
-}
-
-#[derive(Serialize, Deserialize)]
-#[serde(tag = "type")]
-enum LoginError {
-    AccountDisabled { user_id: String },
-    DeltaError { error: String },
-}
-
 /// Log user in.
 ///
 /// # Errors
@@ -118,88 +90,25 @@ enum LoginError {
 #[tauri::command]
 async fn login(
     client: tauri::State<'_, Client>,
-    email: String,
-    password: String,
+    email: &str,
+    password: &str,
     mfa_response: Option<MFAResponse>,
-    mfa_ticket: Option<String>,
-) -> Result<LoginPayload, LoginError> {
-    if let Some(mfa_ticket) = mfa_ticket {
-        return match reywen::client::Client::session_login(
-            &DataLogin::MFA {
-                mfa_ticket,
-                mfa_response,
-                friendly_name: Some(session_friendly_name!()),
-            },
-            None,
-        )
-        .await
-        .map_err(|err| LoginError::DeltaError {
-            error: format!("{err:?}"),
-        })? {
-            ResponseLogin::Success(session) => Ok(LoginPayload::Success(session)),
-            ResponseLogin::MFA {
-                ticket,
-                allowed_methods,
-            } => Ok(LoginPayload::Mfa {
-                ticket,
-                allowed_methods,
-            }),
-            ResponseLogin::Disabled { user_id } => Err(LoginError::AccountDisabled { user_id }),
-        };
-    }
-
-    match reywen::client::Client::session_login(
-        &DataLogin::Email {
-            email,
-            password,
-            friendly_name: Some(session_friendly_name!()),
-        },
-        None,
+) -> Result<ResponseLogin, String> {
+    match reywen::client::Client::session_login_smart(
+        email,
+        password,
+        mfa_response,
+        Some(&session_friendly_name!()),
     )
     .await
-    .map_err(|err| LoginError::DeltaError {
-        error: format!("{err:?}"),
-    })? {
+    .map_err(|error| format!("{error:?}"))?
+    {
         ResponseLogin::Success(session) => {
-            if let Err(error) = login_with_token(client, &session.token).await {
-                Err(LoginError::DeltaError { error })
-            } else {
-                Ok(LoginPayload::Success(session))
-            }
+            login_with_token(client, &session.token).await?;
+
+            Ok(ResponseLogin::Success(session))
         }
-        ResponseLogin::MFA {
-            ticket: mfa_ticket, ..
-        } => {
-            match reywen::client::Client::session_login(
-                &DataLogin::MFA {
-                    mfa_ticket,
-                    mfa_response,
-                    friendly_name: Some(session_friendly_name!()),
-                },
-                None,
-            )
-            .await
-            .map_err(|err| LoginError::DeltaError {
-                error: format!("{err:?}"),
-            })? {
-                ResponseLogin::Success(session) => {
-                    if let Err(error) = login_with_token(client, &session.token).await {
-                        Err(LoginError::DeltaError { error })
-                    } else {
-                        Ok(LoginPayload::Success(session))
-                    }
-                }
-                ResponseLogin::MFA {
-                    ticket,
-                    allowed_methods,
-                } => Ok(LoginPayload::Mfa {
-                    ticket,
-                    allowed_methods,
-                }),
-                ResponseLogin::Disabled { user_id } => Err(LoginError::AccountDisabled { user_id }),
-            }
-        }
-        ResponseLogin::Disabled { user_id } => Err(LoginError::AccountDisabled { user_id }),
+        response => Ok(response),
     }
 }
 
@@ -251,7 +160,7 @@ async fn fetch_messages(
     client: tauri::State<'_, Client>,
     channel: &str,
     limit: Option<i64>,
-) -> Result<BulkMessageResponse2, String> {
+) -> Result<BulkMessageResponse, String> {
     client
         .lock()
         .await

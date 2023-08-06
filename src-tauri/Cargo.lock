@@ -1455,7 +1455,7 @@ checksum = "8eaf4bc02d17cbdd7ff4c7438cafcdf7fb9a4613313ad11b4f8fefe7d3fa0130"
 
 [[package]]
 name = "jolt"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "futures-util",
  "reywen",
@@ -2319,9 +2319,9 @@ checksum = "e5ea92a5b6195c6ef2a0295ea818b312502c6fc94dde986c5553242e18fd4ce2"
 
 [[package]]
 name = "reywen"
-version = "0.1.19"
+version = "0.1.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3e20e9e24587b68c46c23d15f961869368fe29f075b38a79ccd8ddb021d1614a"
+checksum = "65846fa39d2bb65e53decaebccf2468db418a8c0df8403a9479ae26b325e3348"
 dependencies = [
  "futures-util",
  "indexmap 2.0.0",

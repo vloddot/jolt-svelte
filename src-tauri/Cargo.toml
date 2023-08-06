@@ -1,6 +1,6 @@
 [package]
 name = "jolt"
-version = "0.2.4"
+version = "0.2.5"
 description = "A Tauri App"
 authors = ["vloddot (vladpriwalov08@gmail.com)"]
 license = "Apache-2.0"
@@ -16,7 +16,7 @@ tauri-build = { version = "1.4.0", features = [] }
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-reywen = "0.1.19"
+reywen = "0.1.20"
 tokio = { version = "1.29.1", features = ["rt-multi-thread"] }
 futures-util = "0.3.28"
 tokio-tungstenite = "0.20.0"
