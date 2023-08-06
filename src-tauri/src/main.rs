@@ -107,7 +107,7 @@ enum LoginPayload {
 #[serde(tag = "type")]
 enum LoginError {
     AccountDisabled { user_id: String },
-    DeltaError(String),
+    DeltaError { error: String },
 }
 
 /// Log user in.
@@ -133,8 +133,9 @@ async fn login(
             None,
         )
         .await
-        .map_err(|err| LoginError::DeltaError(format!("{err:?}")))?
-        {
+        .map_err(|err| LoginError::DeltaError {
+            error: format!("{err:?}"),
+        })? {
             ResponseLogin::Success(session) => Ok(LoginPayload::Success(session)),
             ResponseLogin::MFA {
                 ticket,
@@ -156,11 +157,12 @@ async fn login(
         None,
     )
     .await
-    .map_err(|err| LoginError::DeltaError(format!("{err:?}")))?
-    {
+    .map_err(|err| LoginError::DeltaError {
+        error: format!("{err:?}"),
+    })? {
         ResponseLogin::Success(session) => {
             if let Err(error) = login_with_token(client, &session.token).await {
-                Err(LoginError::DeltaError(error))
+                Err(LoginError::DeltaError { error })
             } else {
                 Ok(LoginPayload::Success(session))
             }
@@ -177,11 +179,12 @@ async fn login(
                 None,
             )
             .await
-            .map_err(|err| LoginError::DeltaError(format!("{err:?}")))?
-            {
+            .map_err(|err| LoginError::DeltaError {
+                error: format!("{err:?}"),
+            })? {
                 ResponseLogin::Success(session) => {
                     if let Err(error) = login_with_token(client, &session.token).await {
-                        Err(LoginError::DeltaError(error))
+                        Err(LoginError::DeltaError { error })
                     } else {
                         Ok(LoginPayload::Success(session))
                     }

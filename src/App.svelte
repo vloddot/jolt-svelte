@@ -16,26 +16,30 @@
   let modalError: string | null = null;
 
   onMount(async () => {
-    // `user_token` is saved in `AppData` for sessions that are saved.
-    if (await fs.exists('user_token', { dir: fs.BaseDirectory.AppData })) {
-      const token = await fs.readTextFile('user_token', {
-        dir: fs.BaseDirectory.AppData,
-      });
+    try {
+      // `user_token` is saved in `AppLocalData` for sessions that are saved.
+      if (await fs.exists('user_token', { dir: fs.BaseDirectory.AppLocalData })) {
+        const token = await fs.readTextFile('user_token', {
+          dir: fs.BaseDirectory.AppLocalData,
+        });
 
-      invoke('login_with_token', { token })
-        .then(() => invoke('run_client'))
-        .catch((err) => (modalError = err));
-    } else {
+        invoke('login_with_token', { token })
+          .then(() => invoke('run_client'))
+          .catch((err) => (modalError = err));
+      } else {
+        show = 'login';
+      }
+    } catch (e) {
       show = 'login';
+    } finally {
+      event.listen<ReadyPayload>('ready', (event) => {
+        users.set(event.payload.users);
+        servers.set(event.payload.servers);
+        channels.set(event.payload.channels);
+        emojis.set(event.payload.emojis);
+        show = 'main';
+      });
     }
-
-    event.listen<ReadyPayload>('ready', (event) => {
-      users.set(event.payload.users);
-      servers.set(event.payload.servers);
-      channels.set(event.payload.channels);
-      emojis.set(event.payload.emojis);
-      show = 'main';
-    });
   });
 </script>
 

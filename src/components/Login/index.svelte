@@ -1,6 +1,8 @@
 <script lang="ts">
   import { fs, invoke } from '@tauri-apps/api';
   import './index.css';
+  import { session } from '$lib/stores';
+  import Modal from '$components/Modal.svelte';
 
   // current email input
   let email: string = '';
@@ -24,13 +26,6 @@
   ];
 
   async function login() {
-    const token = sessionToken.trim();
-    if (token !== '') {
-      await invoke('login_with_token', { token });
-      invoke('run_client');
-      return;
-    }
-
     let mfaResponse:
       | { totp_code: string }
       | { recovery_code: string }
@@ -55,39 +50,50 @@
       }
     }
 
-    let payload: LoginPayload;
-    try {
-      payload = await invoke<LoginPayload>('login', {
-        email,
-        password,
-        mfaResponse,
-        mfaTicket,
+    invoke<LoginPayload>('login', {
+      email,
+      password,
+      mfaResponse,
+      mfaTicket,
+    })
+      .then(async (payload) => {
+        if (payload.type === 'Success') {
+          // save user token for conrurrent sessions
+          try {
+            await saveUserToken(sessionToken);
+          } finally {
+            invoke('run_client');
+          }
+        } else if (payload.type === 'Mfa') {
+          mfaTicket = payload.ticket;
+          mfaMethods = payload.allowed_methods.map((method) => [method, '']);
+
+          if (mfaResponse !== undefined) {
+            error =
+              'MFA method is not allowed. The following methods are allowed: ' +
+              payload.allowed_methods.join(',');
+          }
+        }
+      })
+      .catch(({ error: err }) => {
+        error = err;
+        return;
       });
-    } catch (e: any) {
-      error = e;
-      return;
-    }
+  }
 
-    if (payload.type === 'Success') {
-      // save user token for conrurrent sessions
-      await fs.writeTextFile('user_token', payload.token, { dir: fs.BaseDirectory.AppData });
-      invoke('run_client');
-    } else if (payload.type === 'Mfa') {
-      mfaTicket = payload.ticket;
-      mfaMethods = payload.allowed_methods.map((method) => [method, '']);
-
-      if (mfaResponse !== undefined) {
-        error =
-          'MFA method is not allowed. The following methods are allowed: ' +
-          payload.allowed_methods.join(',');
-      }
-    }
+  async function saveUserToken(token: string) {
+    fs.writeTextFile('user_token', token, { dir: fs.BaseDirectory.AppLocalData }).catch(
+      (err) => (error = `Unable to save user token for concurrent sessions: ${err}`)
+    );
   }
 
   async function loginWithSessionToken() {
-    await fs.writeTextFile('user_token', sessionToken, { dir: fs.BaseDirectory.AppData });
-    await invoke('login_with_token', { token: sessionToken });
-    invoke('run_client');
+    try {
+      saveUserToken(sessionToken);
+    } finally {
+      await invoke('login_with_token', { token: sessionToken });
+      invoke('run_client');
+    }
   }
 
   function displayMfaMethod(method: string): string {
@@ -101,8 +107,15 @@
   }
 </script>
 
+<Modal showModal={error !== undefined}>
+  <h1 slot="header">Error</h1>
+  {error}
+</Modal>
+
 <div class="w-full h-full flex items-center flex-col justify-center relative">
-  <div class="rounded-xl relative flex flex-col items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm px-6 pt-12 pb-6 max-w-[90%] mb-auto">
+  <div
+    class="rounded-xl relative flex flex-col items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm px-6 pt-12 pb-6 max-w-[90%] mb-auto"
+  >
     <form class="flex flex-col" on:submit|preventDefault={login}>
       <input type="email" placeholder="Email" bind:value={email} />
       <input type="password" placeholder="Password" bind:value={password} />
@@ -114,15 +127,11 @@
       <button type="submit">Login</button>
     </form>
 
-      -- OR --
+    -- OR --
 
     <form class="flex flex-col" on:submit={loginWithSessionToken}>
       <input type="text" placeholder="Session token" bind:value={sessionToken} />
       <button type="submit">Login with Session Token</button>
     </form>
-
-    {#if error}
-      <p>{error}</p>
-    {/if}
   </div>
 </div>
