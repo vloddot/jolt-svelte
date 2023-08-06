@@ -11,13 +11,13 @@
    */
   export let channel: Exclude<Channel, { channel_type: 'VoiceChannel' }>;
 
-  let bulkMessagesInfo = writable<BulkMessagePayload>({
+  const bulkMessagesInfo = writable<BulkMessagePayload>({
     members: [],
     messages: [],
     users: [],
   });
 
-  let replies = writable<Reply[]>([]);
+  const replies = writable<Reply[]>([]);
 
   // `bulkMessageInfo` contains info about users and members that are helpful.
   setContext(bulkMessageInfoKey, bulkMessagesInfo);
@@ -28,9 +28,9 @@
   let messageInputNode: HTMLTextAreaElement;
 
   $: {
-    invoke<BulkMessagePayload>('fetch_messages', { channel: channel._id }).then((response) => {
-      bulkMessagesInfo.set(response);
-    });
+    invoke<BulkMessagePayload>('fetch_messages', { channel: channel._id }).then((response) =>
+      bulkMessagesInfo.set(response)
+    );
     replies.set([]);
   }
 
@@ -102,7 +102,8 @@
       {#if Array.isArray($bulkMessagesInfo)}
         {reply.message._id}
       {:else}
-        {$bulkMessagesInfo.users?.find(({ _id }) => _id === reply.message.author)?._id ?? '<Unknown User>'}
+        {$bulkMessagesInfo.users?.find(({ _id }) => _id === reply.message.author)?._id ??
+          '<Unknown User>'}
       {/if}
       {#if reply.mention}
         with mention
@@ -111,6 +112,14 @@
     <form on:submit|preventDefault={sendMessage}>
       <textarea
         on:input={startTyping}
+        on:keydown={(event) => {
+          if (event.shiftKey || event.key !== 'Enter') {
+            return;
+          }
+
+          event.preventDefault();
+          return sendMessage();
+        }}
         bind:this={messageInputNode}
         class="resize-none rounded-xl bg-gray-500 w-full"
       />
