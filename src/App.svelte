@@ -17,12 +17,8 @@
 
   onMount(async () => {
     try {
-      // `user_token` is saved in `AppLocalData` for sessions that are saved.
-      if (await fs.exists('user_token', { dir: fs.BaseDirectory.AppLocalData })) {
-        const token = await fs.readTextFile('user_token', {
-          dir: fs.BaseDirectory.AppLocalData,
-        });
-
+      const token = localStorage.getItem('user_token');
+      if (token !== null) {
         invoke('login_with_token', { token })
           .then(() => invoke('run_client'))
           .catch((err) => (modalError = err));

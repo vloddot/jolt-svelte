@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { fs, invoke } from '@tauri-apps/api';
+  import { invoke } from '@tauri-apps/api';
   import './index.css';
   import { session } from '$lib/stores';
   import Modal from '$components/Modal.svelte';
@@ -36,18 +36,12 @@
     const recovery_code = mfaMethods.find(([method]) => method === 'Recovery')?.[1].trim();
     const mfaPassword = mfaMethods.find(([method]) => method === 'Password')?.[1].trim();
 
-    if (totp_code !== undefined) {
-      if (totp_code !== '') {
-        mfaResponse = { totp_code };
-      }
-    } else if (recovery_code !== undefined) {
-      if (recovery_code !== '') {
-        mfaResponse = { recovery_code };
-      }
-    } else if (mfaPassword !== undefined) {
-      if (mfaPassword !== '') {
-        mfaResponse = { password: mfaPassword };
-      }
+    if (totp_code !== undefined && totp_code !== '') {
+      mfaResponse = { totp_code };
+    } else if (recovery_code !== undefined && recovery_code !== '') {
+      mfaResponse = { recovery_code };
+    } else if (mfaPassword !== undefined && mfaPassword !== '') {
+      mfaResponse = { password: mfaPassword };
     }
 
     invoke<LoginPayload>('login', {
@@ -58,9 +52,8 @@
     })
       .then(async (payload) => {
         if (payload.type === 'Success') {
-          // save user token for conrurrent sessions
           try {
-            await saveUserToken(sessionToken);
+            saveSession(payload);
           } finally {
             invoke('run_client');
           }
@@ -81,19 +74,17 @@
       });
   }
 
-  async function saveUserToken(token: string) {
-    fs.writeTextFile('user_token', token, { dir: fs.BaseDirectory.AppLocalData }).catch(
-      (err) => (error = `Unable to save user token for concurrent sessions: ${err}`)
-    );
+  function saveSession(payload: Session) {
+    session.set(payload);
+    localStorage.setItem('user_token', payload.token);
   }
 
   async function loginWithSessionToken() {
-    try {
-      saveUserToken(sessionToken);
-    } finally {
-      await invoke('login_with_token', { token: sessionToken });
-      invoke('run_client');
-    }
+    invoke('login_with_token', { token: sessionToken })
+      .then(() => invoke('run_client'))
+      .catch((err) => {
+        error = err;
+      });
   }
 
   function displayMfaMethod(method: string): string {
