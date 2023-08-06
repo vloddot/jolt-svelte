@@ -4,6 +4,7 @@
   import { currentServerID } from '$lib/stores';
   import { getContext } from 'svelte';
   import type { Writable } from 'svelte/store';
+  import type { Reply } from './sharedData';
 
   /**
    * Message to show.
@@ -21,13 +22,11 @@
   }
 
   function pushReply(_: MouseEvent) {
-    if ($replies.some((reply) => reply.id === message._id)) {
+    if ($replies.some((reply) => reply.message._id === message._id)) {
       return;
     }
 
-    console.log(message);
-
-    replies.set([...$replies, { id: message._id, mention: true }]);
+    replies.set([...$replies, { message, mention: true }]);
   }
 
   const controls: Controls[] = [
