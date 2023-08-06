@@ -2,7 +2,7 @@
 name = "jolt"
 version = "0.2.4"
 description = "A Tauri App"
-authors = ["you"]
+authors = ["vloddot (vladpriwalov08@gmail.com)"]
 license = "Apache-2.0"
 repository = "https://www.github.com/vloddot/jolt"
 default-run = "jolt"
