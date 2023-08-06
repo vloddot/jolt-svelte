@@ -6,7 +6,7 @@
   import ChannelBar from '$components/ChannelBar/index.svelte';
   import MembersList from '$components/MembersList/index.svelte';
   import { channels, emojis, servers, users } from '$lib/stores';
-  import { event, fs, invoke } from '@tauri-apps/api';
+  import { event, invoke } from '@tauri-apps/api';
   import { onMount } from 'svelte';
   import Modal from '$components/Modal.svelte';
 
