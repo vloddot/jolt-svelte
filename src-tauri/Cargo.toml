@@ -1,10 +1,10 @@
 [package]
 name = "jolt"
-version = "0.2.3"
+version = "0.2.4"
 description = "A Tauri App"
-authors = ["you"]
-license = ""
-repository = ""
+authors = ["vloddot (vladpriwalov08@gmail.com)"]
+license = "Apache-2.0"
+repository = "https://www.github.com/vloddot/jolt"
 default-run = "jolt"
 edition = "2021"
 
