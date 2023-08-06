@@ -29,7 +29,7 @@ use reywen::{
             session::Session,
         },
         channels::{
-            message::{BulkMessageResponse2, Message, MessageSort},
+            message::{BulkMessageResponse, Message, MessageSort},
             Channel,
         },
         server::Server,
@@ -121,86 +121,32 @@ async fn login(
     email: String,
     password: String,
     mfa_response: Option<MFAResponse>,
-    mfa_ticket: Option<String>,
 ) -> Result<LoginPayload, LoginError> {
-    if let Some(mfa_ticket) = mfa_ticket {
-        return match reywen::client::Client::session_login(
-            &DataLogin::MFA {
-                mfa_ticket,
-                mfa_response,
-                friendly_name: Some(session_friendly_name!()),
-            },
-            None,
-        )
-        .await
-        .map_err(|err| LoginError::DeltaError {
-            error: format!("{err:?}"),
-        })? {
-            ResponseLogin::Success(session) => Ok(LoginPayload::Success(session)),
-            ResponseLogin::MFA {
+    let login =
+        match reywen::client::Client::session_login_smart(&email, &password, mfa_response, None)
+            .await
+        {
+            Ok(ResponseLogin::Disabled { user_id }) => Err(LoginError::AccountDisabled { user_id }),
+            Ok(ResponseLogin::MFA {
                 ticket,
                 allowed_methods,
-            } => Ok(LoginPayload::Mfa {
+            }) => Ok(LoginPayload::Mfa {
                 ticket,
                 allowed_methods,
             }),
-            ResponseLogin::Disabled { user_id } => Err(LoginError::AccountDisabled { user_id }),
+            Ok(ResponseLogin::Success(session)) => Ok(LoginPayload::Success(session)),
+
+            Err(error) => Err(LoginError::DeltaError {
+                error: format!("{:#?}", error),
+            }),
+        };
+
+    if let Ok(LoginPayload::Success(session)) = &login {
+        if let Err(a) = login_with_token(client, &session.token).await {
+            return Err(LoginError::DeltaError { error: a });
         };
     }
-
-    match reywen::client::Client::session_login(
-        &DataLogin::Email {
-            email,
-            password,
-            friendly_name: Some(session_friendly_name!()),
-        },
-        None,
-    )
-    .await
-    .map_err(|err| LoginError::DeltaError {
-        error: format!("{err:?}"),
-    })? {
-        ResponseLogin::Success(session) => {
-            if let Err(error) = login_with_token(client, &session.token).await {
-                Err(LoginError::DeltaError { error })
-            } else {
-                Ok(LoginPayload::Success(session))
-            }
-        }
-        ResponseLogin::MFA {
-            ticket: mfa_ticket, ..
-        } => {
-            match reywen::client::Client::session_login(
-                &DataLogin::MFA {
-                    mfa_ticket,
-                    mfa_response,
-                    friendly_name: Some(session_friendly_name!()),
-                },
-                None,
-            )
-            .await
-            .map_err(|err| LoginError::DeltaError {
-                error: format!("{err:?}"),
-            })? {
-                ResponseLogin::Success(session) => {
-                    if let Err(error) = login_with_token(client, &session.token).await {
-                        Err(LoginError::DeltaError { error })
-                    } else {
-                        Ok(LoginPayload::Success(session))
-                    }
-                }
-                ResponseLogin::MFA {
-                    ticket,
-                    allowed_methods,
-                } => Ok(LoginPayload::Mfa {
-                    ticket,
-                    allowed_methods,
-                }),
-                ResponseLogin::Disabled { user_id } => Err(LoginError::AccountDisabled { user_id }),
-            }
-        }
-        ResponseLogin::Disabled { user_id } => Err(LoginError::AccountDisabled { user_id }),
-    }
+    login
 }
 
 /// Login with session token.
@@ -215,12 +161,14 @@ async fn login_with_token(client: tauri::State<'_, Client>, token: &str) -> Resu
 /// Fetch a user from ID.
 #[tauri::command]
 async fn fetch_user(client: tauri::State<'_, Client>, user: &str) -> Result<User, String> {
-    client
+    let a = client
         .lock()
         .await
         .user_fetch(user)
         .await
-        .map_err(|err| format!("{err:?}"))
+        .map_err(|err| format!("{err:?}"));
+    println!("target user: {}\nresult: {:#?}", user, a);
+    a
 }
 
 /// Fetch a server from ID.
@@ -251,7 +199,7 @@ async fn fetch_messages(
     client: tauri::State<'_, Client>,
     channel: &str,
     limit: Option<i64>,
-) -> Result<BulkMessageResponse2, String> {
+) -> Result<BulkMessageResponse, String> {
     client
         .lock()
         .await
@@ -354,11 +302,11 @@ async fn run_client<R: tauri::Runtime>(
 }
 
 fn main() {
+    let client = reywen::client::Client::new();
+
     #[allow(clippy::expect_used)]
     tauri::Builder::default()
-        .manage(Client(tokio::sync::Mutex::new(
-            reywen::client::Client::new(),
-        )))
+        .manage(Client(tokio::sync::Mutex::new(client)))
         .invoke_handler(tauri::generate_handler![
             login,
             login_with_token,
