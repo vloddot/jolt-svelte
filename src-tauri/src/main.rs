@@ -161,14 +161,12 @@ async fn login_with_token(client: tauri::State<'_, Client>, token: &str) -> Resu
 /// Fetch a user from ID.
 #[tauri::command]
 async fn fetch_user(client: tauri::State<'_, Client>, user: &str) -> Result<User, String> {
-    let a = client
+    client
         .lock()
         .await
         .user_fetch(user)
         .await
-        .map_err(|err| format!("{err:?}"));
-    println!("target user: {}\nresult: {:#?}", user, a);
-    a
+        .map_err(|err| format!("{err:?}"))
 }
 
 /// Fetch a server from ID.
