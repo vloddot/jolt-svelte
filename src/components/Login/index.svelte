@@ -2,7 +2,6 @@
   import { invoke } from '@tauri-apps/api';
   import './index.css';
   import { session } from '$lib/stores';
-  import Modal from '$components/Modal.svelte';
 
   // current email input
   let email: string = '';
@@ -15,9 +14,6 @@
 
   // error text to display
   let error: string | undefined = undefined;
-
-  // MFA ticket to store for later
-  let mfaTicket: string | undefined = undefined;
 
   // MFA Methods with their input fields' values
   let mfaMethods: [MFAMethod, string][] = [
@@ -48,7 +44,6 @@
       email,
       password,
       mfaResponse,
-      mfaTicket,
     })
       .then(async (payload) => {
         if (payload.result === 'Success') {
@@ -58,9 +53,8 @@
             invoke('run_client');
           }
         } else if (payload.result === 'Mfa') {
-          mfaTicket = payload.ticket;
           mfaMethods = payload.allowed_methods.map((method) => [method, '']);
-          error = 'Invalid MFA method/code';
+          error = 'Invalid MFA method';
         } else if (payload.result === 'Disabled') {
           error = `Account ${payload.user_id} is disabled.`;
         }
