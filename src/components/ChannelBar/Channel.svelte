@@ -3,31 +3,26 @@
 
   /**
    * Whether the element is rounded or not.
-   * @type {boolean}
    */
   export let rounded: boolean = false;
 
   /**
    * Image URL to show alongside channel name.
-   * @type {string}
    */
   export let src: string | undefined;
 
   /**
    * Image width.
-   * @type {string}
    */
   export let width: string | undefined;
 
   /**
    * Image height.
-   * @type {string}
    */
   export let height: string | undefined;
 
   /**
    * Channel name.
-   * @type {string}
    */
   export let name: string;
 
@@ -38,7 +33,6 @@
 
   /**
    * Channel ID.
-   * @type {string}
    */
   export let id: string;
 </script>

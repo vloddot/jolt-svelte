@@ -30,6 +30,6 @@
 
   .right-sidebar-container {
     grid-area: right-sidebar;
-    @apply overflow-y-scroll h-screen;
+    @apply overflow-y-scroll h-screen bg-gray-800;
   }
 }
