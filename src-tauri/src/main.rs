@@ -14,7 +14,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use core::ops::Deref;
-use std::collections::HashMap;
 
 use futures_util::{SinkExt, StreamExt};
 
@@ -37,6 +36,7 @@ use reywen::{
     },
     websocket::data::{WebSocketEvent, WebSocketSend},
 };
+use tokio::sync::Mutex;
 
 /// Session friendly name to be used for login.
 macro_rules! session_friendly_name {
@@ -79,7 +79,7 @@ struct Client(tokio::sync::Mutex<System>);
 #[derive(Debug, Default)]
 pub struct System {
     pub driver: tokio::sync::Mutex<reywen::client::Client>,
-    pub cache: tokio::sync::Mutex<Cache>,
+    pub cache: Mutex<Cache>,
 }
 
 impl System {}
@@ -97,8 +97,16 @@ impl Cache {
             .filter_map(|item| if item.id == user_id { Some(item) } else { None })
             .collect::<Vec<&User>>()
             .get(0)
+            .copied()
             .cloned()
-            .cloned()
+    }
+    pub fn insert_user(&mut self, user: User) -> bool {
+        if self.contains_user(&user.id).is_some() {
+            false
+        } else {
+            self.users.push(user);
+            true
+        }
     }
     pub fn contains_server(&self, server_id: &str) -> Option<Server> {
         self.servers
@@ -112,7 +120,7 @@ impl Cache {
             })
             .collect::<Vec<&Server>>()
             .get(0)
-            .cloned()
+            .copied()
             .cloned()
     }
     pub fn contains_channel(&self, channel_id: &str) -> Option<Channel> {
@@ -127,14 +135,14 @@ impl Cache {
             })
             .collect::<Vec<&Channel>>()
             .get(0)
-            .cloned()
+            .copied()
             .cloned()
     }
 }
 
 impl System {
     pub fn new() -> Self {
-        Default::default()
+        System::default()
     }
 }
 
@@ -188,12 +196,11 @@ async fn login_with_token(client: tauri::State<'_, Client>, token: &str) -> Resu
 /// Fetch a user from ID.
 #[tauri::command]
 async fn fetch_user(client: tauri::State<'_, Client>, user: &str) -> Result<User, String> {
-    let client = client.lock().await;
-
-    let x = if let Some(user) = client.cache.lock().await.contains_user(user) {
+    let ref_client = client.lock().await;
+    let x = if let Some(user) = ref_client.cache.lock().await.contains_user(user) {
         Ok(user)
     } else {
-        client
+        ref_client
             .driver
             .lock()
             .await
@@ -212,6 +219,9 @@ async fn fetch_members(
     client
         .lock()
         .await
+        .driver
+        .lock()
+        .await
         .member_fetch_all(server)
         .await
         .map_err(|err| format!("{err:?}"))
@@ -219,30 +229,41 @@ async fn fetch_members(
 
 /// Fetch a server from ID.
 #[tauri::command]
-async fn fetch_server(client: tauri::State<'_, Client>, server: &str) -> Result<Server, String> {
-    client
-        .lock()
-        .await
-        .driver
-        .lock()
-        .await
-        .server_fetch(server)
-        .await
-        .map_err(|err| format!("{err:?}"))
+async fn fetch_server(client: tauri::State<'_, Client>, server_id: &str) -> Result<Server, String> {
+    let ref_client = client.lock().await;
+    let x = if let Some(channel) = ref_client.cache.lock().await.contains_server(server_id) {
+        Ok(channel)
+    } else {
+        ref_client
+            .driver
+            .lock()
+            .await
+            .server_fetch(server_id)
+            .await
+            .map_err(|err| format!("{err:?}"))
+    };
+    x
 }
 
 /// Fetch a channel from ID.
 #[tauri::command]
-async fn fetch_channel(client: tauri::State<'_, Client>, channel: &str) -> Result<Channel, String> {
-    client
-        .lock()
-        .await
-        .driver
-        .lock()
-        .await
-        .channel_fetch(channel)
-        .await
-        .map_err(|err| format!("{err:?}"))
+async fn fetch_channel(
+    client: tauri::State<'_, Client>,
+    channel_id: &str,
+) -> Result<Channel, String> {
+    let ref_client = client.lock().await;
+    let x = if let Some(channel) = ref_client.cache.lock().await.contains_channel(channel_id) {
+        Ok(channel)
+    } else {
+        ref_client
+            .driver
+            .lock()
+            .await
+            .channel_fetch(channel_id)
+            .await
+            .map_err(|err| format!("{err:?}"))
+    };
+    x
 }
 
 /// Fetch a bulk of messages.
