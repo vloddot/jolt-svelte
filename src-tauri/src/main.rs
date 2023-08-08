@@ -13,8 +13,6 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use core::ops::Deref;
-
 use futures_util::{SinkExt, StreamExt};
 
 use serde::{Deserialize, Serialize};
@@ -36,6 +34,7 @@ use reywen::{
     },
     websocket::data::{WebSocketEvent, WebSocketSend},
 };
+use tokio::sync::Mutex;
 
 /// Session friendly name to be used for login.
 macro_rules! session_friendly_name {
@@ -72,15 +71,67 @@ struct TypingPayload {
     user_id: String,
 }
 
-/// `tauri::State` wrapper for `reywen::client::Client` to be used globally.
-#[derive(Debug)]
-struct Client(tokio::sync::Mutex<reywen::client::Client>);
+#[derive(Debug, Default)]
+struct Client {
+    pub driver: tokio::sync::Mutex<reywen::client::Client>,
+    pub cache: Mutex<Cache>,
+}
 
-impl Deref for Client {
-    type Target = tokio::sync::Mutex<reywen::client::Client>;
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct Cache {
+    pub users: Vec<User>,
+    pub servers: Vec<Server>,
+    pub channels: Vec<Channel>,
+}
 
-    fn deref(&self) -> &Self::Target {
-        &self.0
+impl Cache {
+    #[must_use]
+    pub fn contains_user(&self, user_id: &str) -> Option<User> {
+        self.users
+            .iter()
+            .filter(|user| user.id == user_id)
+            .collect::<Vec<&User>>()
+            .get(0)
+            .copied()
+            .cloned()
+    }
+
+    #[must_use]
+    pub fn contains_server(&self, server_id: &str) -> Option<Server> {
+        self.servers
+            .iter()
+            .filter(|server| server.id == server_id)
+            .collect::<Vec<&Server>>()
+            .get(0)
+            .copied()
+            .cloned()
+    }
+
+    #[must_use]
+    pub fn contains_channel(&self, channel_id: &str) -> Option<Channel> {
+        self.channels
+            .iter()
+            .filter(|channel| channel.id() == channel_id)
+            .collect::<Vec<&Channel>>()
+            .get(0)
+            .copied()
+            .cloned()
+    }
+
+    pub fn insert_user(&mut self, user: User) -> bool {
+        if self.contains_user(&user.id).is_some() {
+            false
+        } else {
+            self.users.push(user);
+            true
+        }
+    }
+}
+
+impl Client {
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
     }
 }
 
@@ -117,7 +168,7 @@ async fn login(
 /// Login with session token.
 #[tauri::command]
 async fn login_with_token(client: tauri::State<'_, Client>, token: &str) -> Result<(), String> {
-    *client.lock().await =
+    *client.driver.lock().await =
         reywen::client::Client::from_token(token, false).map_err(|err| format!("{err:?}"))?;
 
     Ok(())
@@ -126,12 +177,17 @@ async fn login_with_token(client: tauri::State<'_, Client>, token: &str) -> Resu
 /// Fetch a user from ID.
 #[tauri::command]
 async fn fetch_user(client: tauri::State<'_, Client>, user: &str) -> Result<User, String> {
-    client
-        .lock()
-        .await
-        .user_fetch(user)
-        .await
-        .map_err(|err| format!("{err:?}"))
+    let Some(user) = client.cache.lock().await.contains_user(user) else {
+        return client
+            .driver
+            .lock()
+            .await
+            .user_fetch(user)
+            .await
+            .map_err(|err| format!("{err:?}"));
+    };
+
+    Ok(user)
 }
 
 #[tauri::command]
@@ -140,6 +196,7 @@ async fn fetch_members(
     server: &str,
 ) -> Result<ResponseMemberAll, String> {
     client
+        .driver
         .lock()
         .await
         .member_fetch_all(server)
@@ -149,24 +206,37 @@ async fn fetch_members(
 
 /// Fetch a server from ID.
 #[tauri::command]
-async fn fetch_server(client: tauri::State<'_, Client>, server: &str) -> Result<Server, String> {
-    client
-        .lock()
-        .await
-        .server_fetch(server)
-        .await
-        .map_err(|err| format!("{err:?}"))
+async fn fetch_server(client: tauri::State<'_, Client>, server_id: &str) -> Result<Server, String> {
+    let Some(channel) = client.cache.lock().await.contains_server(server_id) else {
+        return client
+            .driver
+            .lock()
+            .await
+            .server_fetch(server_id)
+            .await
+            .map_err(|err| format!("{err:?}"));
+    };
+
+    Ok(channel)
 }
 
 /// Fetch a channel from ID.
 #[tauri::command]
-async fn fetch_channel(client: tauri::State<'_, Client>, channel: &str) -> Result<Channel, String> {
-    client
-        .lock()
-        .await
-        .channel_fetch(channel)
-        .await
-        .map_err(|err| format!("{err:?}"))
+async fn fetch_channel(
+    client: tauri::State<'_, Client>,
+    channel_id: &str,
+) -> Result<Channel, String> {
+    let Some(channel) = client.cache.lock().await.contains_channel(channel_id) else {
+        return client
+            .driver
+            .lock()
+            .await
+            .channel_fetch(channel_id)
+            .await
+            .map_err(|err| format!("{err:?}"));
+    };
+
+    Ok(channel)
 }
 
 /// Fetch a bulk of messages.
@@ -177,6 +247,7 @@ async fn fetch_messages(
     limit: Option<i64>,
 ) -> Result<BulkMessageResponse, String> {
     client
+        .driver
         .lock()
         .await
         .message_query(
@@ -198,6 +269,7 @@ async fn send_message(
     data_message_send: DataMessageSend,
 ) -> Result<Message, String> {
     client
+        .driver
         .lock()
         .await
         .message_send(channel, &data_message_send)
@@ -208,7 +280,7 @@ async fn send_message(
 /// Send a `BeginTyping` event to WebSocket using `channel` (id).
 #[tauri::command]
 async fn start_typing(client: tauri::State<'_, Client>, channel: String) -> Result<(), ()> {
-    let (_, write) = client.lock().await.websocket.dual_async().await;
+    let (_, write) = client.driver.lock().await.websocket.dual_async().await;
 
     let _ = write
         .lock()
@@ -226,53 +298,63 @@ async fn run_client<R: tauri::Runtime>(
     client: tauri::State<'_, Client>,
 ) -> Result<(), ()> {
     loop {
-        let (mut read, write) = client.lock().await.websocket.dual_async().await;
+        let (mut read, write) = client.driver.lock().await.websocket.dual_async().await;
 
         while let Some(event) = read.next().await {
             let app = app.clone();
             let write = std::sync::Arc::clone(&write);
 
-            tokio::spawn(async move {
-                match event {
-                    WebSocketEvent::Ready { .. } => {
-                        let _ = app.emit_all("ready", event);
+            match event {
+                WebSocketEvent::Ready {
+                    users,
+                    servers,
+                    channels,
+                    ..
+                } => {
+                    let cache = Cache {
+                        users,
+                        servers,
+                        channels,
+                    };
 
-                        let _ = write.lock().await.send(WebSocketSend::ping(0).into()).await;
-                    }
-                    WebSocketEvent::Message { message } => {
-                        let _ = app.emit_all("message", message);
-                    }
-                    WebSocketEvent::Pong { .. } => {
-                        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
-                        let _ = write.lock().await.send(WebSocketSend::ping(0).into()).await;
-                    }
-                    WebSocketEvent::ChannelStartTyping {
-                        channel_id,
-                        user_id,
-                    } => {
-                        let _ = app.emit_all(
-                            "channel_start_typing",
-                            TypingPayload {
-                                channel_id,
-                                user_id,
-                            },
-                        );
-                    }
-                    WebSocketEvent::ChannelStopTyping {
-                        channel_id,
-                        user_id,
-                    } => {
-                        let _ = app.emit_all(
-                            "channel_stop_typing",
-                            TypingPayload {
-                                channel_id,
-                                user_id,
-                            },
-                        );
-                    }
-                    _ => {}
+                    let _ = app.emit_all("ready", &cache);
+                    *client.cache.lock().await = cache;
+
+                    let _ = write.lock().await.send(WebSocketSend::ping(0).into()).await;
                 }
-            });
+                WebSocketEvent::Message { message } => {
+                    let _ = app.emit_all("message", message);
+                }
+                WebSocketEvent::Pong { .. } => {
+                    tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                    let _ = write.lock().await.send(WebSocketSend::ping(0).into()).await;
+                }
+                WebSocketEvent::ChannelStartTyping {
+                    channel_id,
+                    user_id,
+                } => {
+                    let _ = app.emit_all(
+                        "channel_start_typing",
+                        TypingPayload {
+                            channel_id,
+                            user_id,
+                        },
+                    );
+                }
+                WebSocketEvent::ChannelStopTyping {
+                    channel_id,
+                    user_id,
+                } => {
+                    let _ = app.emit_all(
+                        "channel_stop_typing",
+                        TypingPayload {
+                            channel_id,
+                            user_id,
+                        },
+                    );
+                }
+                _ => {}
+            }
         }
     }
 }
@@ -280,9 +362,7 @@ async fn run_client<R: tauri::Runtime>(
 fn main() {
     #[allow(clippy::expect_used)]
     tauri::Builder::default()
-        .manage(Client(tokio::sync::Mutex::new(
-            reywen::client::Client::new(),
-        )))
+        .manage(Client::new())
         .invoke_handler(tauri::generate_handler![
             login,
             login_with_token,
