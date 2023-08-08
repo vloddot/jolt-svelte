@@ -1,7 +1,7 @@
 <script lang="ts">
   import { bulkMessageInfoKey, repliesKey } from './sharedData';
   import { getAutumnURL } from '$lib/helpers';
-  import { currentServerID } from '$lib/stores';
+  import { currentServerID, session } from '$lib/stores';
   import { getContext } from 'svelte';
   import type { Writable } from 'svelte/store';
   import type { Reply } from './sharedData';
@@ -17,7 +17,7 @@
   interface Controls {
     src: string;
     alt: string;
-    ariaLabel?: string;
+    showIf?: () => boolean;
     onclick: (event: MouseEvent) => unknown;
   }
 
@@ -34,6 +34,12 @@
       src: '/reply.svg',
       alt: 'Reply',
       onclick: pushReply,
+    },
+    {
+      src: '/edit.svg',
+      alt: 'Edit',
+      onclick() {},
+      showIf: () => message.author === $session?.user_id,
     },
   ];
 
@@ -69,10 +75,12 @@
     <div class="flex-1" />
 
     <span class="hidden group-hover:block">
-      {#each controls as { src, ariaLabel, alt, onclick }}
-        <button aria-label={ariaLabel ?? alt} on:click={onclick}>
-          <img width="16" height="16" {src} {alt} />
-        </button>
+      {#each controls as { src, alt, onclick, showIf }}
+        {#if showIf?.() ?? true}
+          <button class="ml-2" aria-label={alt} on:click={onclick}>
+            <img width="16" height="16" {src} {alt} />
+          </button>
+        {/if}
       {/each}
     </span>
   </div>
@@ -103,7 +111,7 @@
             {text}
           {/await}
         {:catch error}
-          Unable to download the file: {error}
+          Unable to download {attachment.filename}: {error}
         {/await}
       {/if}
     {/each}

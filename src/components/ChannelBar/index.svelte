@@ -1,8 +1,7 @@
 <script lang="ts">
   import ChannelComponent from './Channel.svelte';
-  import { currentServerID, servers, session } from '$lib/stores';
-  import { fetchUser, getAutumnURL } from '$lib/helpers';
-  import ChannelFinder from '$components/ChannelFinder.svelte';
+  import { currentServerID, servers } from '$lib/stores';
+  import ChannelFinder from '$components/ChannelFetcher.svelte';
   import ChannelCategory from './Category.svelte';
 
   let unsortedChannels: (string | undefined)[] = [];
