@@ -22,3 +22,16 @@ type Role = {
   hoist: boolean;
   rank: number;
 };
+
+type Member = {
+  _id: MemberCompositeKey;
+  joined_at: string;
+  nickname?: string;
+  avatar?: AutumnFile;
+  timeout?: string;
+};
+
+type MemberResponseAll = {
+  members: Member[];
+  users: User[];
+};

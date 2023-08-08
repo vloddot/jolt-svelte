@@ -5,7 +5,7 @@
   import MainContent from '$components/MainContent/index.svelte';
   import ChannelBar from '$components/ChannelBar/index.svelte';
   import MembersList from '$components/MembersList/index.svelte';
-  import { channels, emojis, servers, users } from '$lib/stores';
+  import { channels, emojis, servers, session, users } from '$lib/stores';
   import { event, invoke } from '@tauri-apps/api';
   import { onMount } from 'svelte';
   import Modal from '$components/Modal.svelte';
@@ -17,9 +17,10 @@
 
   onMount(async () => {
     try {
-      const token = localStorage.getItem('user_token');
-      if (token !== null) {
-        invoke('login_with_token', { token })
+      const cachedSession: Session | null = JSON.parse(localStorage.getItem('session') || 'null');
+      if (cachedSession !== null) {
+        session.set(cachedSession);
+        invoke('login_with_token', { token: cachedSession.token })
           .then(() => invoke('run_client'))
           .catch((err) => (modalError = err));
       } else {
