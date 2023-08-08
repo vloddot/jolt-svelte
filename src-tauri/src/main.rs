@@ -22,7 +22,10 @@ use serde::{Deserialize, Serialize};
 use tauri::Manager;
 
 use reywen::{
-    client::methods::message::{DataMessageSend, DataQueryMessages},
+    client::methods::{
+        member::ResponseMemberAll,
+        message::{DataMessageSend, DataQueryMessages},
+    },
     structures::{
         authentication::{login::ResponseLogin, mfa::MFAResponse},
         channels::{
@@ -35,11 +38,14 @@ use reywen::{
     websocket::data::{WebSocketEvent, WebSocketSend},
 };
 
-const APP_NAME: &str = "Jolt";
-
 /// Session friendly name to be used for login.
 macro_rules! session_friendly_name {
     () => {{
+        #[cfg(any(target_os = "ios", target_os = "android"))]
+        const APP_NAME: &str = "Jolt mobile client";
+        #[cfg(not(any(target_os = "ios", target_os = "android")))]
+        const APP_NAME: &str = "Jolt desktop client";
+
         #[cfg(target_os = "windows")]
         const PLATFORM: &str = "Windows";
 
@@ -52,11 +58,7 @@ macro_rules! session_friendly_name {
         #[cfg(not(any(target_os = "windows", target_os = "darwin", target_os = "linux")))]
         const PLATFORM: &str = "Unknown Device";
 
-        format!(
-            "{app_name} desktop client on {platform}",
-            app_name = $crate::APP_NAME,
-            platform = PLATFORM
-        )
+        format!("{APP_NAME} on {PLATFORM}")
     }};
 }
 
@@ -202,6 +204,19 @@ async fn fetch_user(client: tauri::State<'_, Client>, user: &str) -> Result<User
     x
 }
 
+#[tauri::command]
+async fn fetch_members(
+    client: tauri::State<'_, Client>,
+    server: &str,
+) -> Result<ResponseMemberAll, String> {
+    client
+        .lock()
+        .await
+        .member_fetch_all(server)
+        .await
+        .map_err(|err| format!("{err:?}"))
+}
+
 /// Fetch a server from ID.
 #[tauri::command]
 async fn fetch_server(client: tauri::State<'_, Client>, server: &str) -> Result<Server, String> {
@@ -230,7 +245,7 @@ async fn fetch_channel(client: tauri::State<'_, Client>, channel: &str) -> Resul
         .map_err(|err| format!("{err:?}"))
 }
 
-/// Fetch a bulk amount of messages.
+/// Fetch a bulk of messages.
 #[tauri::command]
 async fn fetch_messages(
     client: tauri::State<'_, Client>,
@@ -376,6 +391,7 @@ fn main() {
             login,
             login_with_token,
             fetch_user,
+            fetch_members,
             fetch_server,
             fetch_channel,
             fetch_messages,

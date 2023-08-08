@@ -2,7 +2,6 @@
   import { invoke } from '@tauri-apps/api';
   import './index.css';
   import { session } from '$lib/stores';
-  import Modal from '$components/Modal.svelte';
 
   // current email input
   let email: string = '';
@@ -10,14 +9,8 @@
   // current password input
   let password: string = '';
 
-  // current session token input
-  let sessionToken: string = '';
-
   // error text to display
   let error: string | undefined = undefined;
-
-  // MFA ticket to store for later
-  let mfaTicket: string | undefined = undefined;
 
   // MFA Methods with their input fields' values
   let mfaMethods: [MFAMethod, string][] = [
@@ -48,7 +41,6 @@
       email,
       password,
       mfaResponse,
-      mfaTicket,
     })
       .then(async (payload) => {
         if (payload.result === 'Success') {
@@ -58,9 +50,8 @@
             invoke('run_client');
           }
         } else if (payload.result === 'Mfa') {
-          mfaTicket = payload.ticket;
           mfaMethods = payload.allowed_methods.map((method) => [method, '']);
-          error = 'Invalid MFA method/code';
+          error = 'Invalid MFA method';
         } else if (payload.result === 'Disabled') {
           error = `Account ${payload.user_id} is disabled.`;
         }
@@ -73,15 +64,7 @@
 
   function saveSession(payload: Session) {
     session.set(payload);
-    localStorage.setItem('user_token', payload.token);
-  }
-
-  async function loginWithSessionToken() {
-    invoke('login_with_token', { token: sessionToken })
-      .then(() => invoke('run_client'))
-      .catch((err) => {
-        error = err;
-      });
+    localStorage.setItem('session', JSON.stringify(payload));
   }
 
   function displayMfaMethod(method: string): string {
@@ -97,24 +80,21 @@
 
 <div class="w-full h-full flex items-center flex-col justify-center relative">
   <div
-    class="rounded-xl relative flex flex-col items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm px-6 pt-12 pb-6 max-w-[90%] mb-auto"
+    class="rounded-xl relative items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm px-6 py-12 max-w-[90%] mb-auto"
   >
     <form class="flex flex-col" on:submit|preventDefault={login}>
       <input type="email" placeholder="Email" bind:value={email} />
       <input type="password" placeholder="Password" bind:value={password} />
 
+      <p class="text-xs text-gray-500">
+        Optionally, if your account uses MFA, use one of these methods, including the previous email
+        and password as well:
+      </p>
       {#each mfaMethods as [method, value]}
         <input type="text" placeholder={displayMfaMethod(method)} bind:value />
       {/each}
 
       <button type="submit">Login</button>
-    </form>
-
-    -- OR --
-
-    <form class="flex flex-col" on:submit={loginWithSessionToken}>
-      <input type="text" placeholder="Session token" bind:value={sessionToken} />
-      <button type="submit">Login with Session Token</button>
     </form>
 
     {#if error}

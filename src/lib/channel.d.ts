@@ -57,11 +57,3 @@ type MemberCompositeKey = {
   server: string;
   user: string;
 };
-
-type Member = {
-  _id: MemberCompositeKey;
-  joined_at: string;
-  nickname?: string;
-  avatar?: AutumnFile;
-  timeout?: string;
-};

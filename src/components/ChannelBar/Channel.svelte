@@ -1,55 +1,56 @@
 <script lang="ts">
-  import { currentChannelID } from '$lib/stores';
+  import ChannelItem from '$components/ChannelBar/ChannelItem.svelte';
+  import { fetchUser, getAutumnURL } from '$lib/helpers';
+  import { session } from '$lib/stores';
 
-  /**
-   * Whether the element is rounded or not.
-   * @type {boolean}
-   */
-  export let rounded: boolean = false;
+  function getChannelIcon({
+    icon,
+    channel_type,
+  }: Exclude<Channel, { channel_type: 'DirectMessage' | 'SavedMessages' }>): string {
+    if (icon !== undefined) {
+      return getAutumnURL(icon);
+    }
 
-  /**
-   * Image URL to show alongside channel name.
-   * @type {string}
-   */
-  export let src: string | undefined;
+    switch (channel_type) {
+      case 'Group':
+        return '/group.svg';
+      case 'TextChannel':
+        return '/hash.svg';
+      case 'VoiceChannel':
+        return '/volume.svg';
+    }
+  }
 
-  /**
-   * Image width.
-   * @type {string}
-   */
-  export let width: string | undefined;
-
-  /**
-   * Image height.
-   * @type {string}
-   */
-  export let height: string | undefined;
-
-  /**
-   * Channel name.
-   * @type {string}
-   */
-  export let name: string;
-
-  /**
-   * Alternate text for image.
-   */
-  export let alt: string | undefined = name;
-
-  /**
-   * Channel ID.
-   * @type {string}
-   */
-  export let id: string;
+  export let channel: Channel;
 </script>
 
-<div
-  class="p-2 hover:bg-gray-400 cursor-pointer"
-  tabindex="0"
-  role="link"
-  on:click={() => currentChannelID.set(id)}
-  on:keydown={(event) => event.key === 'Enter' && currentChannelID.set(id)}
->
-  <img {src} {alt} {width} {height} class:rounded-3xl={rounded} class="inline aspect-square" />
-  {name}
-</div>
+{#if channel.channel_type === 'DirectMessage'}
+  {#await fetchUser(channel.recipients[0] === $session?.user_id ? channel.recipients[1] : channel.recipients[0]) then user}
+    <ChannelItem
+      src={user.avatar === undefined ? '/user.svg' : getAutumnURL(user.avatar)}
+      name={user.username}
+      width={32}
+      height={32}
+      rounded
+      id={channel._id}
+    />
+  {:catch}
+    <ChannelItem
+      src="/user.svg"
+      name="<Unknown User>"
+      alt="Unknown User"
+      width={32}
+      height={32}
+      rounded
+      id={channel._id}
+    />
+  {/await}
+{:else if channel.channel_type === 'TextChannel' || channel.channel_type === 'VoiceChannel' || channel.channel_type === 'Group'}
+  <ChannelItem
+    src={getChannelIcon(channel)}
+    name={channel.name}
+    width={24}
+    height={24}
+    id={channel._id}
+  />
+{/if}
