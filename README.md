@@ -1,7 +1,7 @@
 # Jolt
 
 Acceleration is defined to be the rate of change of speed.
-"Jolt" is defined to be the rate of change of acceleration.
+[Jolt](https://en.m.wikipedia.org/wiki/Jerk_(physics)) is defined to be the rate of change of acceleration.
 
 Custom [Revolt](https://www.github.com/revoltchat) client for desktop machines made in Tauri and Svelte.
 
