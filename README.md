@@ -1,6 +1,6 @@
 # Jolt
 
-In physics, [jolt](https://en.m.wikipedia.org/wiki/Jerk_(physics)) is the rate at which an object's acceleration changes with respect to time. It is a vector quantity (having both magnitude and direction). Jerk is most commonly denoted by the symbol `j` and expressed in m/s<sup>3</sup> (SI units) or standard gravities per second (g<sub>0</sub>/s).
+In physics, [jolt](https://en.m.wikipedia.org/wiki/Jerk_(physics)) is the rate at which an object's acceleration changes with respect to time. It is a vector quantity (having both magnitude and direction). Jolt is most commonly denoted by the symbol `j` and expressed in m/s<sup>3</sup> (SI units) or standard gravities per second (g<sub>0</sub>/s).
 
 Custom [Revolt](https://www.github.com/revoltchat) client for desktop machines made in Tauri and Svelte.
 
