@@ -13,48 +13,57 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use tokio::sync::Mutex;
-use websocket::Cache;
+// main websocket process
+pub mod ws;
 
-#[macro_use]
-mod macros;
+// sending websocket events
+pub mod events;
 
-mod fetch;
-mod login;
-mod websocket;
+// api routes
+pub mod routes;
 
-use fetch::{fetch_channel, fetch_members, fetch_messages, fetch_server, fetch_user, send_message};
-use login::{login, login_with_token};
-use websocket::{run_client, start_typing};
+use reywen::structures::{channels::Channel, server::Server, users::User};
+use serde::{Deserialize, Serialize};
+use tokio::sync::RwLock;
 
 #[derive(Debug, Default)]
 pub struct Client {
-    pub driver: Mutex<reywen::client::Client>,
-    pub cache: Mutex<Cache>,
+    pub driver: RwLock<reywen::client::Client>,
+    pub cache: RwLock<Cache>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+pub struct Cache {
+    pub users: Vec<User>,
+    pub servers: Vec<Server>,
+    pub channels: Vec<Channel>,
 }
 
 impl Client {
     #[must_use]
-    pub fn new() -> Self {
-        Self::default()
+    pub async fn new() -> Self {
+        let client = Self::default();
+        client.driver.write().await.http.timeout = std::time::Duration::from_secs(5);
+        client
     }
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     #[allow(clippy::expect_used)]
     tauri::Builder::default()
-        .manage(Client::new())
+        .manage(Client::new().await)
         .invoke_handler(tauri::generate_handler![
-            login,
-            login_with_token,
-            fetch_user,
-            fetch_members,
-            fetch_server,
-            fetch_channel,
-            fetch_messages,
-            send_message,
-            start_typing,
-            run_client
+            routes::session::login,
+            routes::session::login_with_token,
+            routes::users::fetch_user,
+            routes::members::fetch_members,
+            routes::servers::fetch_server,
+            routes::channels::fetch_channel,
+            routes::message::fetch_messages,
+            routes::message::send_message,
+            events::typing::start_typing,
+            ws::run_client,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
