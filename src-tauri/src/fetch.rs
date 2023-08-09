@@ -15,108 +15,95 @@ use reywen::{
 
 use crate::Client;
 
-/// Fetch a user from ID.
-#[tauri::command]
-pub async fn fetch_user(client: tauri::State<'_, Client>, user: &str) -> Result<User, String> {
-    let Some(user) = client.cache.lock().await.contains_user(user) else {
-        return client
-            .driver
-            .lock()
-            .await
-            .user_fetch(user)
-            .await
-            .map_err(|err| format!("{err:?}"));
+macro_rules! route_fn {
+    (
+        $(#[$outer:meta])*
+        $vis:vis fn $fn_name:ident($name:ident: $at:ty$(, $args:ident: $tys:ty)*) -> $rt:ty;
+        $fetch_fn:ident($($add_args:expr)*),
+        $cache_fn:ident
+    ) => {
+        #[tauri::command]
+        $(#[$outer])*
+        $vis async fn $fn_name(
+            client: tauri::State<'_, Client>,
+            $name: $at,
+            $($args: $tys)*
+        ) -> Result<$rt, String> {
+            let Some($name) = client.cache.lock().await.$cache_fn($name) else {
+                return client
+                    .driver
+                    .lock()
+                    .await
+                    .$fetch_fn($name, $($add_args)*)
+                    .await
+                    .map_err(|err| format!("{err:?}"));
+            };
+
+            Ok($name)
+        }
     };
-
-    Ok(user)
-}
-
-#[tauri::command]
-pub async fn fetch_members(
-    client: tauri::State<'_, Client>,
-    server: &str,
-) -> Result<ResponseMemberAll, String> {
-    client
-        .driver
-        .lock()
-        .await
-        .member_fetch_all(server)
-        .await
-        .map_err(|err| format!("{err:?}"))
-}
-
-/// Fetch a server from ID.
-#[tauri::command]
-pub async fn fetch_server(
-    client: tauri::State<'_, Client>,
-    server_id: &str,
-) -> Result<Server, String> {
-    let Some(channel) = client.cache.lock().await.contains_server(server_id) else {
-        return client
-            .driver
-            .lock()
-            .await
-            .server_fetch(server_id)
-            .await
-            .map_err(|err| format!("{err:?}"));
+    (
+        $(#[$outer:meta])*
+        $vis:vis fn $fn_name:ident($name:ident: $at:ty$(, $args:ident: $tys:ty)*) -> $rt:ty;
+        $fetch_fn:ident($($add_args:expr)*)
+    ) => {
+        #[tauri::command]
+        $(#[$outer])*
+        $vis async fn $fn_name(
+            client: tauri::State<'_, Client>,
+            $name: $at,
+            $($args: $tys)*
+        ) -> Result<$rt, String> {
+            client
+                .driver
+                .lock()
+                .await
+                .$fetch_fn($name, $($add_args)*)
+                .await
+                .map_err(|err| format!("{err:?}"))
+        }
     };
-
-    Ok(channel)
 }
 
-/// Fetch a channel from ID.
-#[tauri::command]
-pub async fn fetch_channel(
-    client: tauri::State<'_, Client>,
-    channel: &str,
-) -> Result<Channel, String> {
-    let Some(channel) = client.cache.lock().await.contains_channel(channel) else {
-        return client
-            .driver
-            .lock()
-            .await
-            .channel_fetch(channel)
-            .await
-            .map_err(|err| format!("{err:?}"));
-    };
-
-    Ok(channel)
+route_fn! {
+    /// Fetch a user from ID.
+    pub fn fetch_user(user: &str) -> User;
+    user_fetch(),
+    contains_user
 }
 
-/// Fetch a bulk of messages.
-#[tauri::command]
-pub async fn fetch_messages(
-    client: tauri::State<'_, Client>,
-    channel: &str,
-    limit: Option<i64>,
-) -> Result<BulkMessageResponse, String> {
-    client
-        .driver
-        .lock()
-        .await
-        .message_query(
-            channel,
-            &DataQueryMessages::new()
-                .set_limit(limit.unwrap_or(50))
-                .set_sort(MessageSort::Latest)
-                .set_include_users(true),
-        )
-        .await
-        .map_err(|err| format!("{err:?}"))
+route_fn! {
+    /// Fetch a server from ID.
+    pub fn fetch_server(server: &str) -> Server;
+    server_fetch(),
+    contains_server
 }
 
-/// Send a message to `channel`.
-#[tauri::command]
-pub async fn send_message(
-    client: tauri::State<'_, Client>,
-    channel: &str,
-    data_message_send: DataMessageSend,
-) -> Result<Message, String> {
-    client
-        .driver
-        .lock()
-        .await
-        .message_send(channel, &data_message_send)
-        .await
-        .map_err(|err| format!("{err:?}"))
+route_fn! {
+    /// Fetch a channel from ID.
+    pub fn fetch_channel(channel: &str) -> Channel;
+    channel_fetch(),
+    contains_channel
+}
+
+route_fn! {
+    /// Fetch all members from server ID.
+    pub fn fetch_members(server: &str) -> ResponseMemberAll;
+    member_fetch_all()
+}
+
+route_fn! {
+    /// Fetch a bulk of messages.
+    pub fn fetch_messages(channel: &str, limit: Option<i64>) -> BulkMessageResponse;
+    message_query(
+        &DataQueryMessages::new()
+            .set_limit(limit.unwrap_or(50))
+            .set_sort(MessageSort::Latest)
+            .set_include_users(true)
+    )
+}
+
+route_fn! {
+    pub fn send_message(channel: &str, data_message_send: DataMessageSend) -> Message;
+    message_send(&data_message_send)
 }
