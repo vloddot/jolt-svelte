@@ -23,7 +23,7 @@ pub mod events;
 pub mod routes;
 
 use reywen::structures::{channels::Channel, server::Server, users::User};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use tokio::sync::RwLock;
 
 #[derive(Debug, Default)]
@@ -32,7 +32,7 @@ pub struct Client {
     pub cache: RwLock<Cache>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+#[derive(Serialize, Debug, Default, Clone)]
 pub struct Cache {
     pub users: Vec<User>,
     pub servers: Vec<Server>,
