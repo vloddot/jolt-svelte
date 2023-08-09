@@ -4,6 +4,6 @@ export function getAutumnURL(file: AutumnFile): string {
   return `https://autumn.revolt.chat/${file.tag}/${file._id}`;
 }
 
-export function fetchUser(user: string): Promise<User> {
-  return invoke('fetch_user', { user });
+export function fetchUser(userId: string): Promise<User> {
+  return invoke('fetch_user', { userId: userId });
 }

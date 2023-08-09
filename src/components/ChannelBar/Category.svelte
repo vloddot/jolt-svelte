@@ -1,6 +1,6 @@
 <script lang="ts">
   import './Category.css';
-  import ChannelFinder from '$components/ChannelFinder.svelte';
+  import ChannelFinder from '$components/ChannelFetcher.svelte';
 
   export let category: Category;
 </script>
