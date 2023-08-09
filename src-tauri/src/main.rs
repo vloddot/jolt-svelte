@@ -9,7 +9,7 @@
     clippy::unwrap_used,
     clippy::expect_used
 )]
-#![allow(clippy::used_underscore_binding)]
+#![allow(clippy::used_underscore_binding, clippy::module_name_repetitions)]
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
@@ -23,7 +23,7 @@ pub mod events;
 pub mod routes;
 
 use reywen::structures::{channels::Channel, server::Server, users::User};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use tokio::sync::RwLock;
 
 #[derive(Debug, Default)]
@@ -32,7 +32,7 @@ pub struct Client {
     pub cache: RwLock<Cache>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+#[derive(Serialize, Debug, Default, Clone)]
 pub struct Cache {
     pub users: Vec<User>,
     pub servers: Vec<Server>,

@@ -1,16 +1,9 @@
-use crate::Client;
+use crate::{route_fn, Client};
 use reywen::client::methods::member::ResponseMemberAll;
 
-#[tauri::command]
-pub async fn fetch_members(
-    client: tauri::State<'_, Client>,
-    server: &str,
-) -> Result<ResponseMemberAll, String> {
-    client
-        .driver
-        .read()
-        .await
-        .member_fetch_all(server)
-        .await
-        .map_err(|err| format!("{err:?}"))
+route_fn! {
+    /// Fetch all members from server.
+    pub fn fetch_members(server_id: &str) -> ResponseMemberAll {
+        member_fetch_all();
+    }
 }
