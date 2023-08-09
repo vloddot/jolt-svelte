@@ -28,7 +28,7 @@
   let messageInputNode: HTMLTextAreaElement;
 
   $: {
-    invoke<BulkMessagePayload>('fetch_messages', { channel: channel._id }).then((response) =>
+    invoke<BulkMessagePayload>('fetch_messages', { channelId: channel._id }).then((response) =>
       bulkMessagesInfo.set(response)
     );
     replies.set([]);
@@ -82,11 +82,11 @@
     replies.set([]);
     messageInputNode.value = '';
 
-    await invoke<Message>('send_message', { channel: channel._id, dataMessageSend });
+    await invoke<Message>('send_message', { channelId: channel._id, dataMessageSend });
   }
 
   async function startTyping() {
-    invoke('start_typing', { channel: channel._id });
+    invoke('start_typing', { channelId: channel._id });
   }
 </script>
 

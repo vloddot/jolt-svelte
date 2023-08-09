@@ -14,7 +14,7 @@
 
   $: {
     if ($currentServerID !== null) {
-      invoke<MemberResponseAll>('fetch_members', { server: $currentServerID }).then((response) => {
+      invoke<MemberResponseAll>('fetch_members', { serverId: $currentServerID }).then((response) => {
         members = response.members;
         users.set(response.users);
       });
