@@ -19,7 +19,6 @@ serde = { version = "1.0", features = ["derive"] }
 reywen = "0.1.20"
 tokio = { version = "1.29.1", features = ["rt-multi-thread"] }
 futures-util = "0.3.28"
-tokio-tungstenite = "0.20.0"
 
 [dependencies.tauri]
 version = "1.4.1"
