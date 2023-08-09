@@ -43,7 +43,7 @@ impl Client {
     #[must_use]
     pub async fn new() -> Self {
         let client = Self::default();
-        client.driver.write().await.http.timeout = std::time::Duration::from_secs(1);
+        client.driver.write().await.http.timeout = std::time::Duration::from_secs(5);
         client
     }
 }
