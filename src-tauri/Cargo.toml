@@ -1,6 +1,6 @@
 [package]
 name = "jolt"
-version = "0.2.8"
+version = "0.2.9"
 description = "A Tauri App"
 authors = ["vloddot (vladpriwalov08@gmail.com)"]
 license = "Apache-2.0"
