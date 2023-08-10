@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getAutumnURL } from '$lib/helpers';
+  import { getAutumnURL, getDefaultUserAvatar } from '$lib/helpers';
   import { currentServerID } from '$lib/stores';
   import { invoke } from '@tauri-apps/api';
   import { setContext } from 'svelte';
@@ -14,10 +14,12 @@
 
   $: {
     if ($currentServerID !== null) {
-      invoke<MemberResponseAll>('fetch_members', { serverId: $currentServerID }).then((response) => {
-        members = response.members;
-        users.set(response.users);
-      });
+      invoke<MemberResponseAll>('fetch_members', { serverId: $currentServerID }).then(
+        (response) => {
+          members = response.members;
+          users.set(response.users);
+        }
+      );
     }
   }
 
@@ -27,7 +29,7 @@
     }
 
     if (user?.avatar === undefined) {
-      return '/user.svg';
+      return user === undefined ? '/user.svg' : getDefaultUserAvatar(user._id);
     } else {
       return getAutumnURL(user?.avatar);
     }

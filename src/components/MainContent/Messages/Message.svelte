@@ -1,6 +1,6 @@
 <script lang="ts">
   import { bulkMessageInfoKey, repliesKey } from './sharedData';
-  import { getAutumnURL } from '$lib/helpers';
+  import { getAutumnURL, getDefaultUserAvatar } from '$lib/helpers';
   import { currentServerID, session } from '$lib/stores';
   import { getContext } from 'svelte';
   import type { Writable } from 'svelte/store';
@@ -60,8 +60,12 @@
 <div role="listitem" class="group m-4">
   <div class="flex">
     <img
-      alt={`${displayUsername}'s avatar'`}
-      src={displayAvatar === undefined ? '/user.svg' : getAutumnURL(displayAvatar)}
+      alt={displayUsername}
+      src={displayAvatar === undefined
+        ? author === undefined
+          ? '/user.svg'
+          : getDefaultUserAvatar(author?._id)
+        : getAutumnURL(displayAvatar)}
       width="24"
       height="24"
       class="rounded-3xl inline"

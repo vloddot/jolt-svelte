@@ -39,6 +39,7 @@
 
 <div
   class="p-2 hover:bg-gray-400 cursor-pointer"
+  class:bg-gray-200={$currentChannelID === id}
   tabindex="0"
   role="link"
   on:click={() => currentChannelID.set(id)}

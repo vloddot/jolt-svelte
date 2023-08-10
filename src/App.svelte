@@ -5,7 +5,15 @@
   import MainContent from '$components/MainContent/index.svelte';
   import ChannelBar from '$components/ChannelBar/index.svelte';
   import MembersList from '$components/MembersList/index.svelte';
-  import { channels, emojis, servers, session, users } from '$lib/stores';
+  import {
+    channels,
+    currentChannelID,
+    currentServerID,
+    emojis,
+    servers,
+    session,
+    users,
+  } from '$lib/stores';
   import { event, invoke } from '@tauri-apps/api';
   import { onMount } from 'svelte';
   import Modal from '$components/Modal.svelte';
@@ -22,13 +30,23 @@
         session.set(cachedSession);
         invoke('login_with_token', { token: cachedSession.token })
           .then(() => invoke('run_client'))
-          .catch((err) => (modalError = err));
+          .catch((err) => {
+            modalError = err;
+            show = 'login';
+          });
       } else {
         show = 'login';
       }
     } catch (e) {
       show = 'login';
     } finally {
+      currentServerID.subscribe((id) => {
+        currentChannelID.set(
+          (id === null ? $servers?.[0] : $servers?.find((server) => server._id === id))
+            ?.channels[0] ?? null
+        );
+      });
+
       event.listen<ReadyPayload>('ready', (event) => {
         users.set(event.payload.users);
         servers.set(event.payload.servers);

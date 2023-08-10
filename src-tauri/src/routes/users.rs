@@ -7,7 +7,7 @@ route_fn! {
     /// # Errors
     ///
     /// This function will return an error if the request fails.
-    pub fn fetch_user(user: &str) -> User {
+    pub fn fetch_user(user_id: &str) -> User {
         user_fetch();
         (contains_user, insert_user)
     }

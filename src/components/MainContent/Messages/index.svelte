@@ -5,6 +5,8 @@
   import { bulkMessageInfoKey, repliesKey } from './sharedData';
   import { writable } from 'svelte/store';
   import type { Reply } from './sharedData';
+  import { currentChannelID } from '$lib/stores';
+  import { fetchUser, getAutumnURL, getDefaultUserAvatar } from '$lib/helpers';
 
   /**
    * Which channel to show messages from.
@@ -26,12 +28,15 @@
   setContext(repliesKey, replies);
 
   let messageInputNode: HTMLTextAreaElement;
+  let currentlyTypingUsers: User[];
 
   $: {
     invoke<BulkMessagePayload>('fetch_messages', { channelId: channel._id }).then((response) =>
       bulkMessagesInfo.set(response)
     );
+
     replies.set([]);
+    currentlyTypingUsers = [];
   }
 
   onMount(() => {
@@ -48,6 +53,27 @@
         });
       }
     });
+
+    event.listen<ChannelTypingPayload>(
+      'channel_start_typing',
+      async ({ payload: { user_id, channel_id } }) => {
+        if (
+          channel_id === $currentChannelID &&
+          !currentlyTypingUsers.map((user) => user._id).includes(user_id)
+        ) {
+          currentlyTypingUsers = [...currentlyTypingUsers, await fetchUser(user_id)];
+        }
+      }
+    );
+
+    event.listen<ChannelTypingPayload>(
+      'channel_stop_typing',
+      ({ payload: { user_id, channel_id } }) => {
+        if (channel_id === $currentChannelID) {
+          currentlyTypingUsers = currentlyTypingUsers.filter((user) => user._id !== user_id);
+        }
+      }
+    );
   });
 
   async function sendMessage() {
@@ -77,17 +103,30 @@
         <MessageComponent {message} />
       </div>
     {/each}
-    {#each $replies as reply}
+    {#each currentlyTypingUsers as user}
+      <div>
+        <img
+          src={user.avatar === undefined
+            ? getDefaultUserAvatar(user._id)
+            : getAutumnURL(user.avatar)}
+          class="inline aspect-square rounded-3xl"
+          width="16"
+          height="1"
+          alt={user.username}
+        />
+        {user.username} is typing...
+      </div>
+    {/each}
+    {#if $replies.length !== 0}
       replying to
-      {#if Array.isArray($bulkMessagesInfo)}
-        {reply.message._id}
-      {:else}
-        {$bulkMessagesInfo.users?.find(({ _id }) => _id === reply.message.author)?._id ??
-          '<Unknown User>'}
-      {/if}
-      {#if reply.mention}
-        with mention
-      {/if}
+    {/if}
+    {#each $replies as reply}
+      <div>
+        {#await fetchUser(reply.message.author) then user}
+          <strong>{user.username}</strong>
+        {/await}
+        <p>{reply.message.content}</p>
+      </div>
     {/each}
     <form on:submit|preventDefault={sendMessage}>
       <textarea

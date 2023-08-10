@@ -1,6 +1,6 @@
 <script lang="ts">
   import ChannelItem from '$components/ChannelBar/ChannelItem.svelte';
-  import { fetchUser, getAutumnURL } from '$lib/helpers';
+  import { fetchUser, getAutumnURL, getDefaultUserAvatar } from '$lib/helpers';
   import { session } from '$lib/stores';
 
   function getChannelIcon({
@@ -27,7 +27,7 @@
 {#if channel.channel_type === 'DirectMessage'}
   {#await fetchUser(channel.recipients[0] === $session?.user_id ? channel.recipients[1] : channel.recipients[0]) then user}
     <ChannelItem
-      src={user.avatar === undefined ? '/user.svg' : getAutumnURL(user.avatar)}
+      src={user.avatar === undefined ? getDefaultUserAvatar(user._id) : getAutumnURL(user.avatar)}
       name={user.username}
       width={32}
       height={32}
