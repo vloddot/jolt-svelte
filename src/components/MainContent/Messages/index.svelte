@@ -48,26 +48,6 @@
         });
       }
     });
-
-    // event.listen<ChannelTypingPayload>(
-    //   'channel_start_typing',
-    //   ({ payload: { channel_id, user_id } }) => {
-    //     if (user_id !== $session?.user_id && channel_id === channel._id) {
-    //       usersTyping = [...usersTyping, user_id];
-    //     }
-    //   }
-    // );
-
-    // event.listen<ChannelTypingPayload>(
-    //   'channel_stop_typing',
-    //   ({ payload: { channel_id, user_id } }) => {
-    //     if (user_id !== $session?.user_id) {
-    //       if (channel_id === channel._id) {
-    //         usersTyping = usersTyping.filter((id) => user_id !== id);
-    //       }
-    //     }
-    //   }
-    // );
   });
 
   async function sendMessage() {

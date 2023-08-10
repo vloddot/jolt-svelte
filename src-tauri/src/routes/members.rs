@@ -1,4 +1,4 @@
-use crate::{route_fn, Client};
+use crate::route_fn;
 use reywen::client::methods::member::ResponseMemberAll;
 
 route_fn! {

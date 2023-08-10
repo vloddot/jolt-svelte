@@ -47,7 +47,7 @@ macro_rules! route_fn {
         ///
         /// This function will return an error if the request fails.
         $vis async fn $fn_name(
-            client: tauri::State<'_, Client>,
+            client: tauri::State<'_, $crate::Client>,
             $name: $at,
             $($args: $tys)*
         ) -> Result<$rt, String> {
