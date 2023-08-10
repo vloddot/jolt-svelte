@@ -1,10 +1,13 @@
 <script lang="ts">
   import { bulkMessageInfoKey, repliesKey } from './sharedData';
-  import { getAutumnURL, getDefaultUserAvatar } from '$lib/helpers';
+  import { getAutumnURL, getDisplayAvatar } from '$lib/helpers';
   import { currentServerID, session } from '$lib/stores';
   import { getContext } from 'svelte';
   import type { Writable } from 'svelte/store';
   import type { Reply } from './sharedData';
+  import dayjs from 'dayjs';
+  import { decodeTime } from 'ulid';
+  import { shell } from '@tauri-apps/api';
 
   /**
    * Message to show.
@@ -54,31 +57,34 @@
     : undefined;
 
   $: displayUsername = member?.nickname ?? author?.username ?? '<Unknown User>';
-  $: displayAvatar = member?.avatar ?? author?.avatar;
+  $: displayAvatar = getDisplayAvatar(member, author);
 </script>
 
 <div role="listitem" class="group m-4">
   <div class="flex">
     <img
       alt={displayUsername}
-      src={displayAvatar === undefined
-        ? author === undefined
-          ? '/user.svg'
-          : getDefaultUserAvatar(author?._id)
-        : getAutumnURL(displayAvatar)}
-      width="24"
-      height="24"
-      class="rounded-3xl inline"
+      src={displayAvatar}
+      width="40"
+      height="40"
+      class="rounded-3xl inline aspect-square"
     />
 
     {displayUsername}
-    {#if message.edited}
-      <span class="text-gray-500">(edited)</span>
+
+    <time>
+      {dayjs(decodeTime(message._id)).format('YYYY-MM-DD hh:mm')}
+    </time>
+
+    {#if message.edited !== undefined}
+      <p class="text-gray-500">
+        (edited at {dayjs(message.edited).format('YYYY-MM-DD hh:mm')})
+      </p>
     {/if}
 
     <div class="flex-1" />
 
-    <span class="hidden group-hover:block">
+    <div class="hidden group-hover:block">
       {#each controls as { src, alt, onclick, showIf }}
         {#if showIf?.() ?? true}
           <button class="ml-2" aria-label={alt} on:click={onclick}>
@@ -86,7 +92,7 @@
           </button>
         {/if}
       {/each}
-    </span>
+    </div>
   </div>
 
   {#if message.content}
@@ -95,29 +101,34 @@
 
   {#if message.attachments}
     {#each message.attachments as attachment}
-      {#if attachment.metadata.type === 'Image'}
-        <img src={getAutumnURL(attachment)} alt={attachment.filename} />
-      {:else if attachment.metadata.type === 'Video'}
-        <!-- svelte-ignore a11y-media-has-caption -->
-        <video controls>
-          <source src={getAutumnURL(attachment)} />
-        </video>
-      {:else if attachment.metadata.type === 'Audio'}
-        <audio controls>
-          <source src={getAutumnURL(attachment)} />
-          Your browser does not support the &lt;audio&gt; element.
-        </audio>
-      {:else if attachment.metadata.type === 'File'}
-        File ({attachment.filename})
-      {:else if attachment.metadata.type === 'Text'}
-        {#await fetch(getAutumnURL(attachment)) then response}
-          {#await response.text() then text}
-            {text}
+      <div>
+        {#if attachment.metadata.type === 'Image'}
+          <img src={getAutumnURL(attachment)} alt={attachment.filename} />
+        {:else if attachment.metadata.type === 'Video'}
+          <!-- svelte-ignore a11y-media-has-caption -->
+          <video controls>
+            <source src={getAutumnURL(attachment)} />
+          </video>
+        {:else if attachment.metadata.type === 'Audio'}
+          <audio controls>
+            <source src={getAutumnURL(attachment)} />
+            Your browser does not support the &lt;audio&gt; element.
+          </audio>
+        {:else if attachment.metadata.type === 'File'}
+          File <span class="text-gray-500">{attachment.filename}</span>
+          <button on:click={() => shell.open(getAutumnURL(attachment))}>
+            <img src="/download.svg" alt="Download" />
+          </button>
+        {:else if attachment.metadata.type === 'Text'}
+          {#await fetch(getAutumnURL(attachment)) then response}
+            {#await response.text() then text}
+              <p>{text}</p>
+            {/await}
+          {:catch error}
+            <p>Unable to download {attachment.filename}: {error}</p>
           {/await}
-        {:catch error}
-          Unable to download {attachment.filename}: {error}
-        {/await}
-      {/if}
+        {/if}
+      </div>
     {/each}
   {/if}
 
