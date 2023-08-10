@@ -38,8 +38,9 @@
 </script>
 
 <div
-  class="p-2 hover:bg-gray-400 cursor-pointer"
-  class:bg-gray-200={$currentChannelID === id}
+  class="p-2 cursor-pointer"
+  class:hover:bg-gray-600={$currentChannelID !== id}
+  class:bg-gray-400={$currentChannelID === id}
   tabindex="0"
   role="link"
   on:click={() => currentChannelID.set(id)}
