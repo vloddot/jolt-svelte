@@ -5,7 +5,7 @@
   import { bulkMessageInfoKey, repliesKey } from './sharedData';
   import { writable } from 'svelte/store';
   import type { Reply } from './sharedData';
-  import { currentChannelID } from '$lib/stores';
+  import { currentChannelID, session } from '$lib/stores';
   import { fetchUser, getAutumnURL, getDefaultUserAvatar } from '$lib/helpers';
 
   /**
@@ -58,11 +58,14 @@
       'channel_start_typing',
       async ({ payload: { user_id, channel_id } }) => {
         if (
-          channel_id === $currentChannelID &&
-          !currentlyTypingUsers.map((user) => user._id).includes(user_id)
+          user_id === $session?.user_id ||
+          channel_id !== $currentChannelID ||
+          currentlyTypingUsers.map((user) => user._id).includes(user_id)
         ) {
-          currentlyTypingUsers = [...currentlyTypingUsers, await fetchUser(user_id)];
+          return;
         }
+
+        currentlyTypingUsers = [...currentlyTypingUsers, await fetchUser(user_id)];
       }
     );
 
@@ -90,10 +93,6 @@
 
     await invoke<Message>('send_message', { channelId: channel._id, dataMessageSend });
   }
-
-  async function startTyping() {
-    invoke('start_typing', { channelId: channel._id });
-  }
 </script>
 
 {#if $bulkMessagesInfo !== undefined}
@@ -111,7 +110,7 @@
             : getAutumnURL(user.avatar)}
           class="inline aspect-square rounded-3xl"
           width="16"
-          height="1"
+          height="16"
           alt={user.username}
         />
         {user.username} is typing...
@@ -128,22 +127,20 @@
         <p>{reply.message.content}</p>
       </div>
     {/each}
-    <form on:submit|preventDefault={sendMessage}>
+    <form class="m-4" on:submit|preventDefault={sendMessage}>
       <textarea
-        on:input={startTyping}
+        on:input={() => invoke('start_typing', { channelId: channel._id })}
         on:keydown={(event) => {
           if (event.shiftKey || event.key !== 'Enter') {
             return;
           }
 
           event.preventDefault();
-          return sendMessage();
+          sendMessage();
         }}
         bind:this={messageInputNode}
         class="resize-none rounded-xl bg-gray-500 w-full"
       />
-
-      <button type="submit">Send</button>
     </form>
   </div>
 {/if}
