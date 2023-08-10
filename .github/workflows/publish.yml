@@ -1,11 +1,7 @@
 name: 'publish'
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version'
-        required: true
+  workflow_dispatch
 
 jobs:
   create-release:
@@ -22,7 +18,7 @@ jobs:
         with:
           node-version: 16
       - name: get version
-        run: echo "PACKAGE_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
       - name: create release
         id: create-release
         uses: actions/github-script@v6
