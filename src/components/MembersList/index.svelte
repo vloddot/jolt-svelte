@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getAutumnURL, getDefaultUserAvatar } from '$lib/helpers';
+  import { getDisplayAvatar } from '$lib/helpers';
   import { currentServerID } from '$lib/stores';
   import { invoke } from '@tauri-apps/api';
   import { setContext } from 'svelte';
@@ -22,18 +22,6 @@
       );
     }
   }
-
-  function getAvatar(member: Member, user?: User): string {
-    if (member.avatar !== undefined) {
-      return getAutumnURL(member.avatar);
-    }
-
-    if (user?.avatar === undefined) {
-      return user === undefined ? '/user.svg' : getDefaultUserAvatar(user._id);
-    } else {
-      return getAutumnURL(user?.avatar);
-    }
-  }
 </script>
 
 {#each members as member}
@@ -41,7 +29,7 @@
     {#if user?.online ?? true}
       <div>
         <img
-          src={getAvatar(member, user)}
+          src={getDisplayAvatar(member, user)}
           alt={member.nickname}
           width="24"
           height="24"

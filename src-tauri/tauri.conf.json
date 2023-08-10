@@ -12,11 +12,8 @@
   },
   "tauri": {
     "allowlist": {
-      "fs": {
-        "readFile": true,
-        "writeFile": true,
-        "exists": true,
-        "scope": ["$APPLOCALDATA/*"]
+      "shell": {
+        "open": true
       }
     },
     "bundle": {

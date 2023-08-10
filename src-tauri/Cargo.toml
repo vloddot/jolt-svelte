@@ -23,9 +23,7 @@ futures-util = "0.3.28"
 [dependencies.tauri]
 version = "1.4.1"
 features = [
-  "fs-write-file",
-  "fs-read-file",
-  "fs-exists",
+  "shell-open",
   "devtools",
   "windows7-compat",
 ]

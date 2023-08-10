@@ -11,3 +11,15 @@ export function getDefaultUserAvatar(user_id: string): string {
 export function fetchUser(userId: string): Promise<User> {
   return invoke('fetch_user', { userId });
 }
+
+export function getDisplayAvatar(member?: Member, user?: User): string {
+  if (member?.avatar !== undefined) {
+    return getAutumnURL(member.avatar);
+  }
+
+  if (user?.avatar === undefined) {
+    return user === undefined ? '/user.svg' : getDefaultUserAvatar(user._id);
+  } else {
+    return getAutumnURL(user?.avatar);
+  }
+}
