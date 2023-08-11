@@ -4,8 +4,9 @@
   import { invoke } from '@tauri-apps/api';
   import { setContext } from 'svelte';
   import { writable } from 'svelte/store';
-  import { userCacheKey } from '$lib/fetcher';
-  import UserFetcher from '$components/UserFetcher.svelte';
+  import { userCacheKey } from '$components/UserFetcher';
+  import UserFetcher from '$components/UserFetcher/index.svelte';
+  import { _ } from 'svelte-i18n';
 
   let members: Member[] = [];
   let users = writable<User[]>([]);
@@ -36,7 +37,7 @@
           class="rounded-3xl inline aspect-square"
         />
 
-        {member.nickname ?? user?.username ?? '<Unknown User>'}
+        {member.nickname ?? user?.username ?? `<${$_('user.unknown')}>`}
       </div>
     {/if}
   </UserFetcher>

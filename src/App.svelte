@@ -5,23 +5,26 @@
   import MainContent from '$components/MainContent/index.svelte';
   import ChannelBar from '$components/ChannelBar/index.svelte';
   import MembersList from '$components/MembersList/index.svelte';
-  import {
-    channels,
-    currentChannelID,
-    currentServerID,
-    emojis,
-    servers,
-    session,
-    users,
-  } from '$lib/stores';
+  import { currentChannelID, currentServerID, servers, session } from '$lib/stores';
   import { event, invoke } from '@tauri-apps/api';
   import { onMount } from 'svelte';
+  import { _, addMessages, getLocaleFromNavigator, init, isLoading, register } from 'svelte-i18n';
   import Modal from '$components/Modal.svelte';
+  import en_US from '$locale/en_US.json';
+  import it from '$locale/it.json';
 
   // View to show.
   let show: 'main' | 'login' | null = null;
 
   let modalError: string | null = null;
+
+  addMessages('en_US', en_US);
+  addMessages('it', it);
+
+  init({
+    fallbackLocale: 'en_US',
+    initialLocale: getLocaleFromNavigator(),
+  });
 
   onMount(async () => {
     try {
@@ -47,11 +50,8 @@
         );
       });
 
-      event.listen<ReadyPayload>('ready', (event) => {
-        users.set(event.payload.users);
-        servers.set(event.payload.servers);
-        channels.set(event.payload.channels);
-        emojis.set(event.payload.emojis);
+      event.listen<Server[]>('ready', (event) => {
+        servers.set(event.payload);
         show = 'main';
       });
     }
@@ -59,7 +59,11 @@
 </script>
 
 <Modal showModal={modalError !== null}>
-  <h2 slot="header">Error</h2>
+  <h2 slot="header">
+    {#if !$isLoading}
+      {$_('error')}
+    {/if}
+  </h2>
   <div>{modalError}</div>
 </Modal>
 

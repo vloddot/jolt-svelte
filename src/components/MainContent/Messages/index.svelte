@@ -7,6 +7,7 @@
   import type { Reply } from './sharedData';
   import { currentChannelID, session } from '$lib/stores';
   import { fetchUser, getAutumnURL, getDefaultUserAvatar } from '$lib/helpers';
+  import { _ } from 'svelte-i18n';
 
   /**
    * Which channel to show messages from.
@@ -113,11 +114,12 @@
           height="16"
           alt={user.username}
         />
-        {user.username} is typing...
+        {user.username}
+        {$_('user.is-typing')}...
       </div>
     {/each}
     {#if $replies.length !== 0}
-      replying to
+      {$_('message.replying-to')}
     {/if}
     {#each $replies as reply}
       <div>

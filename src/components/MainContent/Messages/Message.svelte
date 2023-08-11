@@ -8,6 +8,7 @@
   import dayjs from 'dayjs';
   import { decodeTime } from 'ulid';
   import { shell } from '@tauri-apps/api';
+  import { _, date } from 'svelte-i18n';
 
   /**
    * Message to show.
@@ -35,12 +36,12 @@
   const controls: Controls[] = [
     {
       src: '/reply.svg',
-      alt: 'Reply',
+      alt: $_('message.reply'),
       onclick: pushReply,
     },
     {
       src: '/edit.svg',
-      alt: 'Edit',
+      alt: $_('message.edit'),
       onclick() {},
       showIf: () => message.author === $session?.user_id,
     },
@@ -56,7 +57,7 @@
       )
     : undefined;
 
-  $: displayUsername = member?.nickname ?? author?.username ?? '<Unknown User>';
+  $: displayUsername = member?.nickname ?? author?.username ?? `<${$_('user.unknown')}>`;
   $: displayAvatar = getDisplayAvatar(member, author);
 </script>
 
@@ -72,15 +73,18 @@
 
     {displayUsername}
 
-    <time>
-      {dayjs(decodeTime(message._id)).format('YYYY-MM-DD hh:mm')}
-    </time>
+    <span class="text-gray-500">
+      <time>
+        {$date(dayjs(decodeTime(message._id)).toDate())}
+      </time>
 
-    {#if message.edited !== undefined}
-      <p class="text-gray-500">
-        (edited at {dayjs(message.edited).format('YYYY-MM-DD hh:mm')})
-      </p>
-    {/if}
+      {#if message.edited !== undefined}
+        <p>
+          [{$_('message.edited-at')}
+          {$date(dayjs(message.edited).toDate())}]
+        </p>
+      {/if}
+    </span>
 
     <div class="flex-1" />
 
@@ -117,7 +121,7 @@
         {:else if attachment.metadata.type === 'File'}
           File <span class="text-gray-500">{attachment.filename}</span>
           <button on:click={() => shell.open(getAutumnURL(attachment))}>
-            <img src="/download.svg" alt="Download" />
+            <img src="/download.svg" alt={$_('file.download.name')} />
           </button>
         {:else if attachment.metadata.type === 'Text'}
           {#await fetch(getAutumnURL(attachment)) then response}
@@ -125,7 +129,7 @@
               <p>{text}</p>
             {/await}
           {:catch error}
-            <p>Unable to download {attachment.filename}: {error}</p>
+            <p>{$_('file.download.error')} {attachment.filename}: {error}</p>
           {/await}
         {/if}
       </div>
@@ -145,7 +149,6 @@
         <!-- svelte-ignore a11y-media-has-caption -->
         <video controls>
           <source src={embed.url} width={embed.width} height={embed.height} />
-          Your browser does not support the &lt;video&gt; element.
         </video>
       {:else}
         Hewwo, {JSON.stringify(embed)}

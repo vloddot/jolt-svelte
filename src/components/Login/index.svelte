@@ -2,6 +2,7 @@
   import { invoke } from '@tauri-apps/api';
   import './index.css';
   import { session } from '$lib/stores';
+  import { _ } from 'svelte-i18n';
 
   // current email input
   let email: string = '';
@@ -87,14 +88,13 @@
       <input type="password" placeholder="Password" bind:value={password} />
 
       <p class="text-xs text-gray-500">
-        Optionally, if your account uses MFA, use one of these methods, including the previous email
-        and password as well:
+        {$_('mfa.notice')}:
       </p>
       {#each mfaMethods as [method, value]}
         <input type="text" placeholder={displayMfaMethod(method)} bind:value />
       {/each}
 
-      <button type="submit">Login</button>
+      <button type="submit">{$_('login')}</button>
     </form>
 
     {#if error}

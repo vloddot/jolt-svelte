@@ -13,7 +13,7 @@
     <hr />
 
     <form method="dialog">
-      <button type="submit">Ok</button>
+      <button type="submit">$_('confirm')</button>
     </form>
   </div>
 </dialog>

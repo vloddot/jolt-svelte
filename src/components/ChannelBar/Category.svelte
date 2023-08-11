@@ -1,6 +1,6 @@
 <script lang="ts">
   import './Category.css';
-  import ChannelFinder from '$components/ChannelFetcher.svelte';
+  import ChannelFetcher from '$components/ChannelFetcher/index.svelte';
 
   export let category: Category;
 </script>
@@ -11,9 +11,9 @@
   </summary>
   <div class="ml-2">
     {#each category.channels as channel}
-      <ChannelFinder id={channel} let:channel>
+      <ChannelFetcher id={channel} let:channel>
         <slot {channel} />
-      </ChannelFinder>
+      </ChannelFetcher>
     {/each}
   </div>
 </details>

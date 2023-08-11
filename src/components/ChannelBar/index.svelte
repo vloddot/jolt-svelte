@@ -1,7 +1,7 @@
 <script lang="ts">
   import ChannelComponent from './Channel.svelte';
   import { currentServerID, servers } from '$lib/stores';
-  import ChannelFinder from '$components/ChannelFetcher.svelte';
+  import ChannelFetcher from '$components/ChannelFetcher/index.svelte';
   import ChannelCategory from './Category.svelte';
 
   let unsortedChannels: (string | undefined)[] = [];
@@ -27,11 +27,11 @@
 
 {#each unsortedChannels as channel}
   {#if channel !== undefined}
-    <ChannelFinder id={channel} let:channel>
+    <ChannelFetcher id={channel} let:channel>
       {#if channel !== undefined}
         <ChannelComponent {channel} />
       {/if}
-    </ChannelFinder>
+    </ChannelFetcher>
   {/if}
 {/each}
 

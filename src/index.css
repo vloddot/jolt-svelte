@@ -4,7 +4,7 @@
 
 @layer components {
   body {
-    @apply bg-gray-700 text-white;
+    @apply bg-gray-700 text-white overflow-hidden;
   }
 
   .grid-container {

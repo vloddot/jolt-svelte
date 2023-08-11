@@ -1,11 +1,14 @@
 import { invoke } from '@tauri-apps/api';
 
+const AUTUMN_URL = 'https://autumn.revolt.chat';
+const API_URL = 'https://api.revolt.chat';
+
 export function getAutumnURL(file: AutumnFile): string {
-  return `https://autumn.revolt.chat/${file.tag}/${file._id}`;
+  return `${AUTUMN_URL}/${file.tag}/${file._id}`;
 }
 
 export function getDefaultUserAvatar(user_id: string): string {
-  return `https://api.revolt.chat/users/${user_id}/default_avatar`;
+  return `${API_URL}/users/${user_id}/default_avatar`;
 }
 
 export function fetchUser(userId: string): Promise<User> {

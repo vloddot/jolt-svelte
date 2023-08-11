@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { getAutumnURL } from '$lib/helpers';
+  import { getAutumnURL } from '$lib/helpers';
   import { currentServerID } from '$lib/stores';
   import './index.css';
 
@@ -8,7 +8,7 @@
    */
 
   export let tooltip: string;
-  
+
   /**
    * Icon to show.
    */

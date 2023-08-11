@@ -23,7 +23,7 @@ pub async fn run_client<R: tauri::Runtime>(
                 servers,
                 channels,
             };
-            let _ = app.emit_all("ready", &cache);
+            let _ = app.emit_all("ready", &cache.servers);
             *client.cache.write().await = cache;
             break;
         }

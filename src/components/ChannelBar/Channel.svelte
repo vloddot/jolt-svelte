@@ -2,6 +2,7 @@
   import ChannelItem from '$components/ChannelBar/ChannelItem.svelte';
   import { fetchUser, getAutumnURL, getDefaultUserAvatar } from '$lib/helpers';
   import { session } from '$lib/stores';
+  import { _ } from 'svelte-i18n';
 
   function getChannelIcon({
     icon,
@@ -37,8 +38,8 @@
   {:catch}
     <ChannelItem
       src="/user.svg"
-      name="<Unknown User>"
-      alt="Unknown User"
+      name={`<${$_('user.unknown')}>`}
+      alt={$_('user.unknown')}
       width={32}
       height={32}
       rounded
