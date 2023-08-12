@@ -1,5 +1,6 @@
 use crate::Client;
 use reywen::structures::authentication::{login::ResponseLogin, mfa::MFAResponse};
+use reywen_http::results::DeltaError;
 
 /// Session friendly name to be used for login.
 macro_rules! session_friendly_name {
@@ -47,7 +48,7 @@ pub async fn login(
     .map_err(|error| format!("{error:?}"))?
     {
         ResponseLogin::Success(session) => {
-            login_with_token(client, &session.token).await?;
+            login_with_token(client, &session.id, &session.token).await?;
 
             Ok(ResponseLogin::Success(session))
         }
@@ -57,9 +58,33 @@ pub async fn login(
 
 /// Login with session token.
 #[tauri::command]
-pub async fn login_with_token(client: tauri::State<'_, Client>, token: &str) -> Result<(), String> {
-    *client.driver.write().await =
+pub async fn login_with_token(
+    client: tauri::State<'_, Client>,
+    session_id: &str,
+    token: &str,
+) -> Result<(), String> {
+    let client_with_token =
         reywen::client::Client::from_token(token, false).map_err(|err| format!("{err:?}"))?;
+
+
+    // Verify that the session exists.
+    let sessions = match client_with_token.session_fetch_all().await {
+        Ok(result) => result,
+        Err(error) => {
+            if let DeltaError::Http(hyper::StatusCode::UNAUTHORIZED, _) = error {
+                return Err(String::from("You are signed out!"));
+            }
+
+            return Err(format!("{error:?}"));
+        }
+    };
+
+    sessions
+        .iter()
+        .find(|session| session.id == session_id)
+        .ok_or_else(|| String::from("You are signed out!"))?;
+
+    *client.driver.write().await = client_with_token;
 
     Ok(())
 }
