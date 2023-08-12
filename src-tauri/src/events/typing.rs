@@ -23,25 +23,6 @@ pub async fn start_typing(client: tauri::State<'_, Client>, channel_id: String) 
     Ok(())
 }
 
-// /// Send a `BeginTyping` event to WebSocket using `channel` (id).
-// #[tauri::command]
-// pub async fn stop_typing(client: tauri::State<'_, Client>, channel_id: String) -> Result<(), ()> {
-//     let (_, write) = client.driver.read().await.websocket.dual_async().await;
-
-//     let _ = write
-//         .lock()
-//         .await
-//         .send(
-//             WebSocketSend::EndTyping {
-//                 channel: channel_id,
-//             }
-//             .into(),
-//         )
-//         .await;
-
-//     Ok(())
-// }
-
 /// Payload containing a `channel_id` and a `user_id` for another user that emitted
 /// the `BeginTyping` or `EndTyping` websocket event.
 #[derive(Serialize, Deserialize, Clone)]

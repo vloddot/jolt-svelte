@@ -1462,7 +1462,9 @@ name = "jolt"
 version = "0.2.11"
 dependencies = [
  "futures-util",
+ "hyper",
  "reywen",
+ "reywen_http",
  "serde",
  "serde_json",
  "tauri",
@@ -2338,9 +2340,9 @@ checksum = "e5ea92a5b6195c6ef2a0295ea818b312502c6fc94dde986c5553242e18fd4ce2"
 
 [[package]]
 name = "reywen"
-version = "0.1.21"
+version = "0.1.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c44a07339e04514e80795c02f211b7930e19b9f60931d0cb5b8b91bed9627b0b"
+checksum = "b7bd8e3d666b4c8d3f4ba1b18f103ec65beca8b047f2724f9e80e50f57997e0e"
 dependencies = [
  "futures-util",
  "indexmap 2.0.0",

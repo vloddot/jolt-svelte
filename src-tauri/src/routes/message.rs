@@ -1,25 +1,50 @@
-use crate::route_fn;
+use crate::Client;
 use reywen::{
     client::methods::message::{DataMessageSend, DataQueryMessages},
     structures::channels::message::{BulkMessageResponse, Message, MessageSort},
 };
 
-route_fn! {
-    /// Fetch a bulk amount of messages from a channel given an optional limit.
-    /// Default limit is 50 messages.
-    pub fn fetch_messages(channel_id: &str, limit: Option<i64>) -> BulkMessageResponse {
-        message_query(
+#[tauri::command]
+/// Fetch a bulk amount of messages from a channel given an optional limit.
+/// Default limit is 50 messages.
+///
+/// # Errors
+///
+/// This function will return an error if the request fails.
+pub async fn fetch_messages(
+    client: tauri::State<'_, Client>,
+    channel_id: &str,
+) -> Result<BulkMessageResponse, String> {
+    client
+        .driver
+        .read()
+        .await
+        .message_query(
+            channel_id,
             &DataQueryMessages::new()
-                .set_limit(limit.unwrap_or(50))
                 .set_sort(MessageSort::Latest)
-                .set_include_users(true)
-        );
-    }
+                .set_include_users(true),
+        )
+        .await
+        .map_err(|err| format!("{err:?}"))
 }
 
-route_fn! {
-    /// Sends a message payload to a given channel
-    pub fn send_message(channel_id: &str, data_message_send: DataMessageSend) -> Message {
-        message_send(&data_message_send);
-    }
+#[tauri::command]
+/// Sends a message payload to a given channel
+///
+/// # Errors
+///
+/// This function will return an error if the request fails.
+pub async fn send_message(
+    client: tauri::State<'_, Client>,
+    channel_id: &str,
+    data_message_send: DataMessageSend,
+) -> Result<Message, String> {
+    client
+        .driver
+        .read()
+        .await
+        .message_send(channel_id, &data_message_send)
+        .await
+        .map_err(|err| format!("{err:?}"))
 }
