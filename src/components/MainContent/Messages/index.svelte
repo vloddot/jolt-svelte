@@ -43,15 +43,10 @@
   onMount(() => {
     event.listen<Message>('message', ({ payload: message }) => {
       if (message.channel === channel._id) {
-        bulkMessagesInfo.set({
-          ...$bulkMessagesInfo,
-          messages: [
-            message,
-            ...(Array.isArray($bulkMessagesInfo)
-              ? $bulkMessagesInfo
-              : $bulkMessagesInfo.messages ?? []),
-          ],
-        });
+        bulkMessagesInfo.update((info) => ({
+          ...info,
+          messages: [message, ...(Array.isArray(info) ? info : info.messages ?? [])],
+        }));
       }
     });
 
@@ -126,23 +121,25 @@
         {#await fetchUser(reply.message.author) then user}
           <strong>{user.username}</strong>
         {/await}
-        <p>{reply.message.content}</p>
+        <p>{reply.message.content?.slice(0, 50)}</p>
       </div>
     {/each}
     <form class="m-4" on:submit|preventDefault={sendMessage}>
-      <textarea
-        on:input={() => invoke('start_typing', { channelId: channel._id })}
-        on:keydown={(event) => {
-          if (event.shiftKey || event.key !== 'Enter') {
-            return;
-          }
+      <div class="bg-gray-500 rounded-xl px-2 pt-2">
+        <textarea
+          on:input={() => invoke('start_typing', { channelId: channel._id })}
+          on:keydown={(event) => {
+            if (event.shiftKey || event.key !== 'Enter') {
+              return;
+            }
 
-          event.preventDefault();
-          sendMessage();
-        }}
-        bind:this={messageInputNode}
-        class="resize-none rounded-xl bg-gray-500 w-full"
-      />
+            event.preventDefault();
+            sendMessage();
+          }}
+          bind:this={messageInputNode}
+          class="outline-none resize-none bg-inherit w-full"
+        />
+      </div>
     </form>
   </div>
 {/if}

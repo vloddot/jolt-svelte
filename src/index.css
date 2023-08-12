@@ -7,29 +7,19 @@
     @apply bg-gray-700 text-white overflow-hidden;
   }
 
-  .grid-container {
-    display: grid;
-    grid-template-areas: 'server-sidebar channel-bar main-content right-sidebar';
-    grid-template-columns: 64px 256px 1fr 256px;
-  }
-
   .server-sidebar-container {
-    grid-area: server-sidebar;
-    @apply h-screen flex flex-col m-0 bg-gray-900 shadow-lg overflow-y-scroll;
+    @apply flex-1 h-screen flex flex-col bg-gray-900 shadow-lg overflow-y-scroll;
   }
 
   .channel-bar-container {
-    grid-area: channel-bar;
-    @apply h-screen flex flex-col m-0 bg-gray-800 overflow-y-scroll;
+    @apply flex-[3] h-screen flex flex-col bg-gray-800 overflow-y-scroll;
   }
 
   .main-content-container {
-    grid-area: main-content;
-    @apply whitespace-pre-wrap h-screen;
+    @apply flex-[12] h-screen overflow-x-hidden overflow-y-scroll;
   }
 
   .right-sidebar-container {
-    grid-area: right-sidebar;
-    @apply overflow-y-scroll h-screen bg-gray-800;
+    @apply flex-[3] overflow-y-scroll h-screen bg-gray-800;
   }
 }

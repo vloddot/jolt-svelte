@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getDisplayAvatar } from '$lib/helpers';
-  import { currentServerID } from '$lib/stores';
+  import { currentServerID, settings } from '$lib/stores';
   import { invoke } from '@tauri-apps/api';
   import { setContext } from 'svelte';
   import { writable } from 'svelte/store';
@@ -29,13 +29,15 @@
   <UserFetcher id={member._id.user} let:user>
     {#if user?.online ?? true}
       <div>
-        <img
-          src={getDisplayAvatar(member, user)}
-          alt={member.nickname}
-          width="24"
-          height="24"
-          class="rounded-3xl inline aspect-square"
-        />
+        {#if !$settings.lowDataMode}
+          <img
+            src={getDisplayAvatar(member, user)}
+            alt={member.nickname}
+            width="24"
+            height="24"
+            class="rounded-3xl inline aspect-square"
+          />
+        {/if}
 
         {member.nickname ?? user?.username ?? `<${$_('user.unknown')}>`}
       </div>

@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { getAutumnURL } from '$lib/helpers';
-  import { currentServerID } from '$lib/stores';
+  import { settings } from '$lib/stores';
   import './index.css';
 
   /**
@@ -12,26 +11,26 @@
   /**
    * Icon to show.
    */
-  export let icon: AutumnFile | undefined;
+  export let icon: string | undefined;
 
   /**
-   * Item ID.
+   * Force to show icon (unless `icon` is `undefined`), ignoring low data mode.
    */
-  export let id: string;
+  export let forceShowIcon = false;
 </script>
 
 <div class="group m-0">
   <span class="sidebar-tooltip group-hover:scale-100">
     {tooltip}
   </span>
-  <span
-    tabindex="0"
-    role="link"
-    aria-label={tooltip}
-    on:click={() => currentServerID.set(id)}
-    on:keydown={(event) => event.key === 'Enter' && currentServerID.set(id)}
-  >
-    {#if icon === undefined}
+  <span tabindex="0" role="link" aria-label={tooltip} on:click on:keydown>
+    {#if icon !== undefined && !$settings.lowDataMode || forceShowIcon}
+      <img
+        class="sidebar-icon group-hover:rounded-xl group-hover:bg-green-600 group-hover:text-white"
+        src={icon}
+        alt={tooltip}
+      />
+    {:else}
       <span
         class="sidebar-icon group-hover:rounded-xl group-hover:bg-green-600 group-hover:text-white"
         >{tooltip
@@ -40,12 +39,6 @@
           .map((s) => s[0])
           .join('')}
       </span>
-    {:else}
-      <img
-        class="sidebar-icon group-hover:rounded-xl group-hover:bg-green-600 group-hover:text-white"
-        src={getAutumnURL(icon)}
-        alt={tooltip}
-      />
     {/if}
   </span>
 </div>

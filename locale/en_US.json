@@ -20,5 +20,6 @@
       "name": "Download",
       "error": "Unable to download"
     }
-  }
+  },
+  "cancel": "Cancel"
 }

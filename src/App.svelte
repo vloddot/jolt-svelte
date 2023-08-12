@@ -5,73 +5,57 @@
   import MainContent from '$components/MainContent/index.svelte';
   import ChannelBar from '$components/ChannelBar/index.svelte';
   import MembersList from '$components/MembersList/index.svelte';
-  import { currentChannelID, currentServerID, servers, session } from '$lib/stores';
+  import Settings from '$components/Settings.svelte';
+  import { pageToShow, servers, session, settings } from '$lib/stores';
   import { event, invoke } from '@tauri-apps/api';
   import { onMount } from 'svelte';
-  import { _, addMessages, getLocaleFromNavigator, init, isLoading, register } from 'svelte-i18n';
+  import { _ } from 'svelte-i18n';
   import Modal from '$components/Modal.svelte';
-  import en_US from '$locale/en_US.json';
-  import it from '$locale/it.json';
-
-  // View to show.
-  let show: 'main' | 'login' | null = null;
+  import '$lib/i18n';
 
   let modalError: string | null = null;
-
-  addMessages('en_US', en_US);
-  addMessages('it', it);
-
-  init({
-    fallbackLocale: 'en_US',
-    initialLocale: getLocaleFromNavigator(),
-  });
 
   onMount(async () => {
     try {
       const cachedSession: Session | null = JSON.parse(localStorage.getItem('session') || 'null');
       if (cachedSession !== null) {
         session.set(cachedSession);
-        invoke('login_with_token', { token: cachedSession.token })
+        invoke('login_with_token', { sessionId: cachedSession._id, token: cachedSession.token })
           .then(() => invoke('run_client'))
           .catch((err) => {
             modalError = err;
-            show = 'login';
+            pageToShow.set('login');
           });
       } else {
-        show = 'login';
+        pageToShow.set('login');
       }
     } catch (e) {
-      show = 'login';
+      pageToShow.set('login');
     } finally {
-      currentServerID.subscribe((id) => {
-        currentChannelID.set(
-          (id === null ? $servers?.[0] : $servers?.find((server) => server._id === id))
-            ?.channels[0] ?? null
-        );
-      });
+      const settingsFromFs = localStorage.getItem('settings');
+      if (settingsFromFs !== null) {
+        settings.set(JSON.parse(settingsFromFs));
+      }
 
+      // websocket thread emits a ready event when it's ready to set stuff up
       event.listen<Server[]>('ready', (event) => {
         servers.set(event.payload);
-        show = 'main';
+        pageToShow.set('main');
       });
     }
   });
 </script>
 
 <Modal showModal={modalError !== null}>
-  <h2 slot="header">
-    {#if !$isLoading}
-      {$_('error')}
-    {/if}
-  </h2>
+  <h1 slot="header">{$_('error')}</h1>
   <div>{modalError}</div>
 </Modal>
 
-{#if show !== null}
-  {#if show === 'login'}
+{#if $pageToShow !== null}
+  {#if $pageToShow === 'login'}
     <Login />
-  {:else if show === 'main'}
-    <span class="grid-container">
+  {:else if $pageToShow === 'main'}
+    <span class="flex">
       <span class="server-sidebar-container">
         <ServerSidebar />
       </span>
@@ -85,5 +69,7 @@
         <MembersList />
       </span>
     </span>
+  {:else if $pageToShow === 'settings'}
+    <Settings />
   {/if}
 {/if}

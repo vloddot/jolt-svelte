@@ -1,14 +1,14 @@
 <script lang="ts">
   import { bulkMessageInfoKey, repliesKey } from './sharedData';
   import { getAutumnURL, getDisplayAvatar } from '$lib/helpers';
-  import { currentServerID, session } from '$lib/stores';
+  import { currentServerID, session, settings } from '$lib/stores';
   import { getContext } from 'svelte';
   import type { Writable } from 'svelte/store';
   import type { Reply } from './sharedData';
   import dayjs from 'dayjs';
   import { decodeTime } from 'ulid';
-  import { shell } from '@tauri-apps/api';
-  import { _, date } from 'svelte-i18n';
+  import { _, time, date } from 'svelte-i18n';
+  import ExternalLink from '$components/ExternalLink.svelte';
 
   /**
    * Message to show.
@@ -18,22 +18,25 @@
   const bulkMessageInfo = getContext<Writable<BulkMessagePayload>>(bulkMessageInfoKey);
   const replies = getContext<Writable<Reply[]>>(repliesKey);
 
-  interface Controls {
+  interface MessageControls {
     src: string;
     alt: string;
     showIf?: () => boolean;
     onclick: (event: MouseEvent) => unknown;
   }
 
-  function pushReply(_: MouseEvent) {
+  function pushReply() {
     if ($replies.some((reply) => reply.message._id === message._id)) {
       return;
     }
 
-    replies.set([...$replies, { message, mention: true }]);
+    replies.update((replies) => {
+      replies.push({ message, mention: true });
+      return replies;
+    });
   }
 
-  const controls: Controls[] = [
+  const controls: MessageControls[] = [
     {
       src: '/reply.svg',
       alt: $_('message.reply'),
@@ -61,30 +64,27 @@
   $: displayAvatar = getDisplayAvatar(member, author);
 </script>
 
-<div role="listitem" class="group m-4">
+<div class="group m-4">
   <div class="flex">
-    <img
-      alt={displayUsername}
-      src={displayAvatar}
-      width="40"
-      height="40"
-      class="rounded-3xl inline aspect-square"
-    />
+    {#if !$settings.lowDataMode}
+      <img
+        alt={displayUsername}
+        src={displayAvatar}
+        width="40"
+        height="40"
+        class="rounded-3xl inline aspect-square"
+      />
+    {/if}
 
     {displayUsername}
 
-    <span class="text-gray-500">
-      <time>
-        {$date(dayjs(decodeTime(message._id)).toDate())}
-      </time>
+    <p class="text-gray-500">
+      [{$time(dayjs(decodeTime(message._id)).toDate())}]
 
       {#if message.edited !== undefined}
-        <p>
-          [{$_('message.edited-at')}
-          {$date(dayjs(message.edited).toDate())}]
-        </p>
+        [{$_('message.edited-at')} {$date(dayjs(message.edited).toDate())}]
       {/if}
-    </span>
+    </p>
 
     <div class="flex-1" />
 
@@ -100,14 +100,20 @@
   </div>
 
   {#if message.content}
-    {message.content}
+    <span style="overflow-wrap: break-word;" class="whitespace-pre-wrap">{message.content}</span>
   {/if}
 
   {#if message.attachments}
     {#each message.attachments as attachment}
       <div>
         {#if attachment.metadata.type === 'Image'}
-          <img src={getAutumnURL(attachment)} alt={attachment.filename} />
+          {#if $settings.lowDataMode}
+            <span class="text-gray-500"
+              >[Image <ExternalLink link={getAutumnURL(attachment)} />]</span
+            >
+          {:else}
+            <img src={getAutumnURL(attachment)} alt={attachment.filename} />
+          {/if}
         {:else if attachment.metadata.type === 'Video'}
           <!-- svelte-ignore a11y-media-has-caption -->
           <video controls>
@@ -116,21 +122,26 @@
         {:else if attachment.metadata.type === 'Audio'}
           <audio controls>
             <source src={getAutumnURL(attachment)} />
-            Your browser does not support the &lt;audio&gt; element.
           </audio>
         {:else if attachment.metadata.type === 'File'}
-          File <span class="text-gray-500">{attachment.filename}</span>
-          <button on:click={() => shell.open(getAutumnURL(attachment))}>
-            <img src="/download.svg" alt={$_('file.download.name')} />
-          </button>
+          <span class="text-gray-500"
+            >[File {attachment.filename}]
+            <ExternalLink link={getAutumnURL(attachment)} /></span
+          >
         {:else if attachment.metadata.type === 'Text'}
-          {#await fetch(getAutumnURL(attachment)) then response}
-            {#await response.text() then text}
-              <p>{text}</p>
+          {#if $settings.lowDataMode}
+            <span class="text-gray-500"
+              >[Text <ExternalLink link={getAutumnURL(attachment)} />]</span
+            >
+          {:else}
+            {#await fetch(getAutumnURL(attachment)) then response}
+              {#await response.text() then text}
+                <p>{text}</p>
+              {/await}
+            {:catch error}
+              <p>{$_('file.download.error')} {attachment.filename}: {error}</p>
             {/await}
-          {:catch error}
-            <p>{$_('file.download.error')} {attachment.filename}: {error}</p>
-          {/await}
+          {/if}
         {/if}
       </div>
     {/each}
@@ -138,9 +149,9 @@
 
   {#if message.embeds}
     {#each message.embeds as embed}
-      {#if embed.type === 'Website'}
-        {#if embed.special}
-          {console.log(embed.special)}
+      {#if $settings.lowDataMode}
+        {#if embed.type !== 'None' && embed.url !== undefined}
+          <ExternalLink link={embed.url} />
         {/if}
       {:else if embed.type === 'Image'}
         <!-- svelte-ignore a11y-missing-attribute -->
@@ -151,7 +162,7 @@
           <source src={embed.url} width={embed.width} height={embed.height} />
         </video>
       {:else}
-        Hewwo, {JSON.stringify(embed)}
+        <span class="text-gray-500">Embed for debugging {JSON.stringify(embed)}</span>
       {/if}
     {/each}
   {/if}
