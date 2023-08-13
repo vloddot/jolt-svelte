@@ -51,6 +51,22 @@ pub async fn fetch_direct_messages(
         .map_err(|err| format!("{err:?}"))
 }
 
+#[tauri::command]
+/// Opens a `DirectMessage` channel with a certain user ID.
+///
+/// # Errors
+///
+/// This function will return an error if the request fails.
+pub async fn open_dm(client: tauri::State<'_, Client>, user_id: &str) -> Result<Channel, String> {
+    client
+        .driver
+        .read()
+        .await
+        .dm_open(user_id)
+        .await
+        .map_err(|err| format!("{err:?}"))
+}
+
 impl crate::Cache {
     /// Checks if the item exists in the cache.
     #[must_use]

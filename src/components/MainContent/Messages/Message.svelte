@@ -1,7 +1,7 @@
 <script lang="ts">
   import { usersKey, membersKey, repliesKey } from './sharedData';
   import { getDisplayAvatar } from '$lib/util';
-  import { currentServerID, session, settings } from '$lib/stores';
+  import { selectedServerID, session, settings } from '$lib/stores';
   import { getContext } from 'svelte';
   import type { Writable } from 'svelte/store';
   import type { Reply } from './sharedData';
@@ -59,7 +59,7 @@
   $: member =
     $members !== undefined
       ? $members.find(
-          (member) => member._id.server === $currentServerID && member._id.user === author?._id
+          (member) => member._id.server === $selectedServerID && member._id.user === author?._id
         )
       : undefined;
 
@@ -90,7 +90,8 @@
     {displayUsername}
 
     <p class="text-gray-500">
-      [{$date(messageTimestamp)} {$time(messageTimestamp)}]
+      [{$date(messageTimestamp)}
+      {$time(messageTimestamp)}]
 
       {#if messageEditedAt !== undefined}
         [{$_('message.edited')} {$date(messageEditedAt)} {$time(messageEditedAt)}]

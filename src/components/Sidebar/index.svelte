@@ -1,6 +1,6 @@
 <script lang="ts">
   import Icon from './Icon.svelte';
-  import { currentServerID, servers, pageToShow } from '$lib/stores';
+  import { selectedServerID, servers, pageToShow } from '$lib/stores';
   import { getAutumnURL } from '$lib/util';
 </script>
 
@@ -8,8 +8,8 @@
   <Icon
     tooltip={server.name}
     icon={server.icon === undefined ? undefined : getAutumnURL(server.icon)}
-    on:click={() => currentServerID.set(server._id)}
-    on:keydown={(event) => event.key === 'Enter' && currentServerID.set(server._id)}
+    on:click={() => selectedServerID.set(server._id)}
+    on:keydown={(event) => event.key === 'Enter' && selectedServerID.set(server._id)}
   />
 {/each}
 

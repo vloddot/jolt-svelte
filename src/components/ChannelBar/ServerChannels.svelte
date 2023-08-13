@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { servers, currentServerID } from '$lib/stores';
+  import { servers, selectedServerID } from '$lib/stores';
   import ChannelFetcher from '$components/ChannelFetcher/index.svelte';
   import Channel from './Channel.svelte';
   import ChannelCategory from './Category.svelte';
@@ -7,7 +7,7 @@
   let categories: Category[] = [];
 
   $: {
-    const server = $servers?.find(({ _id }) => _id === $currentServerID) ?? null;
+    const server = $servers?.find(({ _id }) => _id === $selectedServerID) ?? null;
 
     categories = server?.categories ?? [];
 

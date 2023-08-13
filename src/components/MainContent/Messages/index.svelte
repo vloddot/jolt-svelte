@@ -4,7 +4,7 @@
   import { onMount, setContext } from 'svelte';
   import { writable, type Writable } from 'svelte/store';
   import { type Reply, usersKey, membersKey, repliesKey } from './sharedData';
-  import { currentChannelID, session } from '$lib/stores';
+  import { selectedChannelID, session } from '$lib/stores';
   import { fetchUser, getAutumnURL, getDefaultUserAvatar } from '$lib/util';
   import { _ } from 'svelte-i18n';
   import { getChannelName } from '$lib/util';
@@ -20,7 +20,6 @@
 
   const replies = writable<Reply[]>([]);
 
-  // `bulkMessageInfo` contains info about users and members that are helpful.
   setContext(usersKey, users);
   setContext(membersKey, members);
 
@@ -31,19 +30,15 @@
   let currentlyTypingUsers: User[];
 
   $: {
-    if (channel.channel_type === 'DirectMessage' || channel.channel_type === 'Group') {
-      // TODO: add DMs
-    } else {
-      invoke<BulkMessagePayload>('fetch_messages', { channelId: channel._id }).then((response) => {
-        if (Array.isArray(response)) {
-          messages = response;
-        } else {
-          messages = response.messages ?? [];
-          members.set(response.members ?? []);
-          users.set(response.users ?? []);
-        }
-      });
-    }
+    invoke<BulkMessagePayload>('fetch_messages', { channelId: channel._id }).then((response) => {
+      if (Array.isArray(response)) {
+        messages = response;
+      } else {
+        messages = response.messages ?? [];
+        members.set(response.members ?? []);
+        users.set(response.users ?? []);
+      }
+    });
 
     replies.set([]);
     currentlyTypingUsers = [];
@@ -61,7 +56,7 @@
       async ({ payload: { user_id, channel_id } }) => {
         if (
           user_id === $session?.user_id ||
-          channel_id !== $currentChannelID ||
+          channel_id !== $selectedChannelID ||
           currentlyTypingUsers.map((user) => user._id).includes(user_id)
         ) {
           return;
@@ -74,7 +69,7 @@
     event.listen<ChannelTypingPayload>(
       'channel_stop_typing',
       ({ payload: { user_id, channel_id } }) => {
-        if (channel_id === $currentChannelID) {
+        if (channel_id === $selectedChannelID) {
           currentlyTypingUsers = currentlyTypingUsers.filter((user) => user._id !== user_id);
         }
       }
@@ -95,8 +90,6 @@
 
     await invoke<Message>('send_message', { channelId: channel._id, dataMessageSend });
   }
-
-  $: channelName = getChannelName(channel);
 </script>
 
 <div class="flex flex-col h-full overflow-x-hidden overflow-y-scroll">
@@ -130,7 +123,7 @@
     </div>
   {/each}
   <form class="m-4" on:submit|preventDefault={sendMessage}>
-    {#await channelName then name}
+    {#await getChannelName(channel) then name}
       <div class="bg-gray-500 rounded-xl px-2 pt-2">
         <textarea
           on:input={() => invoke('start_typing', { channelId: channel._id })}

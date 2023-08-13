@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { currentChannelID } from '$lib/stores';
+  import { selectedChannelID } from '$lib/stores';
 
   /**
    * Image source to show.
@@ -38,11 +38,11 @@
 </script>
 
 <div
-  class={`p-2 cursor-pointer ${$currentChannelID === id ? 'bg-gray-400' : 'hover:bg-gray-600'}`}
+  class={`p-2 cursor-pointer ${$selectedChannelID === id ? 'bg-gray-400' : 'hover:bg-gray-600'}`}
   tabindex="0"
   role="link"
-  on:click={() => currentChannelID.set(id)}
-  on:keydown={(event) => event.key === 'Enter' && currentChannelID.set(id)}
+  on:click={() => selectedChannelID.set(id)}
+  on:keydown={(event) => event.key === 'Enter' && selectedChannelID.set(id)}
 >
   <img {src} {alt} {width} {height} class:rounded-3xl={rounded} class="inline aspect-square" />
   {name}
