@@ -3,7 +3,8 @@ use reywen::structures::channels::Channel;
 
 #[tauri::command]
 /// Fetch a channel from ID.
-/// " # Errors"
+///
+/// # Errors
 ///
 /// This function will return an error if the request fails.
 pub async fn fetch_channel(
@@ -30,6 +31,24 @@ pub async fn fetch_channel(
     };
 
     Ok(channel_id)
+}
+
+#[tauri::command]
+/// Fetch current user's DMs
+///
+/// # Errors
+///
+/// This function will return an error if the request fails.
+pub async fn fetch_direct_messages(
+    client: tauri::State<'_, Client>,
+) -> Result<Vec<Channel>, String> {
+    client
+        .driver
+        .read()
+        .await
+        .dm_fetch_all()
+        .await
+        .map_err(|err| format!("{err:?}"))
 }
 
 impl crate::Cache {

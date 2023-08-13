@@ -10,8 +10,8 @@
     {category.title}
   </summary>
   <div class="ml-2">
-    {#each category.channels as channel}
-      <ChannelFetcher id={channel} let:channel>
+    {#each category.channels as id}
+      <ChannelFetcher {id} let:channel>
         <slot {channel} />
       </ChannelFetcher>
     {/each}

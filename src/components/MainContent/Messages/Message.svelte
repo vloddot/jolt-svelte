@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { bulkMessageInfoKey, repliesKey } from './sharedData';
-  import { getAutumnURL, getDisplayAvatar } from '$lib/helpers';
+  import { usersKey, membersKey, repliesKey } from './sharedData';
+  import { getDisplayAvatar } from '$lib/util';
   import { currentServerID, session, settings } from '$lib/stores';
   import { getContext } from 'svelte';
   import type { Writable } from 'svelte/store';
@@ -8,14 +8,18 @@
   import dayjs from 'dayjs';
   import { decodeTime } from 'ulid';
   import { _, time, date } from 'svelte-i18n';
-  import ExternalLink from '$components/ExternalLink.svelte';
+  import Embed from './Embed.svelte';
+  import Attachment from './Attachment.svelte';
+  import SystemMessage from './SystemMessage.svelte';
 
   /**
    * Message to show.
    */
   export let message: Message;
 
-  const bulkMessageInfo = getContext<Writable<BulkMessagePayload>>(bulkMessageInfoKey);
+  const users = getContext<Writable<User[] | undefined>>(usersKey);
+  const members = getContext<Writable<Member[] | undefined>>(membersKey);
+
   const replies = getContext<Writable<Reply[]>>(repliesKey);
 
   interface MessageControls {
@@ -43,25 +47,32 @@
       onclick: pushReply,
     },
     {
-      src: '/edit.svg',
+      src: '/note.svg',
       alt: $_('message.edit'),
       onclick() {},
       showIf: () => message.author === $session?.user_id,
     },
   ];
 
-  $: author = !Array.isArray($bulkMessageInfo)
-    ? $bulkMessageInfo.users?.find((user) => user._id === message.author)
-    : undefined;
+  $: author = $users !== undefined ? $users.find((user) => user._id === message.author) : undefined;
 
-  $: member = !Array.isArray($bulkMessageInfo)
-    ? $bulkMessageInfo.members?.find(
-        (member) => member._id.server === $currentServerID && member._id.user === author?._id
-      )
-    : undefined;
+  $: member =
+    $members !== undefined
+      ? $members.find(
+          (member) => member._id.server === $currentServerID && member._id.user === author?._id
+        )
+      : undefined;
 
-  $: displayUsername = member?.nickname ?? author?.username ?? `<${$_('user.unknown')}>`;
-  $: displayAvatar = getDisplayAvatar(member, author);
+  $: displayUsername =
+    message.system === undefined
+      ? member?.nickname ?? author?.username ?? `<${$_('user.unknown')}>`
+      : 'System Message';
+
+  $: displayAvatar =
+    message.system === undefined ? getDisplayAvatar(member, author) : '/user-gear.svg';
+
+  $: messageTimestamp = dayjs(decodeTime(message._id)).toDate();
+  $: messageEditedAt = message.edited === undefined ? undefined : dayjs(message.edited).toDate();
 </script>
 
 <div class="group m-4">
@@ -79,10 +90,10 @@
     {displayUsername}
 
     <p class="text-gray-500">
-      [{$time(dayjs(decodeTime(message._id)).toDate())}]
+      [{$date(messageTimestamp)} {$time(messageTimestamp)}]
 
-      {#if message.edited !== undefined}
-        [{$_('message.edited-at')} {$date(dayjs(message.edited).toDate())}]
+      {#if messageEditedAt !== undefined}
+        [{$_('message.edited')} {$date(messageEditedAt)} {$time(messageEditedAt)}]
       {/if}
     </p>
 
@@ -99,71 +110,22 @@
     </div>
   </div>
 
-  {#if message.content}
+  {#if message.content !== undefined}
     <span style="overflow-wrap: break-word;" class="whitespace-pre-wrap">{message.content}</span>
   {/if}
 
+  {#if message.system !== undefined}
+    <SystemMessage system={message.system} />
+  {/if}
   {#if message.attachments}
     {#each message.attachments as attachment}
-      <div>
-        {#if attachment.metadata.type === 'Image'}
-          {#if $settings.lowDataMode}
-            <span class="text-gray-500"
-              >[Image <ExternalLink link={getAutumnURL(attachment)} />]</span
-            >
-          {:else}
-            <img src={getAutumnURL(attachment)} alt={attachment.filename} />
-          {/if}
-        {:else if attachment.metadata.type === 'Video'}
-          <!-- svelte-ignore a11y-media-has-caption -->
-          <video controls>
-            <source src={getAutumnURL(attachment)} />
-          </video>
-        {:else if attachment.metadata.type === 'Audio'}
-          <audio controls>
-            <source src={getAutumnURL(attachment)} />
-          </audio>
-        {:else if attachment.metadata.type === 'File'}
-          <span class="text-gray-500"
-            >[File {attachment.filename}]
-            <ExternalLink link={getAutumnURL(attachment)} /></span
-          >
-        {:else if attachment.metadata.type === 'Text'}
-          {#if $settings.lowDataMode}
-            <span class="text-gray-500"
-              >[Text <ExternalLink link={getAutumnURL(attachment)} />]</span
-            >
-          {:else}
-            {#await fetch(getAutumnURL(attachment)) then response}
-              {#await response.text() then text}
-                <p>{text}</p>
-              {/await}
-            {:catch error}
-              <p>{$_('file.download.error')} {attachment.filename}: {error}</p>
-            {/await}
-          {/if}
-        {/if}
-      </div>
+      <Attachment {attachment} />
     {/each}
   {/if}
 
   {#if message.embeds}
     {#each message.embeds as embed}
-      {#if $settings.lowDataMode}
-        {#if embed.type !== 'None' && embed.url !== undefined}
-          <ExternalLink link={embed.url} />
-        {/if}
-      {:else if embed.type === 'Image'}
-        <!-- svelte-ignore a11y-missing-attribute -->
-        <img src={embed.url} width={embed.width} height={embed.height} />
-      {:else if embed.type === 'Video'}
-        <!-- svelte-ignore a11y-media-has-caption -->
-        <video controls>
-          <source src={embed.url} width={embed.width} height={embed.height} />
-        </video>
-      {:else}
-        <span class="text-gray-500">Embed for debugging {JSON.stringify(embed)}</span>
-      {/if}
+      <Embed {embed} />
     {/each}
   {/if}
 </div>

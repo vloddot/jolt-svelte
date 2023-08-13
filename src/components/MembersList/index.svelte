@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getDisplayAvatar } from '$lib/helpers';
+  import { getDisplayAvatar } from '$lib/util';
   import { currentServerID, settings } from '$lib/stores';
   import { invoke } from '@tauri-apps/api';
   import { setContext } from 'svelte';

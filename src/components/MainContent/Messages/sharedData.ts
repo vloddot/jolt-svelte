@@ -3,5 +3,6 @@ export interface Reply {
   mention: boolean;
 }
 
-export const bulkMessageInfoKey = Symbol();
+export const membersKey = Symbol();
+export const usersKey = Symbol();
 export const repliesKey = Symbol();

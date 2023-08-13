@@ -1,18 +1,19 @@
 <script lang="ts">
   import ChannelItem from '$components/ChannelBar/ChannelItem.svelte';
-  import { fetchUser, getAutumnURL, getDefaultUserAvatar } from '$lib/helpers';
+  import { fetchUser, getAutumnURL, getDefaultUserAvatar } from '$lib/util';
   import { session } from '$lib/stores';
   import { _ } from 'svelte-i18n';
 
-  function getChannelIcon({
-    icon,
-    channel_type,
-  }: Exclude<Channel, { channel_type: 'DirectMessage' | 'SavedMessages' }>): string {
-    if (icon !== undefined) {
-      return getAutumnURL(icon);
+  function getChannelIcon(channel: Exclude<Channel, { channel_type: 'DirectMessage' }>): string {
+    if (channel.channel_type === 'SavedMessages') {
+      return '/note.svg';
     }
 
-    switch (channel_type) {
+    if (channel.icon !== undefined) {
+      return getAutumnURL(channel.icon);
+    }
+
+    switch (channel.channel_type) {
       case 'Group':
         return '/group.svg';
       case 'TextChannel':
@@ -46,10 +47,10 @@
       id={channel._id}
     />
   {/await}
-{:else if channel.channel_type === 'TextChannel' || channel.channel_type === 'VoiceChannel' || channel.channel_type === 'Group'}
+{:else if channel.channel_type === 'TextChannel' || channel.channel_type === 'VoiceChannel' || channel.channel_type === 'Group' || channel.channel_type === 'SavedMessages'}
   <ChannelItem
     src={getChannelIcon(channel)}
-    name={channel.name}
+    name={channel.channel_type === 'SavedMessages' ? 'Notes' : channel.name}
     width={24}
     height={24}
     id={channel._id}

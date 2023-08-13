@@ -1,4 +1,52 @@
-type SystemMessage = unknown;
+type SystemMessage =
+  | {
+      type: 'text';
+      content: string;
+    }
+  | {
+      type: 'user_added';
+      id: string;
+      by: string;
+    }
+  | {
+      type: 'user_remove';
+      id: string;
+      by: string;
+    }
+  | {
+      type: 'user_joined';
+      id: string;
+    }
+  | {
+      type: 'user_left';
+      id: string;
+    }
+  | {
+      type: 'user_kicked';
+      id: string;
+    }
+  | {
+      type: 'user_banned';
+      id: string;
+    }
+  | {
+      type: 'channel_renamed';
+      name: string;
+      by: string;
+    }
+  | {
+      type: 'channel_description_changed';
+      by: string;
+    }
+  | {
+      type: 'channel_icon_changed';
+      by: string;
+    }
+  | {
+      type: 'channel_ownership_changed';
+      from: string;
+      to: string;
+    };
 
 type MessageInteractions = {
   /**

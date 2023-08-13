@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { currentChannelID, currentServerID, servers } from '$lib/stores';
   import Messages from './Messages/index.svelte';
   import ChannelFetcher from '$components/ChannelFetcher/index.svelte';

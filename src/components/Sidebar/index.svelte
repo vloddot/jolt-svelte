@@ -1,7 +1,7 @@
 <script lang="ts">
   import Icon from './Icon.svelte';
   import { currentServerID, servers, pageToShow } from '$lib/stores';
-  import { getAutumnURL } from '$lib/helpers';
+  import { getAutumnURL } from '$lib/util';
 </script>
 
 {#each $servers ?? [] as server}
@@ -13,9 +13,9 @@
   />
 {/each}
 
-<div class="flex-1" />
-
 <!-- Any icons under here should set `forceShowIcon` because they're meant to be installed with the app. -->
+
+<div class="flex-1" />
 
 <Icon
   tooltip="Settings"

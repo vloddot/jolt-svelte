@@ -60,6 +60,7 @@ async fn main() {
             routes::members::fetch_members,
             routes::servers::fetch_server,
             routes::channels::fetch_channel,
+            routes::channels::fetch_direct_messages,
             routes::message::fetch_messages,
             routes::message::send_message,
             events::typing::start_typing,

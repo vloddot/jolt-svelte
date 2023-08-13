@@ -2,28 +2,27 @@
   import { event, invoke } from '@tauri-apps/api';
   import MessageComponent from './Message.svelte';
   import { onMount, setContext } from 'svelte';
-  import { bulkMessageInfoKey, repliesKey } from './sharedData';
-  import { writable } from 'svelte/store';
-  import type { Reply } from './sharedData';
+  import { writable, type Writable } from 'svelte/store';
+  import { type Reply, usersKey, membersKey, repliesKey } from './sharedData';
   import { currentChannelID, session } from '$lib/stores';
-  import { fetchUser, getAutumnURL, getDefaultUserAvatar } from '$lib/helpers';
+  import { fetchUser, getAutumnURL, getDefaultUserAvatar } from '$lib/util';
   import { _ } from 'svelte-i18n';
+  import { getChannelName } from '$lib/util';
 
   /**
    * Which channel to show messages from.
    */
   export let channel: Exclude<Channel, { channel_type: 'VoiceChannel' }>;
 
-  const bulkMessagesInfo = writable<BulkMessagePayload>({
-    members: [],
-    messages: [],
-    users: [],
-  });
+  let messages: Message[] = [];
+  let members: Writable<Member[]> = writable([]);
+  let users: Writable<User[]> = writable([]);
 
   const replies = writable<Reply[]>([]);
 
   // `bulkMessageInfo` contains info about users and members that are helpful.
-  setContext(bulkMessageInfoKey, bulkMessagesInfo);
+  setContext(usersKey, users);
+  setContext(membersKey, members);
 
   // `replies` contains the current user's replies that will be sent.
   setContext(repliesKey, replies);
@@ -32,9 +31,19 @@
   let currentlyTypingUsers: User[];
 
   $: {
-    invoke<BulkMessagePayload>('fetch_messages', { channelId: channel._id }).then((response) =>
-      bulkMessagesInfo.set(response)
-    );
+    if (channel.channel_type === 'DirectMessage' || channel.channel_type === 'Group') {
+      // TODO: add DMs
+    } else {
+      invoke<BulkMessagePayload>('fetch_messages', { channelId: channel._id }).then((response) => {
+        if (Array.isArray(response)) {
+          messages = response;
+        } else {
+          messages = response.messages ?? [];
+          members.set(response.members ?? []);
+          users.set(response.users ?? []);
+        }
+      });
+    }
 
     replies.set([]);
     currentlyTypingUsers = [];
@@ -43,10 +52,7 @@
   onMount(() => {
     event.listen<Message>('message', ({ payload: message }) => {
       if (message.channel === channel._id) {
-        bulkMessagesInfo.update((info) => ({
-          ...info,
-          messages: [message, ...(Array.isArray(info) ? info : info.messages ?? [])],
-        }));
+        messages = [message, ...messages];
       }
     });
 
@@ -89,42 +95,42 @@
 
     await invoke<Message>('send_message', { channelId: channel._id, dataMessageSend });
   }
+
+  $: channelName = getChannelName(channel);
 </script>
 
-{#if $bulkMessagesInfo !== undefined}
-  <div class="flex flex-col h-full overflow-x-hidden overflow-y-scroll">
-    {#each [...(Array.isArray($bulkMessagesInfo) ? $bulkMessagesInfo : $bulkMessagesInfo.messages ?? [])].reverse() as message}
-      <div class="hover:bg-gray-800">
-        <MessageComponent {message} />
-      </div>
-    {/each}
-    {#each currentlyTypingUsers as user}
-      <div>
-        <img
-          src={user.avatar === undefined
-            ? getDefaultUserAvatar(user._id)
-            : getAutumnURL(user.avatar)}
-          class="inline aspect-square rounded-3xl"
-          width="16"
-          height="16"
-          alt={user.username}
-        />
-        {user.username}
-        {$_('user.is-typing')}...
-      </div>
-    {/each}
-    {#if $replies.length !== 0}
-      {$_('message.replying-to')}
-    {/if}
-    {#each $replies as reply}
-      <div>
-        {#await fetchUser(reply.message.author) then user}
-          <strong>{user.username}</strong>
-        {/await}
-        <p>{reply.message.content?.slice(0, 50)}</p>
-      </div>
-    {/each}
-    <form class="m-4" on:submit|preventDefault={sendMessage}>
+<div class="flex flex-col h-full overflow-x-hidden overflow-y-scroll">
+  {#each [...messages].reverse() as message}
+    <div class="hover:bg-gray-800">
+      <MessageComponent {message} />
+    </div>
+  {/each}
+  {#each currentlyTypingUsers as user}
+    <div>
+      <img
+        src={user.avatar === undefined ? getDefaultUserAvatar(user._id) : getAutumnURL(user.avatar)}
+        class="inline aspect-square rounded-3xl"
+        width="16"
+        height="16"
+        alt={user.username}
+      />
+      {user.username}
+      {$_('user.is-typing')}...
+    </div>
+  {/each}
+  {#if $replies.length !== 0}
+    {$_('message.replying-to')}
+  {/if}
+  {#each $replies as reply}
+    <div>
+      {#await fetchUser(reply.message.author) then user}
+        <strong>{user.username}</strong>
+      {/await}
+      <p>{reply.message.content?.slice(0, 50)}</p>
+    </div>
+  {/each}
+  <form class="m-4" on:submit|preventDefault={sendMessage}>
+    {#await channelName then name}
       <div class="bg-gray-500 rounded-xl px-2 pt-2">
         <textarea
           on:input={() => invoke('start_typing', { channelId: channel._id })}
@@ -138,8 +144,9 @@
           }}
           bind:this={messageInputNode}
           class="outline-none resize-none bg-inherit w-full"
+          placeholder={`${$_('send-message-in')} ${name}`}
         />
       </div>
-    </form>
-  </div>
-{/if}
+    {/await}
+  </form>
+</div>
