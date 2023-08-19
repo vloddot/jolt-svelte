@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::Client;
 
 /// Send a `BeginTyping` event to WebSocket using `channel` (id).
-#[tauri::command]
+#[tauri::command(rename_all = "snake_case")]
 pub async fn start_typing(client: tauri::State<'_, Client>, channel_id: String) -> Result<(), ()> {
     let (_, write) = client.driver.read().await.websocket.dual_async().await;
 

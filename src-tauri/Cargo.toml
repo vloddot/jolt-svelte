@@ -1,8 +1,9 @@
 [package]
 name = "jolt"
 version = "0.2.12"
-description = "A Tauri App"
+description = "Tauri binary for the Jolt app."
 authors = ["vloddot (vladpriwalov08@gmail.com)"]
+keywords = ["revolt", "custom-client", "rust", "svelte", "tauri", "chatapp"]
 license = "Apache-2.0"
 repository = "https://www.github.com/vloddot/jolt"
 default-run = "jolt"

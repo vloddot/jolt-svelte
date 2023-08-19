@@ -1,47 +1,48 @@
 {
-  "error": "Error",
-  "login": "Login",
-  "mfa": {
-    "notice": "Optionally, if your account uses MFA, use one of these methods, including the previous email and password as well"
-  },
-  "confirm": "Ok",
-  "user": {
-    "unknown": "Unknown User",
-    "is-typing": "is typing",
-    "was-banned": "was banned",
-    "was-kicked": "was kicked",
-    "chat": {
-      "joined": "has joined the chat",
-      "left": "left the chat"
-    }
-  },
-  "message": {
-    "reply": "Reply",
-    "edit": "Edit",
-    "edited": "edited",
-    "replying-to": "replying to"
-  },
-  "file": {
-    "download": {
-      "name": "Download",
-      "error": "Unable to download"
-    }
-  },
-  "cancel": "Cancel",
-  "send-message-in": "Send message in",
-  "channel": {
-    "notes": "Notes channel",
-    "description": {
-      "change": "changed this channel's description"
-    },
-    "icon": {
-      "change": "changed this channel's icon"
-    },
-    "rename-to": "renamed this channel to",
-    "ownership": {
-      "changed-from": "Channel ownership changed from"
-    }
-  },
-  "added": "added",
-  "removed": "removed"
+	"error": "Error",
+	"login": "Login",
+	"mfa": {
+		"notice": "Optionally, if your account uses MFA, use one of these methods, including the previous email and password as well"
+	},
+	"confirm": "Ok",
+	"user": {
+		"unknown": "Unknown User",
+		"is-typing": "is typing",
+		"was-banned": "was banned",
+		"was-kicked": "was kicked",
+		"chat": {
+			"joined": "has joined the chat",
+			"left": "left the chat"
+		}
+	},
+	"message": {
+		"reply": "Reply",
+		"edit": "Edit",
+		"edited": "edited",
+		"replying-to": "replying to",
+		"system": "System Message"
+	},
+	"file": {
+		"download": {
+			"name": "Download",
+			"error": "Unable to download"
+		}
+	},
+	"cancel": "Cancel",
+	"send-message-in": "Send message in",
+	"channel": {
+		"notes": "Notes channel",
+		"description": {
+			"change": "changed this channel's description"
+		},
+		"icon": {
+			"change": "changed this channel's icon"
+		},
+		"rename-to": "renamed this channel to",
+		"ownership": {
+			"changed-from": "Channel ownership changed from"
+		}
+	},
+	"added": "added",
+	"removed": "removed"
 }

@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+	.server-sidebar-container {
+		@apply flex-1 h-screen flex flex-col bg-gray-900 shadow-lg overflow-y-scroll;
+	}
+
+	.channel-bar-container {
+		@apply flex-[3] h-screen flex flex-col bg-gray-800 overflow-y-scroll;
+	}
+
+	.main-content-container {
+		@apply flex-[12] h-screen overflow-x-hidden overflow-y-scroll;
+	}
+}

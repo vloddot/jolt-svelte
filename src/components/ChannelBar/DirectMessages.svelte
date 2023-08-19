@@ -1,27 +1,40 @@
 <script lang="ts">
-  import ChannelComponent from '$components/ChannelBar/Channel.svelte';
-  import { invoke } from '@tauri-apps/api';
-  import { onMount } from 'svelte';
+	import '$lib/i18n';
+	import { invoke } from '@tauri-apps/api';
+	import { onMount, setContext } from 'svelte';
+	import ChannelComponent from '@components/ChannelBar/Channel.svelte';
+	import { lowDataModeKey, userIDKey } from '@components/ChannelBar';
 
-  let channels: Channel[] = [];
-  let savedMessages: Extract<Channel, { channel_type: 'SavedMessages' }> | undefined;
+	export let userID: string;
+	export let lowDataMode: boolean;
 
-  onMount(() => {
-    invoke<Channel[]>('fetch_direct_messages').then((result) => {
-      channels = result;
-      savedMessages = channels.find(
-        (channel) => channel.channel_type === 'SavedMessages'
-      ) as Extract<ChannelComponent, { channel_type: 'SavedMessages' }>;
-    });
-  });
+	setContext(userIDKey, userID);
+	setContext(lowDataModeKey, lowDataMode);
+
+	type SavedMessagesChannel = Extract<Channel, { channel_type: 'SavedMessages' }>;
+
+	let dms: Channel[] = [];
+	let savedMessagesChannel: SavedMessagesChannel | undefined;
+
+	onMount(async () => {
+		invoke<Channel[]>('fetch_direct_messages')
+			.then((result) => {
+				dms = result;
+				savedMessagesChannel = dms.find(
+					(dm) => dm.channel_type === 'SavedMessages'
+				) as SavedMessagesChannel;
+			});
+	});
 </script>
 
-{#if savedMessages !== undefined}
-  <ChannelComponent channel={savedMessages} />
-{/if}
+<div class="channel-bar-container">
+	{#if savedMessagesChannel !== undefined}
+		<ChannelComponent channel={savedMessagesChannel} />
+	{/if}
 
-{#each channels as channel}
-  {#if channel.channel_type !== 'SavedMessages'}
-    <ChannelComponent {channel} />
-  {/if}
-{/each}
+	{#each dms as dm}
+		{#if dm.channel_type !== 'SavedMessages'}
+			<ChannelComponent channel={dm} />
+		{/if}
+	{/each}
+</div>

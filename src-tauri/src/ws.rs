@@ -4,7 +4,7 @@ use reywen::websocket::data::{WebSocketEvent, WebSocketSend};
 use tauri::Manager;
 
 /// Run client event loop.
-#[tauri::command]
+#[tauri::command(rename_all = "snake_case")]
 pub async fn run_client<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     client: tauri::State<'_, Client>,

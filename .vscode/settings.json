@@ -1,10 +1,10 @@
 {
-  "nixEnvSelector.nixFile": "${workspaceRoot}/shell.nix",
-  "files.associations": {
-    "*.css": "tailwindcss"
-  },
-  "i18n-ally.localesPaths": ["locale"],
-  "i18n-ally.sourceLanguage": "en",
-  "i18n-ally.keystyle": "nested",
-  "eslint.validate": ["javascript", "typescript", "svelte"]
+	"nixEnvSelector.nixFile": "${workspaceRoot}/shell.nix",
+	"files.associations": {
+		"*.css": "tailwindcss"
+	},
+	"i18n-ally.localesPaths": ["locale"],
+	"i18n-ally.sourceLanguage": "en",
+	"i18n-ally.keystyle": "nested",
+	"eslint.validate": ["javascript", "typescript", "svelte"]
 }

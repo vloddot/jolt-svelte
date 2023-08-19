@@ -1,49 +1,61 @@
 <script lang="ts">
-  import { selectedChannelID } from '$lib/stores';
+	import { lowDataModeKey, serverIDKey } from '.';
+	import { getContext } from 'svelte';
 
-  /**
-   * Image source to show.
-   */
-  export let src: string | undefined;
+	/**
+	 * Image source to show.
+	 */
+	export let src: string | undefined;
 
-  /**
-   * Channel name.
-   */
-  export let name: string;
+	/**
+	 * Channel name.
+	 */
+	export let name: string;
 
-  /**
-   * Alternate text for image.
-   */
-  export let alt: string = name;
+	/**
+	 * Alternate text for image.
+	 */
+	export let alt = name;
 
-  /**
-   * Width of the image.
-   */
-  export let width: number;
+	/**
+	 * Width of the image.
+	 */
+	export let width: number;
 
-  /**
-   * Height of the image.
-   */
-  export let height: number;
+	/**
+	 * Height of the image.
+	 */
+	export let height: number;
 
-  /**
-   * Whether the image is rounded or not.
-   */
-  export let rounded: boolean = false;
+	/**
+	 * Whether the image is rounded or not.
+	 */
+	export let rounded = false;
 
-  /**
-   * Channel ID.
-   */
-  export let id: string;
+	/**
+	 * Whether the channel is selected or not.
+	 */
+	export let selected = false;
+
+	/**
+	 * Channel ID.
+	 */
+	export let id: string;
+
+	/**
+	 * Override showing the channel icon over low data mode setting.
+	 */
+	export let forceShowIcon = false;
+
+	const serverID: string | undefined = getContext(serverIDKey);
+	const lowDataMode: boolean = getContext(lowDataModeKey);
 </script>
 
-<div
-  class={`p-2 cursor-pointer ${$selectedChannelID === id ? 'bg-gray-400' : 'hover:bg-gray-600'}`}
-  tabindex="0"
-  role="link"
-  on:click={() => selectedChannelID.set(id)}
-  on:keydown={(event) => event.key === 'Enter' && selectedChannelID.set(id)}
->
-  <img {src} {alt} {width} {height} class:rounded-3xl={rounded} class="inline aspect-square" />
-  {name}
-</div>
+<a href={serverID === undefined ? `/channels/${id}` : `/servers/${serverID}/channels/${id}`}>
+	<div role="listitem" class="p-2 cursor-pointer {selected ? 'bg-gray-400' : 'hover:bg-gray-600'}">
+		{#if !lowDataMode || forceShowIcon}
+			<img {src} {alt} {width} {height} class:rounded-3xl={rounded} class="inline aspect-square" />
+		{/if}
+		{name}
+	</div>
+</a>

@@ -1,4 +1,4 @@
-//! Binary for the Jolt app.
+//! Tauri binary for the Jolt app.
 //! This binary contains commands for management of login, web socket connection and doing other requests.
 
 #![warn(

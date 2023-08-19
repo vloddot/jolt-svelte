@@ -1,12 +1,12 @@
 use crate::Client;
 use reywen::client::methods::member::ResponseMemberAll;
 
-#[tauri::command]
 /// Fetch all members in a server using server ID.
 ///
 /// # Errors
 ///
 /// This function will return an error if the request fails.
+#[tauri::command(rename_all = "snake_case")]
 pub async fn fetch_members(
     client: tauri::State<'_, Client>,
     server_id: &str,

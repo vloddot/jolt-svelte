@@ -1,12 +1,12 @@
 use crate::Client;
 use reywen::structures::users::User;
 
-#[tauri::command]
 /// Fetch a user from ID.
 ///
 /// # Errors
 ///
 /// This function will return an error if the request fails.
+#[tauri::command(rename_all = "snake_case")]
 pub async fn fetch_user(client: tauri::State<'_, Client>, user_id: &str) -> Result<User, String> {
     let Some(user_id) = client.cache.read().await.contains_user(user_id) else {
         let result = client
@@ -16,12 +16,16 @@ pub async fn fetch_user(client: tauri::State<'_, Client>, user_id: &str) -> Resu
             .user_fetch(user_id)
             .await
             .map_err(|err| format!("{err:?}"))?;
-        *client.cache.write().await = client
+
+        let cache = client
             .cache
             .read()
             .await
             .clone()
             .insert_user(result.clone());
+
+        *client.cache.write().await = cache;
+
         return Ok(result);
     };
     Ok(user_id)
