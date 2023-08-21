@@ -1,12 +1,12 @@
 use crate::Client;
 use reywen::structures::channels::Channel;
 
-#[tauri::command]
 /// Fetch a channel from ID.
 ///
 /// # Errors
 ///
 /// This function will return an error if the request fails.
+#[tauri::command(rename_all = "snake_case")]
 pub async fn fetch_channel(
     client: tauri::State<'_, Client>,
     channel_id: &str,
@@ -20,12 +20,14 @@ pub async fn fetch_channel(
             .await
             .map_err(|err| format!("{err:?}"))?;
 
-        *client.cache.write().await = client
+        let cache = client
             .cache
             .read()
             .await
             .clone()
             .insert_channel(result.clone());
+
+        *client.cache.write().await = cache;
 
         return Ok(result);
     };
@@ -33,12 +35,12 @@ pub async fn fetch_channel(
     Ok(channel_id)
 }
 
-#[tauri::command]
 /// Fetch current user's DMs
 ///
 /// # Errors
 ///
 /// This function will return an error if the request fails.
+#[tauri::command(rename_all = "snake_case")]
 pub async fn fetch_direct_messages(
     client: tauri::State<'_, Client>,
 ) -> Result<Vec<Channel>, String> {
@@ -51,12 +53,12 @@ pub async fn fetch_direct_messages(
         .map_err(|err| format!("{err:?}"))
 }
 
-#[tauri::command]
 /// Opens a `DirectMessage` channel with a certain user ID.
 ///
 /// # Errors
 ///
 /// This function will return an error if the request fails.
+#[tauri::command(rename_all = "snake_case")]
 pub async fn open_dm(client: tauri::State<'_, Client>, user_id: &str) -> Result<Channel, String> {
     client
         .driver
@@ -95,12 +97,12 @@ impl crate::Cache {
         }
     }
 
-    #[must_use]
     /// Inserts an item into the cache no matter what.
     ///
     /// # Safety
     ///
     /// This function should not be called if the caller is not sure if the item exists or not.
+    #[must_use]
     pub unsafe fn insert_channel_unchecked(&mut self, item: Channel) -> Self {
         self.channels.push(item);
         self.clone()

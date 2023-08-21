@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 @layer components {
-  .category-summary {
-    user-select: none;
-    @apply ml-2 uppercase text-xs outline-none cursor-pointer;
-  }
+	.category-summary {
+		user-select: none;
+		@apply ml-2 uppercase text-xs outline-none cursor-pointer;
+	}
 }

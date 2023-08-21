@@ -31,7 +31,7 @@ macro_rules! session_friendly_name {
 /// # Errors
 ///
 /// This function will return an error if login fails or the account is disabled.
-#[tauri::command]
+#[tauri::command(rename_all = "snake_case")]
 pub async fn login(
     client: tauri::State<'_, Client>,
     email: &str,
@@ -57,7 +57,7 @@ pub async fn login(
 }
 
 /// Login with session token.
-#[tauri::command]
+#[tauri::command(rename_all = "snake_case")]
 pub async fn login_with_token(
     client: tauri::State<'_, Client>,
     session_id: &str,

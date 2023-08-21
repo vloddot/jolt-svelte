@@ -1,49 +1,56 @@
 <script lang="ts">
-  import { selectedChannelID } from '$lib/stores';
+	import { getContext, selectedChannelIDKey, selectedServerIDKey } from '$lib/context';
 
-  /**
-   * Image source to show.
-   */
-  export let src: string | undefined;
+	/**
+	 * Image source to show.
+	 */
+	export let src: string;
 
-  /**
-   * Channel name.
-   */
-  export let name: string;
+	/**
+	 * Channel name.
+	 */
+	export let name: string;
 
-  /**
-   * Alternate text for image.
-   */
-  export let alt: string = name;
+	/**
+	 * Alternate text for image.
+	 */
+	export let alt = name;
 
-  /**
-   * Width of the image.
-   */
-  export let width: number;
+	/**
+	 * Width of the image.
+	 */
+	export let width: number;
 
-  /**
-   * Height of the image.
-   */
-  export let height: number;
+	/**
+	 * Height of the image.
+	 */
+	export let height: number;
 
-  /**
-   * Whether the image is rounded or not.
-   */
-  export let rounded: boolean = false;
+	/**
+	 * Whether the image is rounded or not.
+	 */
+	export let rounded = false;
 
-  /**
-   * Channel ID.
-   */
-  export let id: string;
+	/**
+	 * Channel ID.
+	 */
+	export let id: string;
+
+	const selectedServerID = getContext(selectedServerIDKey);
+	const selectedChannelID = getContext(selectedChannelIDKey);
 </script>
 
-<div
-  class={`p-2 cursor-pointer ${$selectedChannelID === id ? 'bg-gray-400' : 'hover:bg-gray-600'}`}
-  tabindex="0"
-  role="link"
-  on:click={() => selectedChannelID.set(id)}
-  on:keydown={(event) => event.key === 'Enter' && selectedChannelID.set(id)}
+<a
+	href={selectedServerID === undefined
+		? `/channels/${id}`
+		: `/servers/${$selectedServerID}/channels/${id}`}
 >
-  <img {src} {alt} {width} {height} class:rounded-3xl={rounded} class="inline aspect-square" />
-  {name}
-</div>
+	<div
+		role="listitem"
+		class="p-2 {$selectedChannelID === id ? 'bg-gray-400' : 'hover:bg-gray-600'}"
+	>
+		<img {src} {alt} {width} {height} class:rounded-3xl={rounded} class="inline aspect-square" />
+
+		{name}
+	</div>
+</a>

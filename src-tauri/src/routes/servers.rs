@@ -1,11 +1,11 @@
 use crate::Client;
 use reywen::structures::server::Server;
 
-#[tauri::command]
 /// Fetch a server from ID.
 /// # Errors
 ///
 /// This function will return an error if the request fails.
+#[tauri::command(rename_all = "snake_case")]
 pub async fn fetch_server(
     client: tauri::State<'_, Client>,
     server_id: &str,
