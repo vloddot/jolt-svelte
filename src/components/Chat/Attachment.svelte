@@ -1,18 +1,17 @@
 <script lang="ts">
+	import { getContext, settingsKey } from '$lib/context';
 	import { getAutumnURL } from '$lib/util';
-	import { lowDataModeKey } from '@components/Chat';
 	import ExternalLink from '@components/ExternalLink.svelte';
-	import { getContext } from 'svelte';
 	import { _ } from 'svelte-i18n';
 
-	const lowDataMode: boolean = getContext(lowDataModeKey);
+	const settings = getContext(settingsKey);
 
 	export let attachment: AutumnFile;
 </script>
 
 <div>
 	{#if attachment.metadata.type === 'Image'}
-		{#if lowDataMode}
+		{#if $settings?.lowDataMode}
 			<span class="text-gray-500">[Image <ExternalLink link={getAutumnURL(attachment)} />]</span>
 		{:else}
 			<img src={getAutumnURL(attachment)} alt={attachment.filename} />
@@ -32,7 +31,7 @@
 			<ExternalLink link={getAutumnURL(attachment)} /></span
 		>
 	{:else if attachment.metadata.type === 'Text'}
-		{#if lowDataMode}
+		{#if $settings?.lowDataMode}
 			<span class="text-gray-500">[Text <ExternalLink link={getAutumnURL(attachment)} />]</span>
 		{:else}
 			{#await fetch(getAutumnURL(attachment)) then response}

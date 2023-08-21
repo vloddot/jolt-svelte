@@ -1,13 +1,14 @@
 <script lang="ts">
-	import type { PageData } from './$types';
-
-	export let data: PageData;
+	import '$lib/index.css';
+	import { getContext, settingsKey } from '$lib/context';
 
 	interface DisplayedSetting {
 		title: string;
 		description?: string;
 		key: keyof Settings;
 	}
+
+	const settings = getContext(settingsKey);
 
 	const displayedSettings: DisplayedSetting[] = [
 		{
@@ -22,7 +23,7 @@ So media installed with the app are shown but not media from the internet.`,
 <h1>Settings</h1>
 
 {#each displayedSettings as { key, title, description }}
-	{#if typeof data.settings[key] === 'boolean'}
+	{#if typeof $settings?.[key] === 'boolean'}
 		<div class="flex ml-4">
 			<div>
 				<h2><label for={key}>{title}</label></h2>
@@ -33,11 +34,14 @@ So media installed with the app are shown but not media from the internet.`,
 			<div class="flex-1">
 				<input
 					id={key}
-					checked={data.settings[key]}
+					checked={$settings[key]}
 					type="checkbox"
 					on:input={(event) => {
-						data.settings[key] = event.currentTarget.checked;
-						localStorage.setItem('settings', JSON.stringify(data.settings));
+						settings?.update((settings) => {
+							settings[key] = event.currentTarget.checked;
+							localStorage.setItem('settings', JSON.stringify(settings));
+							return settings;
+						});
 					}}
 				/>
 			</div>

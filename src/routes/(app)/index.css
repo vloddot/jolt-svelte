@@ -11,6 +11,10 @@
 		@apply flex-[3] h-screen flex flex-col bg-gray-800 overflow-y-scroll;
 	}
 
+	.members-list-container {
+		@apply flex-[3] h-screen flex flex-col bg-gray-800 overflow-y-scroll;
+	}
+
 	.main-content-container {
 		@apply flex-[12] h-screen overflow-x-hidden overflow-y-scroll;
 	}

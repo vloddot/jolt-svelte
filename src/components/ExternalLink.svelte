@@ -11,6 +11,4 @@
 	<p>Are you sure you want to go to this link? External links can be dangerous.</p>
 </Modal>
 
-<slot>
-	<button role="link" on:click={() => (showModal = true)}>{link}</button>
-</slot>
+<button role="link" on:click={() => (showModal = true)}>{link}</button>

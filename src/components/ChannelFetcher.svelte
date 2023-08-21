@@ -1,11 +1,20 @@
 <script lang="ts">
+	import { clientReadyKey, getContext } from '$lib/context';
 	import { invoke } from '@tauri-apps/api';
 
 	export let ids: string[];
 
-	$: channels = Promise.all(ids.map((id) => invoke<Channel>('fetch_channel', { channel_id: id })));
+	const clientReady = getContext(clientReadyKey);
+
+	$: channels = $clientReady
+		? Promise.all(ids.map((id) => invoke<Channel>('fetch_channel', { channel_id: id })))
+		: undefined;
 </script>
 
-{#await channels then channels}
-	<slot {channels} />
-{/await}
+{#if channels !== undefined}
+	{#await channels then channels}
+		<slot {channels} />
+	{:catch}
+ 		<slot name="catch" />
+	{/await}
+{/if}

@@ -2,18 +2,37 @@
 	import ChannelItem from './ChannelItem.svelte';
 	import { getAutumnURL, getDefaultUserAvatar } from '$lib/util';
 	import { _ } from 'svelte-i18n';
-	import { getContext } from 'svelte';
-	import { userIDKey } from '@components/ChannelBar';
 	import UserFetcher from '@components/UserFetcher.svelte';
+	import { redirect } from '@sveltejs/kit';
+	import { getContext, sessionKey, settingsKey } from '$lib/context';
 
-	const user_id: string = getContext(userIDKey);
+	const settings = getContext(settingsKey);
+	const session = getContext(sessionKey);
 
-	function getChannelIcon(channel: Exclude<Channel, { channel_type: 'DirectMessage' }>): string {
+	if ($session === undefined) {
+		throw redirect(302, '/login');
+	}
+
+	function getChannelIcon(
+		channel:
+			| Exclude<Channel, { channel_type: 'DirectMessage' }>
+			| (Extract<Channel, { channel_type: 'DirectMessage' }> & { user: User })
+	): string {
+		if (channel.channel_type === 'DirectMessage') {
+			if ($settings?.lowDataMode) {
+				return '/user.svg';
+			}
+
+			return channel.user.avatar === undefined
+				? getDefaultUserAvatar(channel.user._id)
+				: getAutumnURL(channel.user.avatar);
+		}
+
 		if (channel.channel_type === 'SavedMessages') {
 			return '/note.svg';
 		}
 
-		if (channel.icon !== undefined) {
+		if (channel.icon !== undefined && !$settings?.lowDataMode) {
 			return getAutumnURL(channel.icon);
 		}
 
@@ -33,17 +52,21 @@
 {#if channel.channel_type === 'DirectMessage'}
 	{#if channel.active}
 		<UserFetcher
-			ids={[channel.recipients[0] === user_id ? channel.recipients[1] : channel.recipients[0]]}
-			let:users={[user]}
+			ids={[
+				channel.recipients[0] === $session?.user_id ? channel.recipients[1] : channel.recipients[0]
+			]}
+			let:users
 		>
-			<ChannelItem
-				src={user.avatar === undefined ? getDefaultUserAvatar(user._id) : getAutumnURL(user.avatar)}
-				name={user.username}
-				width={32}
-				height={32}
-				rounded
-				id={channel._id}
-			/>
+			{#if users !== undefined}
+				<ChannelItem
+					src={getChannelIcon({ ...channel, user: users[0] })}
+					name={users[0].username}
+					width={32}
+					height={32}
+					rounded
+					id={channel._id}
+				/>
+			{/if}
 			<span slot="catch">
 				<ChannelItem
 					src="/user.svg"

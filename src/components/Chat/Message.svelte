@@ -1,35 +1,31 @@
 <script lang="ts">
-	import {
-		usersKey,
-		membersKey,
-		repliesKey,
-		sessionUIDKey,
-		selectedServerIDKey,
-		lowDataModeKey
-	} from '.';
+	import { usersKey, membersKey, repliesKey } from '.';
 	import { getDisplayAvatar } from '$lib/util';
-	import { getContext } from 'svelte';
-	import type { Writable } from 'svelte/store';
-	import type { Reply } from '.';
+	import { getContext, selectedServerIDKey, sessionKey, settingsKey } from '$lib/context';
 	import dayjs from 'dayjs';
 	import { decodeTime } from 'ulid';
 	import { _, time, date } from 'svelte-i18n';
 	import Embed from './Embed.svelte';
 	import Attachment from './Attachment.svelte';
 	import SystemMessage from './SystemMessage.svelte';
+	import { redirect } from '@sveltejs/kit';
 
 	/**
 	 * Message to show.
 	 */
 	export let message: Message;
 
-	const sessionUID: string = getContext(sessionUIDKey);
-	const selectedServerID: string = getContext(selectedServerIDKey);
-	const lowDataMode: boolean = getContext(lowDataModeKey);
+	const session = getContext(sessionKey);
+	const settings = getContext(settingsKey);
+	const selectedServerID = getContext(selectedServerIDKey);
 
-	const users = getContext<Writable<User[] | undefined>>(usersKey);
-	const members = getContext<Writable<Member[] | undefined>>(membersKey);
-	const replies = getContext<Writable<Reply[]>>(repliesKey);
+	if ($session === undefined) {
+		throw redirect(302, '/login');
+	}
+
+	const users = getContext(usersKey);
+	const members = getContext(membersKey);
+	const replies = getContext(repliesKey);
 
 	interface MessageControls {
 		src: string;
@@ -39,11 +35,11 @@
 	}
 
 	function pushReply() {
-		if ($replies.some((reply) => reply.message._id === message._id)) {
+		if ($replies?.some((reply) => reply.message._id === message._id)) {
 			return;
 		}
 
-		replies.update((replies) => {
+		replies?.update((replies) => {
 			replies.push({ message, mention: true });
 			return replies;
 		});
@@ -61,7 +57,7 @@
 			onclick() {
 				// TODO
 			},
-			showIf: () => message.author === sessionUID
+			showIf: () => message.author === $session?.user_id
 		}
 	];
 
@@ -70,7 +66,7 @@
 	$: member =
 		$members !== undefined
 			? $members.find(
-					(member) => member._id.server === selectedServerID && member._id.user === author?._id
+					(member) => member._id.server === $selectedServerID && member._id.user === author?._id
 			  )
 			: undefined;
 
@@ -88,7 +84,7 @@
 
 <div class="group m-4">
 	<div class="flex">
-		{#if lowDataMode}
+		{#if !$settings?.lowDataMode}
 			<img
 				alt={displayUsername}
 				src={displayAvatar}

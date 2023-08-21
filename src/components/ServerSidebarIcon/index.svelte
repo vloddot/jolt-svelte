@@ -15,12 +15,7 @@
 	/**
 	 * Icon to show.
 	 */
-	export let icon: string | undefined;
-
-	/**
-	 * Force to show icon (unless `icon` is `undefined`), ignoring low data mode.
-	 */
-	export let showIcon: boolean;
+	export let icon: string | undefined = undefined;
 </script>
 
 <div class="group m-0">
@@ -28,7 +23,7 @@
 		{tooltip}
 	</span>
 	<a {href} aria-label={tooltip}>
-		{#if icon !== undefined && showIcon}
+		{#if icon !== undefined}
 			<img
 				class="sidebar-icon group-hover:rounded-xl group-hover:bg-green-600 group-hover:text-white"
 				src={icon}

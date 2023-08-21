@@ -1,14 +1,13 @@
 <script lang="ts">
-	import { lowDataModeKey } from '@components/Chat';
+	import { getContext, settingsKey } from '$lib/context';
 	import ExternalLink from '@components/ExternalLink.svelte';
-	import { getContext } from 'svelte';
 
 	export let embed: Embed;
 
-	const lowDataMode = getContext(lowDataModeKey);
+	const settings = getContext(settingsKey);
 </script>
 
-{#if lowDataMode}
+{#if $settings?.lowDataMode}
 	{#if embed.type !== 'None' && embed.url !== undefined}
 		<ExternalLink link={embed.url} />
 	{/if}

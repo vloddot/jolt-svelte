@@ -3,26 +3,24 @@
 	import MessageComponent from './Message.svelte';
 	import { onMount, setContext } from 'svelte';
 	import { writable, type Writable } from 'svelte/store';
-	import { type Reply, usersKey, membersKey, repliesKey, sessionUIDKey, lowDataModeKey } from '.';
+	import { membersKey, repliesKey, usersKey, type Reply } from '.';
 	import { getAutumnURL, getDefaultUserAvatar } from '$lib/util';
 	import { _ } from 'svelte-i18n';
 	import { getChannelName } from '$lib/util';
 	import UserFetcher from '@components/UserFetcher.svelte';
+	import { redirect } from '@sveltejs/kit';
+	import { getContext, sessionKey } from '$lib/context';
 
 	/**
 	 * Which channel to show messages from.
 	 */
 	export let channel: Exclude<Channel, { channel_type: 'VoiceChannel' }>;
 
-	/**
-	 * Currently logged in user's ID.
-	 */
-	export let sessionUID: string;
+	const session = getContext(sessionKey);
 
-	/**
-	 * If the user has the `lowDataMode` setting set.
-	 */
-	export let lowDataMode: boolean;
+	if ($session === undefined) {
+		throw redirect(302, '/login');
+	}
 
 	let messages: Message[] = [];
 	let members: Writable<Member[]> = writable([]);
@@ -30,14 +28,12 @@
 
 	const replies = writable<Reply[]>([]);
 
-	setContext(usersKey, users);
 	setContext(membersKey, members);
+	setContext(usersKey, users);
 	setContext(repliesKey, replies);
-	setContext(sessionUIDKey, sessionUID);
-	setContext(lowDataModeKey, lowDataMode);
 
 	let messageInputNode: HTMLTextAreaElement;
-	let currentlyTypingUsers: User[];
+	let currentlyTypingUsers: User[] = [];
 
 	$: {
 		invoke<BulkMessagePayload>('fetch_messages', { channel_id: channel._id }).then((response) => {
@@ -65,7 +61,7 @@
 			'channel_start_typing',
 			async ({ payload: { user_id, channel_id } }) => {
 				if (
-					user_id === sessionUID ||
+					user_id === $session?.user_id ||
 					channel_id !== channel._id ||
 					currentlyTypingUsers.map((user) => user._id).includes(user_id)
 				) {
@@ -132,14 +128,17 @@
 		{/if}
 		{#each $replies as reply}
 			<div>
-				<UserFetcher ids={[reply.message.author]} let:users={[user]}>
-					<strong>{user.username}</strong>
+				<UserFetcher ids={[reply.message.author]} let:users>
+					{#if users !== undefined}
+						<strong>{users[0].username}</strong>
+					{/if}
+					<strong slot="catch">&lt;{$_('user.unknown')}&gt;</strong>
 				</UserFetcher>
 				<p>{reply.message.content?.slice(0, 50)}</p>
 			</div>
 		{/each}
 		<form class="m-4" on:submit|preventDefault={sendMessage}>
-			{#await getChannelName(channel, sessionUID) then name}
+			{#await getChannelName(channel, $session?.user_id) then name}
 				<div class="bg-gray-500 rounded-xl px-2 pt-2">
 					<textarea
 						on:input={() => invoke('start_typing', { channel_id: channel._id })}

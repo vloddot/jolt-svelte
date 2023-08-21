@@ -1,30 +1,24 @@
 <script lang="ts">
 	import '$lib/i18n';
 	import { invoke } from '@tauri-apps/api';
-	import { onMount, setContext } from 'svelte';
 	import ChannelComponent from '@components/ChannelBar/Channel.svelte';
-	import { lowDataModeKey, userIDKey } from '@components/ChannelBar';
-
-	export let userID: string;
-	export let lowDataMode: boolean;
-
-	setContext(userIDKey, userID);
-	setContext(lowDataModeKey, lowDataMode);
+	import { clientReadyKey, getContext } from '$lib/context';
 
 	type SavedMessagesChannel = Extract<Channel, { channel_type: 'SavedMessages' }>;
 
 	let dms: Channel[] = [];
-	let savedMessagesChannel: SavedMessagesChannel | undefined;
+	let savedMessagesChannel: SavedMessagesChannel | undefined = undefined;
 
-	onMount(async () => {
-		invoke<Channel[]>('fetch_direct_messages')
-			.then((result) => {
-				dms = result;
-				savedMessagesChannel = dms.find(
-					(dm) => dm.channel_type === 'SavedMessages'
-				) as SavedMessagesChannel;
-			});
-	});
+	const clientReady = getContext(clientReadyKey);
+
+	$: if ($clientReady) {
+		invoke<Channel[]>('fetch_direct_messages').then((result) => {
+			dms = result;
+			savedMessagesChannel = result.find(
+				(dm) => dm.channel_type === 'SavedMessages'
+			) as SavedMessagesChannel;
+		});
+	}
 </script>
 
 <div class="channel-bar-container">

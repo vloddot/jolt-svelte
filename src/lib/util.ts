@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api';
+import { getContext, setContext } from 'svelte';
 import { _ } from 'svelte-i18n';
-import { get } from 'svelte/store';
+import { get, writable, type Writable } from 'svelte/store';
 
 export const AUTUMN_URL = 'https://autumn.revolt.chat';
 export const API_URL = 'https://api.revolt.chat';
@@ -26,7 +27,7 @@ export function getDisplayAvatar(member?: Member, user?: User): string {
 	}
 }
 
-export async function getChannelName(channel: Channel, user_id: string): Promise<string> {
+export async function getChannelName(channel: Channel, user_id?: string): Promise<string> {
 	if (
 		channel.channel_type === 'TextChannel' ||
 		channel.channel_type === 'VoiceChannel' ||
@@ -40,8 +41,16 @@ export async function getChannelName(channel: Channel, user_id: string): Promise
 	}
 
 	const user = await invoke<User>('fetch_user', {
-		channel_id: channel.recipients[0] === user_id ? channel.recipients[1] : channel.recipients[0]
+		user_id: channel.recipients[0] === user_id ? channel.recipients[1] : channel.recipients[0]
 	});
 
 	return `@${user.username}`;
+}
+
+export function defineService<T>(
+	key: string | symbol = Symbol(),
+	initialValue?: T
+): () => Writable<T> {
+	setContext(key, writable(initialValue));
+	return () => getContext<Writable<T>>(key);
 }

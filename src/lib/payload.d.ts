@@ -1,3 +1,5 @@
+type ReadyPayload = Server[];
+
 type BulkMessagePayload =
 	| {
 			messages?: Message[];

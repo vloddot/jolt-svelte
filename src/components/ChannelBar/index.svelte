@@ -2,16 +2,8 @@
 	import ChannelFetcher from '@components/ChannelFetcher.svelte';
 	import Channel from './Channel.svelte';
 	import ChannelCategory from './Category.svelte';
-	import { setContext } from 'svelte';
-	import { lowDataModeKey, serverIDKey, userIDKey } from '.';
 
 	export let server: Server;
-	export let user_id: string;
-	export let lowDataMode: boolean;
-
-	setContext(userIDKey, user_id);
-	setContext(serverIDKey, server?._id);
-	setContext(lowDataModeKey, lowDataMode);
 
 	$: categories = server.categories ?? [];
 	$: unsortedChannels =
