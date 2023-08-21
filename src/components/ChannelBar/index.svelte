@@ -18,9 +18,9 @@
 <div class="channel-bar-container">
 	{#each unsortedChannels as channel}
 		{#if channel !== undefined}
-			<ChannelFetcher ids={[channel]} let:channels={[channel]}>
-				{#if channel !== undefined}
-					<Channel {channel} />
+			<ChannelFetcher ids={[channel]} let:channels>
+				{#if channels !== undefined}
+					<Channel channel={channels[0]} />
 				{/if}
 			</ChannelFetcher>
 		{/if}
