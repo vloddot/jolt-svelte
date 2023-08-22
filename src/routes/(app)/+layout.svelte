@@ -66,7 +66,6 @@
 				token: $session?.token
 			});
 
-			console.log('running client instance', runningClient);
 			invoke('run_client');
 			runningClient = true;
 		} catch (_) {
