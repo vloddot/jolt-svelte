@@ -7,13 +7,13 @@
 	import { redirect } from '@sveltejs/kit';
 	import { get, writable, type Writable } from 'svelte/store';
 	import {
-		sessionKey,
+		sessionContext,
 		setContext,
-		settingsKey,
-		serversKey,
-		clientReadyKey,
-		runningClientKey,
-		getContext
+		settingsContext,
+		serversContext,
+		clientReadyContext,
+		runningClientContext,
+		getContext,
 	} from '$lib/context';
 	import '$lib/i18n';
 	import { onMount } from 'svelte';
@@ -29,8 +29,8 @@
 		JSON.parse(localStorage.getItem('session') || 'null')
 	);
 
-	setContext(sessionKey, session);
-	setContext(settingsKey, settings);
+	setContext(sessionContext, session);
+	setContext(settingsContext, settings);
 
 	async function checkSession(session: Session | null) {
 		if (session === null) {
@@ -40,14 +40,14 @@
 
 	$: checkSession($session);
 
-	let clientReady = getContext(clientReadyKey) ?? writable(false);
-	setContext(clientReadyKey, clientReady);
+	let clientReady = getContext(clientReadyContext) ?? writable(false);
+	setContext(clientReadyContext, clientReady);
 
-	let runningClient = getContext(runningClientKey) ?? get(clientReady);
-	setContext(runningClientKey, runningClient);
+	let runningClient = getContext(runningClientContext) ?? get(clientReady);
+	setContext(runningClientContext, runningClient);
 
-	let servers = getContext(serversKey) ?? writable<Server[] | undefined>(undefined);
-	setContext(serversKey, servers);
+	let servers = getContext(serversContext) ?? writable<Server[] | undefined>(undefined);
+	setContext(serversContext, servers);
 
 	onMount(async () => {
 		checkSession($session);

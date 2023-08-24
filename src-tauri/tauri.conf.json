@@ -3,12 +3,12 @@
 		"beforeDevCommand": "pnpm dev",
 		"beforeBuildCommand": "pnpm build",
 		"devPath": "http://localhost:5173",
-		"distDir": "../dist",
+		"distDir": "../build",
 		"withGlobalTauri": false
 	},
 	"package": {
 		"productName": "jolt",
-		"version": "0.2.12"
+		"version": "0.2.13"
 	},
 	"tauri": {
 		"allowlist": {

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '$lib/index.css';
-	import { getContext, settingsKey } from '$lib/context';
+	import { getContext, settingsContext } from '$lib/context';
 
 	interface DisplayedSetting {
 		title: string;
@@ -8,7 +8,7 @@
 		key: keyof Settings;
 	}
 
-	const settings = getContext(settingsKey);
+	const settings = getContext(settingsContext);
 
 	const displayedSettings: DisplayedSetting[] = [
 		{

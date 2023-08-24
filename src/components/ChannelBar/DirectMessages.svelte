@@ -2,14 +2,14 @@
 	import '$lib/i18n';
 	import { invoke } from '@tauri-apps/api';
 	import ChannelComponent from '@components/ChannelBar/Channel.svelte';
-	import { clientReadyKey, getContext } from '$lib/context';
+	import { clientReadyContext, getContext } from '$lib/context';
 
 	type SavedMessagesChannel = Extract<Channel, { channel_type: 'SavedMessages' }>;
 
 	let dms: Channel[] = [];
 	let savedMessagesChannel: SavedMessagesChannel | undefined = undefined;
 
-	const clientReady = getContext(clientReadyKey);
+	const clientReady = getContext(clientReadyContext);
 
 	$: if ($clientReady) {
 		invoke<Channel[]>('fetch_direct_messages').then((result) => {

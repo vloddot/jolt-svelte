@@ -4,10 +4,9 @@
 	import { invoke } from '@tauri-apps/api';
 	import { redirect } from '@sveltejs/kit';
 	import Chat from '@components/Chat/index.svelte';
-	import DirectMessages from '@components/ChannelBar/DirectMessages.svelte';
 	import { writable } from 'svelte/store';
 	import { setContext } from 'svelte';
-	import { selectedChannelIDKey } from '$lib/context';
+	import { selectedChannelIDContext } from '$lib/context';
 	import UserFetcher from '@components/UserFetcher.svelte';
 	import Member from '@components/Member.svelte';
 	import { getAutumnURL, getDefaultUserAvatar } from '$lib/util';
@@ -15,7 +14,7 @@
 	$: pageParams = $page.params as RouteParams;
 
 	const selectedChannelID = writable<string>();
-	setContext(selectedChannelIDKey, selectedChannelID);
+	setContext(selectedChannelIDContext, selectedChannelID);
 
 	let channel: Exclude<Channel, { channel_type: 'TextChannel' | 'VoiceChannel' }> | undefined =
 		undefined;
@@ -34,8 +33,6 @@
 	$: updateChannel(pageParams.id);
 </script>
 
-<DirectMessages />
-
 {#if channel !== undefined}
 	<Chat {channel} />
 
@@ -48,7 +45,7 @@
 							src={recipient.avatar === undefined
 								? getDefaultUserAvatar(recipient._id)
 								: getAutumnURL(recipient.avatar)}
-								displayName={recipient.username}
+							displayName={recipient.username}
 						/>
 					{/each}
 				</div>

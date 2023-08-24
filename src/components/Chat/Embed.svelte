@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { getContext, settingsKey } from '$lib/context';
+	import { getContext, settingsContext } from '$lib/context';
 	import ExternalLink from '@components/ExternalLink.svelte';
 
 	export let embed: Embed;
 
-	const settings = getContext(settingsKey);
+	const settings = getContext(settingsContext);
 </script>
 
 {#if $settings?.lowDataMode}

@@ -4,10 +4,10 @@
 	import { _ } from 'svelte-i18n';
 	import UserFetcher from '@components/UserFetcher.svelte';
 	import { redirect } from '@sveltejs/kit';
-	import { getContext, sessionKey, settingsKey } from '$lib/context';
+	import { getContext, sessionContext, settingsContext } from '$lib/context';
 
-	const settings = getContext(settingsKey);
-	const session = getContext(sessionKey);
+	const settings = getContext(settingsContext);
+	const session = getContext(sessionContext);
 
 	if ($session === undefined) {
 		throw redirect(302, '/login');

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getContext, settingsKey } from '$lib/context';
+	import { getContext, settingsContext } from '$lib/context';
 
 	/**
 	 * Source for avatar of member.
@@ -11,12 +11,18 @@
 	 */
 	export let displayName: string;
 
-	const settings = getContext(settingsKey);
+	const settings = getContext(settingsContext);
 </script>
 
 <div role="listitem">
 	{#if $settings?.lowDataMode}
-		<img src="/user.svg" alt={displayName} width="24" height="24" class="rounded-3xl inline aspect-square" />
+		<img
+			src="/user.svg"
+			alt={displayName}
+			width="24"
+			height="24"
+			class="rounded-3xl inline aspect-square"
+		/>
 	{:else}
 		<img {src} alt={displayName} width="24" height="24" class="rounded-3xl inline aspect-square" />
 	{/if}

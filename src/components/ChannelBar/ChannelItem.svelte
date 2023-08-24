@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getContext, selectedChannelIDKey, selectedServerIDKey } from '$lib/context';
+	import { getContext, selectedChannelIDContext, selectedServerIDContext } from '$lib/context';
 
 	/**
 	 * Image source to show.
@@ -36,8 +36,8 @@
 	 */
 	export let id: string;
 
-	const selectedServerID = getContext(selectedServerIDKey);
-	const selectedChannelID = getContext(selectedChannelIDKey);
+	const selectedServerID = getContext(selectedServerIDContext);
+	const selectedChannelID = getContext(selectedChannelIDContext);
 </script>
 
 <a

@@ -6,7 +6,7 @@
 	import './index.css';
 	import { page } from '$app/stores';
 	import Chat from '@components/Chat/index.svelte';
-	import { selectedChannelIDKey, selectedServerIDKey } from '$lib/context';
+	import { selectedChannelIDContext, selectedServerIDContext } from '$lib/context';
 	import { writable } from 'svelte/store';
 	import MembersListFetcher from '@components/MembersListFetcher.svelte';
 	import MemberComponent from '@components/Member.svelte';
@@ -21,8 +21,8 @@
 	const selectedServerID = writable<string>();
 	const selectedChannelID = writable<string>();
 
-	setContext(selectedServerIDKey, selectedServerID);
-	setContext(selectedChannelIDKey, selectedChannelID);
+	setContext(selectedServerIDContext, selectedServerID);
+	setContext(selectedChannelIDContext, selectedChannelID);
 
 	$: selectedServerID.set(pageParams.sid);
 	$: selectedChannelID.set(pageParams.cid);

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { sessionKey, setContext, settingsKey } from '$lib/context';
+	import { sessionContext, setContext, settingsContext } from '$lib/context';
 	import { writable, type Writable } from 'svelte/store';
 	import '$lib/i18n';
 	import { onMount } from 'svelte';
@@ -15,8 +15,8 @@
 		JSON.parse(localStorage.getItem('session') || 'null')
 	);
 
-	setContext(sessionKey, session);
-	setContext(settingsKey, settings);
+	setContext(sessionContext, session);
+	setContext(settingsContext, settings);
 
 	async function checkSession(session: Session | null) {
 		if (session === null) {

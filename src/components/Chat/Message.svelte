@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { usersKey, membersKey, repliesKey } from '.';
 	import { getDisplayAvatar } from '$lib/util';
-	import { getContext, selectedServerIDKey, sessionKey, settingsKey } from '$lib/context';
+	import {
+		getContext,
+		selectedServerIDContext,
+		sessionContext,
+		settingsContext
+	} from '$lib/context';
 	import dayjs from 'dayjs';
 	import { decodeTime } from 'ulid';
 	import { _, time, date } from 'svelte-i18n';
@@ -15,9 +20,9 @@
 	 */
 	export let message: Message;
 
-	const session = getContext(sessionKey);
-	const settings = getContext(settingsKey);
-	const selectedServerID = getContext(selectedServerIDKey);
+	const session = getContext(sessionContext);
+	const settings = getContext(settingsContext);
+	const selectedServerID = getContext(selectedServerIDContext);
 
 	if ($session === undefined) {
 		throw redirect(302, '/login');

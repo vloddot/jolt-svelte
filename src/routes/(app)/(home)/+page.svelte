@@ -1,9 +1,6 @@
 <script lang="ts">
 	import '$lib/i18n';
-	import DirectMessages from '@components/ChannelBar/DirectMessages.svelte';
 </script>
-
-<DirectMessages />
 
 <div class="main-content-container">
 	<p>so um hi this is mr john jolt (home page ig)</p>

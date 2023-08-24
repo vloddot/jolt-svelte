@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { getContext, settingsKey } from '$lib/context';
+	import { getContext, settingsContext } from '$lib/context';
 	import { getAutumnURL } from '$lib/util';
 	import ExternalLink from '@components/ExternalLink.svelte';
 	import { _ } from 'svelte-i18n';
 
-	const settings = getContext(settingsKey);
+	const settings = getContext(settingsContext);
 
 	export let attachment: AutumnFile;
 </script>

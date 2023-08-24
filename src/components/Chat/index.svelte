@@ -9,14 +9,14 @@
 	import { getChannelName } from '$lib/util';
 	import UserFetcher from '@components/UserFetcher.svelte';
 	import { redirect } from '@sveltejs/kit';
-	import { getContext, sessionKey } from '$lib/context';
+	import { getContext, sessionContext } from '$lib/context';
 
 	/**
 	 * Which channel to show messages from.
 	 */
 	export let channel: Exclude<Channel, { channel_type: 'VoiceChannel' }>;
 
-	const session = getContext(sessionKey);
+	const session = getContext(sessionContext);
 
 	if ($session === undefined) {
 		throw redirect(302, '/login');
