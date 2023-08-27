@@ -3,19 +3,29 @@
 @tailwind utilities;
 
 @layer components {
+	.grid-container {
+		@apply grid;
+		grid-template-areas: 'server-sidebar channel-sidebar main-content member-sidebar';
+		grid-template-columns: 72px 236px 1fr 236px;
+	}
+
 	.server-sidebar-container {
-		@apply flex-1 h-screen flex flex-col bg-gray-900 shadow-lg overflow-y-scroll;
+		grid-area: 'server-sidebar';
+		@apply h-screen flex flex-col bg-gray-900 shadow-lg overflow-y-scroll;
 	}
 
 	.channel-bar-container {
-		@apply flex-[3] h-screen flex flex-col bg-gray-800 overflow-y-scroll;
+		grid-area: 'channel-sidebar';
+		@apply h-screen flex flex-col bg-gray-800 overflow-y-scroll;
 	}
 
 	.members-list-container {
-		@apply flex-[3] h-screen flex flex-col bg-gray-800 overflow-y-scroll;
+		grid-area: 'member-sidebar';
+		@apply h-screen flex flex-col bg-gray-800 overflow-y-scroll;
 	}
 
 	.main-content-container {
-		@apply flex-[12] h-screen overflow-x-hidden overflow-y-scroll;
+		grid-area: 'main-content';
+		@apply h-screen overflow-x-hidden overflow-y-scroll;
 	}
 }

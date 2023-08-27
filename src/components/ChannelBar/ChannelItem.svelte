@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getContext, selectedChannelIDContext, selectedServerIDContext } from '$lib/context';
+	import { getContext, selectedChannelIDKey, selectedServerIDKey } from '$lib/context';
 
 	/**
 	 * Image source to show.
@@ -36,19 +36,16 @@
 	 */
 	export let id: string;
 
-	const selectedServerID = getContext(selectedServerIDContext);
-	const selectedChannelID = getContext(selectedChannelIDContext);
+	const selectedServerID = getContext(selectedServerIDKey);
+	const selectedChannelID = getContext(selectedChannelIDKey);
 </script>
 
 <a
-	href={selectedServerID === undefined
+	href={$selectedServerID == undefined
 		? `/channels/${id}`
 		: `/servers/${$selectedServerID}/channels/${id}`}
 >
-	<div
-		role="listitem"
-		class="p-2 {$selectedChannelID === id ? 'bg-gray-400' : 'hover:bg-gray-600'}"
-	>
+	<div role="listitem" class="p-2 {$selectedChannelID == id ? 'bg-gray-400' : 'hover:bg-gray-600'}">
 		<img {src} {alt} {width} {height} class:rounded-3xl={rounded} class="inline aspect-square" />
 
 		{name}

@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { fetchChannel } from '$lib/util';
 	import './Category.css';
-	import ChannelFetcher from '@components/ChannelFetcher.svelte';
 
 	export let category: Category;
 </script>
@@ -9,9 +9,9 @@
 	<summary class="category-summary" role="group">{category.title}</summary>
 	<div class="ml-2">
 		{#each category.channels as id}
-			<ChannelFetcher ids={[id]} let:channels={[channel]}>
+			{#await fetchChannel(id) then channel}
 				<slot {channel} />
-			</ChannelFetcher>
+			{/await}
 		{/each}
 	</div>
 </details>

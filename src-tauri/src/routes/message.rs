@@ -1,6 +1,6 @@
 use crate::Client;
 use reywen::{
-    client::methods::message::{DataMessageSend, DataQueryMessages},
+    client::methods::message::{DataEditMessage, DataMessageSend, DataQueryMessages},
     structures::channels::message::{BulkMessageResponse, Message, MessageSort},
 };
 
@@ -45,6 +45,47 @@ pub async fn send_message(
         .read()
         .await
         .message_send(channel_id, &data_message_send)
+        .await
+        .map_err(|err| format!("{err:?}"))
+}
+
+/// Edits a specified message using its ID and the channel ID.
+///
+/// # Errors
+///
+/// This function will return an error if the request fails.
+#[tauri::command(rename_all = "snake_case")]
+pub async fn edit_message(
+    client: tauri::State<'_, Client>,
+    channel_id: &str,
+    message_id: &str,
+    data_edit_message: DataEditMessage,
+) -> Result<Message, String> {
+    client
+        .driver
+        .read()
+        .await
+        .message_edit(channel_id, message_id, &data_edit_message)
+        .await
+        .map_err(|err| format!("{err:?}"))
+}
+
+/// Deletes a specified message using its ID and the channel ID.
+///
+/// # Errors
+///
+/// This function will return an error if the request fails.
+#[tauri::command(rename_all = "snake_case")]
+pub async fn delete_message(
+    client: tauri::State<'_, Client>,
+    channel_id: &str,
+    message_id: &str,
+) -> Result<(), String> {
+    client
+        .driver
+        .read()
+        .await
+        .message_delete(channel_id, message_id)
         .await
         .map_err(|err| format!("{err:?}"))
 }

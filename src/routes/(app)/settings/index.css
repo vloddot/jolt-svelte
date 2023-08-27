@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+	.grid-container {
+		@apply grid justify-center items-center;
+		grid-template-columns: 256px 1fr;
+	}
+}

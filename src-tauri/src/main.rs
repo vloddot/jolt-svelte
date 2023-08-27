@@ -63,6 +63,8 @@ async fn main() {
             routes::channels::fetch_direct_messages,
             routes::message::fetch_messages,
             routes::message::send_message,
+            routes::message::edit_message,
+            routes::message::delete_message,
             events::typing::start_typing,
             ws::run_client,
         ])
