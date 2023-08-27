@@ -1,42 +1,38 @@
-<!-- omit in toc -->
-# Jolt
+# create-svelte
 
-In physics, [jolt](https://en.m.wikipedia.org/wiki/Jerk_(physics)) is the rate at which an object's acceleration changes with respect to time. It is a vector quantity (having both magnitude and direction). Jolt is most commonly denoted by the symbol `j` and expressed in m/s<sup>3</sup> (SI units) or standard gravities per second (g<sub>0</sub>/s).
+Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
 
-Custom [Revolt](https://www.github.com/revoltchat) client for desktop made in Tauri and Svelte.
+## Creating a project
 
-<!-- omit in toc -->
-## Table of Contents
+If you're seeing this, you've probably already done this step. Congrats!
 
-- [Running and compiling the project](#running-and-compiling-the-project)
-- [Development Server](#development-server)
-- [Contributing](#contributing)
-
-## Running and compiling the project
-
-<!-- omit in toc -->
-### Prerequisites
-
-To compile or launch Jolt in a development server on your own machine, you're going to need Rust (through [rustup](https://rustup.rs)) and [PNPM](https://pnpm.io/installation), first run the following command to install NPM packages: `pnpm install` (you have to install pnpm to build), then you need to do some setup, if you are on NixOS, just run `nix develop` (recommended) or `nix-shell shell.nix`. If not, you can find the prerequisites in the [`shell.nix`](shell.nix) or [`flake.nix`](flake.nix) files in the Nix language. The things to install are in `packages` and `libraries` keys and a bit of setup to add to a shellrc or such is in `shellHook` key.
-
-<!-- omit in toc -->
-### Build Command
-
-To build, execute this command:
 ```bash
-cargo tauri build
+# create a new project in the current directory
+npm create svelte@latest
+
+# create a new project in my-app
+npm create svelte@latest my-app
 ```
 
-> Once it is finished, you will find the build files in [`src-tauri/target/bundle`](src-tauri/target/bundle).
+## Developing
 
-## Development Server
+Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
 
-If you want to test the application before building it or installing the application through [GitHub Releases](https://github.com/vloddot/jolt/releases), you can run it in a development server. It will not have the best performance compared to the built executable.
-
-Just run the following command:
 ```bash
-cargo tauri dev
+npm run dev
+
+# or start the server and open the app in a new browser tab
+npm run dev -- --open
 ```
 
-## Contributing
-To contribute, make sure you follow the [CONTRIBUTING.md](CONTRIBUTING.md) guide.
+## Building
+
+To create a production version of your app:
+
+```bash
+npm run build
+```
+
+You can preview the production build with `npm run preview`.
+
+> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
