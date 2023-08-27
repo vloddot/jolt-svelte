@@ -6,5 +6,8 @@
 	"i18n-ally.localesPaths": ["locale"],
 	"i18n-ally.sourceLanguage": "en",
 	"i18n-ally.keystyle": "nested",
-	"eslint.validate": ["javascript", "typescript", "svelte"]
+	"eslint.validate": ["javascript", "typescript", "svelte"],
+	"svelte.plugin.svelte.compilerWarnings": {
+		"missing-declaration": "ignore"
+	}
 }

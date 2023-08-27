@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '$lib/index.css';
-	import { getContext, settingsContext } from '$lib/context';
+	import { getContext, settingsKey } from '$lib/context';
 
 	interface DisplayedSetting {
 		title: string;
@@ -8,7 +8,7 @@
 		key: keyof Settings;
 	}
 
-	const settings = getContext(settingsContext);
+	const settings = getContext(settingsKey);
 
 	const displayedSettings: DisplayedSetting[] = [
 		{
@@ -20,21 +20,20 @@ So media installed with the app are shown but not media from the internet.`,
 	];
 </script>
 
-<h1>Settings</h1>
-
 {#each displayedSettings as { key, title, description }}
-	{#if typeof $settings?.[key] === 'boolean'}
-		<div class="flex ml-4">
-			<div>
-				<h2><label for={key}>{title}</label></h2>
-				{#if description}
-					<p class="ml-4 whitespace-pre-wrap">{description}</p>
-				{/if}
-			</div>
-			<div class="flex-1">
+	{@const setting = $settings?.[key]}
+	<div class="flex ml-4">
+		<div>
+			<h2><label for={key}>{title}</label></h2>
+			{#if description}
+				<p class="ml-4 whitespace-pre-wrap">{description}</p>
+			{/if}
+		</div>
+		<div class="flex-1">
+			{#if typeof setting == 'boolean'}
 				<input
 					id={key}
-					checked={$settings[key]}
+					checked={setting}
 					type="checkbox"
 					on:input={(event) => {
 						settings?.update((settings) => {
@@ -44,9 +43,7 @@ So media installed with the app are shown but not media from the internet.`,
 						});
 					}}
 				/>
-			</div>
+			{/if}
 		</div>
-	{/if}
+	</div>
 {/each}
-
-<button on:click={() => history.back()}>Leave</button>
