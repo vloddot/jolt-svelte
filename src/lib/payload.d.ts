@@ -2,25 +2,25 @@ type ReadyPayload = Server[];
 
 type BulkMessagePayload =
 	| {
-			messages?: Message[];
-			users?: User[];
-			members?: Member[];
-	  }
+		messages?: Message[];
+		users?: User[];
+		members?: Member[];
+	}
 	| Message[];
 
 type LoginPayload =
 	| (Session & {
-			result: 'Success';
-	  })
+		result: 'Success';
+	})
 	| {
-			result: 'Mfa';
-			ticket: string;
-			allowed_methods: MFAMethod[];
-	  }
+		result: 'Mfa';
+		ticket: string;
+		allowed_methods: MFAMethod[];
+	}
 	| {
-			result: 'Disabled';
-			user_id: string;
-	  };
+		result: 'Disabled';
+		user_id: string;
+	};
 
 type ChannelTypingPayload = {
 	channel_id: string;
@@ -60,6 +60,6 @@ type DataMessageSend = {
 };
 
 type DataEditMessage = Partial<{
-	content?: string;
-	embeds?: SendableEmbed[];
+	content: string;
+	embeds: SendableEmbed[];
 }>;
