@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getContext, settingsContext } from '$lib/context';
+	import { getContext, settingsKey } from '$lib/context';
 
 	/**
 	 * Source for avatar of member.
@@ -11,7 +11,7 @@
 	 */
 	export let displayName: string;
 
-	const settings = getContext(settingsContext);
+	const settings = getContext(settingsKey);
 </script>
 
 <div role="listitem">

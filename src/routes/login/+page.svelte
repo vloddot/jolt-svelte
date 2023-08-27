@@ -27,15 +27,15 @@
 			| { password: string }
 			| undefined = undefined;
 
-		const totp_code = mfaMethods.find(([method]) => method === 'Totp')?.[1].trim();
-		const recovery_code = mfaMethods.find(([method]) => method === 'Recovery')?.[1].trim();
-		const mfaPassword = mfaMethods.find(([method]) => method === 'Password')?.[1].trim();
+		const totp_code = mfaMethods.find(([method]) => method == 'Totp')?.[1].trim();
+		const recovery_code = mfaMethods.find(([method]) => method == 'Recovery')?.[1].trim();
+		const mfaPassword = mfaMethods.find(([method]) => method == 'Password')?.[1].trim();
 
-		if (totp_code !== undefined && totp_code !== '') {
+		if (totp_code != undefined && totp_code != '') {
 			mfa_response = { totp_code };
-		} else if (recovery_code !== undefined && recovery_code !== '') {
+		} else if (recovery_code != undefined && recovery_code != '') {
 			mfa_response = { recovery_code };
-		} else if (mfaPassword !== undefined && mfaPassword !== '') {
+		} else if (mfaPassword != undefined && mfaPassword != '') {
 			mfa_response = { password: mfaPassword };
 		}
 
@@ -47,18 +47,18 @@
 			error = err;
 		});
 
-		if (payload === undefined) {
+		if (payload == undefined) {
 			return;
 		}
 
-		if (payload.result === 'Success') {
+		if (payload.result == 'Success') {
 			localStorage.setItem('session', JSON.stringify(payload));
 
 			await goto('/');
-		} else if (payload.result === 'Mfa') {
+		} else if (payload.result == 'Mfa') {
 			mfaMethods = payload.allowed_methods.map((method) => [method, '']);
 			error = 'Invalid MFA method';
-		} else if (payload.result === 'Disabled') {
+		} else if (payload.result == 'Disabled') {
 			error = `Account ${payload.user_id} is disabled.`;
 		}
 	}

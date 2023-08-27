@@ -23,7 +23,7 @@
 		{tooltip}
 	</span>
 	<a {href} aria-label={tooltip}>
-		{#if icon !== undefined}
+		{#if icon != undefined}
 			<img
 				class="sidebar-icon group-hover:rounded-xl group-hover:bg-green-600 group-hover:text-white"
 				src={icon}
@@ -32,10 +32,11 @@
 		{:else}
 			<span
 				class="sidebar-icon group-hover:rounded-xl group-hover:bg-green-600 group-hover:text-white"
-				>{tooltip
-					.split(' ')
-					.slice(0, 2)
-					.map((s) => s[0])
+			>
+				<!-- abbreviation of the tooltip -->
+				{tooltip
+					.split(' ') // each word
+					.map((s) => s[0]) // first letter
 					.join('')}
 			</span>
 		{/if}

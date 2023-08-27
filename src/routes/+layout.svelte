@@ -1,30 +1,26 @@
 <script lang="ts">
-	import { sessionContext, setContext, settingsContext } from '$lib/context';
-	import { writable, type Writable } from 'svelte/store';
+	import { sessionKey, setContext, settingsKey } from '$lib/context';
+	import { writable } from 'svelte/store';
 	import '$lib/i18n';
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 
-	const settings: Writable<Settings> = writable(
+	const settings = writable<Settings>(
 		JSON.parse(localStorage.getItem('settings') || 'null') ?? {
 			lowDataMode: false
 		}
 	);
+	setContext(settingsKey, settings);
 
-	const session: Writable<Session | null> = writable(
-		JSON.parse(localStorage.getItem('session') || 'null')
-	);
+	const session = writable<Session | null>(JSON.parse(localStorage.getItem('session') || 'null'));
 
-	setContext(sessionContext, session);
-	setContext(settingsContext, settings);
+	setContext(sessionKey, session);
 
 	async function checkSession(session: Session | null) {
-		if (session === null) {
+		if (session == null) {
 			await goto('/login');
 		}
 	}
 
-	onMount(() => checkSession($session));
 	$: checkSession($session);
 </script>
 
