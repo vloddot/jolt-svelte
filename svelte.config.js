@@ -8,13 +8,6 @@ const config = {
 	preprocess: vitePreprocess(),
 
 	kit: {
-		prerender: {
-			handleHttpError({ path, message }) {
-				if (path == '/favicon.png') return;
-
-				throw new Error(message);
-			}
-		},
 		alias: {
 			'@components': './src/components',
 			'@locale': './locale'
