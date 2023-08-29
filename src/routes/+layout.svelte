@@ -12,7 +12,6 @@
 	setContext(settingsKey, settings);
 
 	const session = writable<Session | null>(JSON.parse(localStorage.getItem('session') || 'null'));
-
 	setContext(sessionKey, session);
 
 	async function checkSession(session: Session | null) {

@@ -4,6 +4,9 @@
 	import './index.css';
 	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
+	import { getContext, sessionKey } from '$lib/context';
+
+	const session = getContext(sessionKey);
 
 	// current email input
 	let email = '';
@@ -52,6 +55,7 @@
 		}
 
 		if (payload.result == 'Success') {
+			session?.set(payload);
 			localStorage.setItem('session', JSON.stringify(payload));
 
 			await goto('/');
