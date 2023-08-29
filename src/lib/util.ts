@@ -13,12 +13,13 @@ export function getDefaultUserAvatar(user_id: string): string {
 	return `${API_URL}/users/${user_id}/default_avatar`;
 }
 
-export function getDisplayName(author?: User, member?: Member, message?: Message): string {
+export function getDisplayName(user?: User, member?: Member, message?: Message): string {
 	if (message?.system == undefined) {
 		return (
 			message?.masquerade?.name ??
 			member?.nickname ??
-			author?.username ??
+			user?.display_name ??
+			user?.username ??
 			`<${get(_)('user.unknown')}>`
 		);
 	}
@@ -59,7 +60,7 @@ export async function getChannelName(channel: Channel, user_id?: string): Promis
 		channel.recipients[0] == user_id ? channel.recipients[1] : channel.recipients[0]
 	);
 
-	return `@${user.username}`;
+	return `@${getDisplayName(user)}`;
 }
 
 export function fetchUser(user_id: string): Promise<User> {

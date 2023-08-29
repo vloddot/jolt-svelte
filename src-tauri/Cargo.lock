@@ -2341,7 +2341,7 @@ checksum = "e5ea92a5b6195c6ef2a0295ea818b312502c6fc94dde986c5553242e18fd4ce2"
 [[package]]
 name = "reywen"
 version = "0.1.23"
-source = "git+https://www.github.com/vloddot/Reywen-Revolt#ea1cfa8200b41b3f9bcae64ba97dccc1630ca684"
+source = "git+https://www.github.com/vloddot/Reywen-Revolt.git#73c0d98253a92be29ea98cbd288e75ea1324e334"
 dependencies = [
  "futures-util",
  "indexmap 2.0.0",

@@ -60,7 +60,7 @@
 				<ServerSidebarIcon href="/" tooltip="Home" icon="/home.svg" />
 			{:else}
 				{#await fetchUser($session.user_id) then user}
-					<ServerSidebarIcon href="/" tooltip={user.username} icon={getDisplayAvatar(user)} />
+					<ServerSidebarIcon href="/" tooltip="{user.username}#{user.discriminator}" icon={getDisplayAvatar(user)} />
 					<hr class="border-gray-600 mx-4" />
 				{/await}
 			{/if}

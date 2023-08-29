@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ChannelItem from './ChannelItem.svelte';
-	import { fetchUser, getAutumnURL, getDisplayAvatar } from '$lib/util';
+	import { fetchUser, getAutumnURL, getDisplayAvatar, getDisplayName } from '$lib/util';
 	import { _ } from 'svelte-i18n';
 	import { getContext, sessionKey, settingsKey } from '$lib/context';
 
@@ -46,7 +46,7 @@
 		{#await fetchUser(channel.recipients[0] == $session.user_id ? channel.recipients[1] : channel.recipients[0]) then user}
 			<ChannelItem
 				src={getChannelIcon({ ...channel, user })}
-				name={user.username}
+				name={getDisplayName(user)}
 				width={32}
 				height={32}
 				rounded

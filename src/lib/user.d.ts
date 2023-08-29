@@ -30,6 +30,8 @@ type BotInformation = {
 type User = {
 	_id: string;
 	username: string;
+	discriminator: string;
+	display_name: string;
 	avatar?: AutumnFile;
 	relations?: Relationship[];
 	badges?: number;

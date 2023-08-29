@@ -4,7 +4,7 @@
 	import { onMount, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { membersKey, repliesKey, usersKey, type Reply, messagesKey } from '.';
-	import { fetchUser, getDisplayAvatar } from '$lib/util';
+	import { fetchUser, getDisplayAvatar, getDisplayName } from '$lib/util';
 	import { _ } from 'svelte-i18n';
 	import { getChannelName } from '$lib/util';
 	import { getContext, sessionKey } from '$lib/context';
@@ -105,16 +105,16 @@
 			</div>
 		{/each}
 		{#each currentlyTypingUsers as user}
+			{@const displayName = getDisplayName(user)}
 			<div>
 				<img
 					src={getDisplayAvatar(user)}
 					class="inline aspect-square rounded-3xl"
 					width="16"
 					height="16"
-					alt={user.username}
+					alt={displayName}
 				/>
-				{user.username}
-				{$_('user.is-typing')}...
+				{displayName} {$_('user.is-typing')}...
 			</div>
 		{/each}
 		{#if $replies.length != 0}
@@ -125,7 +125,7 @@
 			<div>
 				<strong>
 					{#await user then user}
-						{user.username}
+						{getDisplayName(user)}
 					{:catch}
 						&lt;{$_('user.unknown')}&gt;
 					{/await}
