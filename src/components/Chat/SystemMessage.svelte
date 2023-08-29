@@ -10,7 +10,7 @@
 {:else if system.type == 'channel_description_changed' || system.type == 'channel_icon_changed' || system.type == 'channel_renamed' || system.type == 'user_added' || system.type == 'user_remove'}
 	{#await fetchUser(system.by) then user}
 		{@const displayName = getDisplayName(user)}
-		<img src={getDisplayAvatar(user)} alt={displayName} />
+		<img src={getDisplayAvatar(user)} width="24" height="24" alt={displayName} class="inline aspect-square rounded-3xl" />
 		{displayName}
 		{#if system.type == 'channel_description_changed'}
 			{$_('channel.description.change')}.
@@ -37,7 +37,7 @@
 {:else if system.type == 'user_banned' || system.type == 'user_joined' || system.type == 'user_kicked' || system.type == 'user_left'}
 	{#await fetchUser(system.id) then user}
 		{@const displayName = getDisplayName(user)}
-		<img src={getDisplayAvatar(user)} alt={displayName} />
+		<img src={getDisplayAvatar(user)} width="24" height="24" alt={displayName} class="inline aspect-square rounded-3xl" />
 		{displayName}
 		{#if system.type == 'user_banned'}
 			{$_('user.was-banned')}.
