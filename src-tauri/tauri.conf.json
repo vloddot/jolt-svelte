@@ -28,6 +28,9 @@
 				"icons/icon.icns",
 				"icons/icon.ico"
 			],
+			"appimage": {
+				"bundleMediaFramework": true
+			},
 			"windows": {
 				"allowDowngrades": true,
 				"certificateThumbprint": null,

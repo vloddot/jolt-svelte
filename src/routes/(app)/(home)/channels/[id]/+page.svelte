@@ -4,7 +4,7 @@
 	import { redirect } from '@sveltejs/kit';
 	import Chat from '@components/Chat/index.svelte';
 	import Member from '@components/Member.svelte';
-	import { fetchChannel, fetchUser, getDisplayAvatar } from '$lib/util';
+	import { fetchChannel, fetchUser, getDisplayAvatar, getDisplayName } from '$lib/util';
 
 	$: pageParams = $page.params as RouteParams;
 
@@ -31,7 +31,7 @@
 		{#await Promise.all(channel.recipients.map((id) => fetchUser(id))) then recipients}
 			<div class="members-list-container">
 				{#each recipients as recipient}
-					<Member src={getDisplayAvatar(recipient)} displayName={recipient.username} />
+					<Member src={getDisplayAvatar(recipient)} displayName={getDisplayName(recipient)} />
 				{/each}
 			</div>
 		{/await}
