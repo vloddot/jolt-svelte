@@ -6,9 +6,9 @@ use reywen_http::results::DeltaError;
 macro_rules! session_friendly_name {
     () => {{
         #[cfg(any(target_os = "ios", target_os = "android"))]
-        const APP_NAME: &str = "Jolt mobile client";
+        const APP_NAME: &str = "Jolt mobile";
         #[cfg(not(any(target_os = "ios", target_os = "android")))]
-        const APP_NAME: &str = "Jolt desktop client";
+        const APP_NAME: &str = "Jolt desktop";
 
         #[cfg(target_os = "windows")]
         const PLATFORM: &str = "Windows";
@@ -65,7 +65,6 @@ pub async fn login_with_token(
 ) -> Result<(), String> {
     let client_with_token =
         reywen::client::Client::from_token(token, false).map_err(|err| format!("{err:?}"))?;
-
 
     // Verify that the session exists.
     let sessions = match client_with_token.session_fetch_all().await {
