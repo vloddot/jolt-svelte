@@ -114,7 +114,7 @@
 	// 	message.edited == undefined ? undefined : dayjs(decodeTime(message.edited)).toDate();
 </script>
 
-<div class="group m-4">
+<div class="hover:bg-gray-800 group p-4">
 	<div class="flex">
 		{#if !$settings?.lowDataMode}
 			<img

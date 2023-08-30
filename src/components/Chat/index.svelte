@@ -100,9 +100,7 @@
 	<div class="flex flex-col h-full overflow-x-hidden overflow-y-scroll">
 		<p>so um hi this is the start, i should make this text box much further down i think</p>
 		{#each $messages as message}
-			<div class="hover:bg-gray-800">
-				<MessageComponent {message} />
-			</div>
+			<MessageComponent {message} />
 		{/each}
 		{#each currentlyTypingUsers as user}
 			{@const displayName = getDisplayName(user)}
@@ -114,7 +112,8 @@
 					height="16"
 					alt={displayName}
 				/>
-				{displayName} {$_('user.is-typing')}...
+				{displayName}
+				{$_('user.is-typing')}...
 			</div>
 		{/each}
 		{#if $replies.length != 0}
