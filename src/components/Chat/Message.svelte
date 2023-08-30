@@ -29,8 +29,8 @@
 	interface MessageControls {
 		src: string;
 		alt: string;
-		showIf?: () => boolean;
-		onclick: (event: MouseEvent) => unknown;
+		showIf?: (message: Message) => boolean;
+		onclick: (message: Message) => unknown;
 	}
 
 	const controls: MessageControls[] = [
@@ -51,23 +51,17 @@
 		{
 			src: '/note.svg',
 			alt: $_('message.edit'),
-			showIf: () => message.author == $session.user_id,
-			onclick() {
-				messageContentToEdit =
-					messageContentToEdit == undefined ? message.content ?? '' : undefined;
-			}
+			showIf: (message) => message.author == $session.user_id,
+			onclick: (message) =>
+				(messageContentToEdit =
+					messageContentToEdit == undefined ? message.content ?? '' : undefined)
 		},
 		{
 			src: '/trash.svg',
 			alt: $_('message.delete'),
-			showIf: () => message.author == $session.user_id, // TODO: check permissions for message deleting
-			async onclick() {
-				await invoke('delete_message', { channel_id: message.channel, message_id: message._id });
-				messages?.update((messages) => {
-					messages = messages.filter((v) => v._id != message._id);
-					return messages;
-				});
-			}
+			showIf: (message) => message.author == $session.user_id, // TODO: check permissions for message deleting
+			onclick: (message) =>
+				invoke('delete_message', { channel_id: message.channel, message_id: message._id })
 		}
 	];
 
@@ -141,8 +135,8 @@
 
 		<div class="hidden group-hover:block">
 			{#each controls as { src, alt, onclick, showIf }}
-				{#if showIf?.() ?? true}
-					<button class="ml-2" aria-label={alt} on:click={onclick}>
+				{#if showIf?.(message) ?? true}
+					<button class="ml-2" aria-label={alt} on:click={() => onclick(message)}>
 						<img width="16" height="16" {src} {alt} />
 					</button>
 				{/if}

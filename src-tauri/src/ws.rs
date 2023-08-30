@@ -41,12 +41,18 @@ pub async fn run_client<R: tauri::Runtime>(
                     WebSocketEvent::Ready { .. } => {
                         let _ = write.lock().await.send(WebSocketSend::ping(0).into()).await;
                     }
-                    WebSocketEvent::Message { message } => {
-                        let _ = app.emit_all("message", message);
-                    }
                     WebSocketEvent::Pong { .. } => {
                         tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
                         let _ = write.lock().await.send(WebSocketSend::ping(0).into()).await;
+                    }
+                    WebSocketEvent::Message { message } => {
+                        let _ = app.emit_all("message", message);
+                    }
+                    WebSocketEvent::MessageDelete { .. } => {
+                        let _ = app.emit_all("message_delete", event);
+                    }
+                    WebSocketEvent::MessageUpdate { .. } => {
+                        let _ = app.emit_all("message_update", event);
                     }
                     WebSocketEvent::ChannelStartTyping {
                         channel_id,

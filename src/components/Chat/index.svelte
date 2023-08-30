@@ -55,6 +55,44 @@
 			}
 		});
 
+		event.listen<ChannelMessageDeletePayload>(
+			'message_delete',
+			({ payload: { id, channel: channel_id } }) => {
+				if (channel_id != channel._id) {
+					return;
+				}
+
+				messages.update((messages) => messages.filter((message) => message._id != id));
+			}
+		);
+
+		event.listen<ChannelMessageUpdatePayload>(
+			'message_update',
+			({ payload: { id, channel: channel_id, data } }) => {
+				if (channel_id != channel._id) {
+					return;
+				}
+
+				messages.update((messages) => {
+					const index = messages.findIndex((message) => message._id == id);
+					const message = messages[index];
+
+					if (data.content != undefined) {
+						message.content = data.content;
+					}
+
+					if (data.embeds != undefined) {
+						message.embeds = data.embeds;
+					}
+
+					message.edited = data.edited;
+
+					messages[index] = message;
+					return messages;
+				});
+			}
+		);
+
 		event.listen<ChannelTypingPayload>(
 			'channel_start_typing',
 			async ({ payload: { user_id, channel_id } }) => {
