@@ -145,9 +145,19 @@
 	</div>
 
 	{#if messageContentToEdit != undefined}
-		<form on:submit={editMessage}>
+		<form class="bg-gray-500 rounded-xl px-2 pt-2" on:submit={editMessage}>
 			<textarea
 				on:keydown={(event) => {
+					if (event.defaultPrevented) {
+						return;
+					}
+
+					if (event.key == 'Escape') {
+						event.preventDefault();
+						messageContentToEdit = undefined;
+						return;
+					}
+
 					if (event.shiftKey || event.key != 'Enter') {
 						return;
 					}
@@ -156,7 +166,7 @@
 					editMessage();
 					messageContentToEdit = undefined;
 				}}
-				class="bg-gray-500 rounded-xl px-2 pt-2"
+				class="outline-none resize-none bg-inherit w-full"
 				placeholder="Edit this message"
 				bind:value={messageContentToEdit}
 			/>
