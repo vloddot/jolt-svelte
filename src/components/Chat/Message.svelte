@@ -2,11 +2,12 @@
 	import { usersKey, membersKey, repliesKey, messagesKey } from '.';
 	import { fetchUser, getDisplayAvatar, getDisplayName } from '$lib/util';
 	import { getContext, selectedServerIDKey, sessionKey, settingsKey } from '$lib/context';
-	import { _ } from 'svelte-i18n';
+	import { _, date, time } from 'svelte-i18n';
 	import Embed from './Embed.svelte';
 	import Attachment from './Attachment.svelte';
 	import SystemMessage from './SystemMessage.svelte';
 	import { invoke } from '@tauri-apps/api';
+	import { decodeTime } from 'ulid';
 
 	/**
 	 * Message to show.
@@ -103,9 +104,7 @@
 	$: $selectedServerID == undefined ? undefined : updateMember($selectedServerID, message.author);
 	$: displayName = getDisplayName(author, member, message);
 	$: displayAvatar = getDisplayAvatar(author, member, message);
-	// $: timestamp = dayjs(decodeTime(message._id)).toDate();
-	// $: editedTimestamp =
-	// 	message.edited == undefined ? undefined : dayjs(decodeTime(message.edited)).toDate();
+	$: timestamp = decodeTime(message._id);
 </script>
 
 <div class="hover:bg-gray-800 group p-4">
@@ -122,14 +121,15 @@
 
 		{displayName}
 
-		<!-- <p class="text-gray-500">
+		<p class="text-gray-500">
 			[{$date(timestamp)}
 			{$time(timestamp)}]
 
-			{#if editedTimestamp != undefined}
-				[{$_('message.edited')} {$date(editedTimestamp)} {$time(editedTimestamp)}]
+			{#if message.edited != undefined}
+				{@const timestamp = new Date(message.edited)}
+				[{$_('message.edited')} {$date(timestamp)} {$time(timestamp)}]
 			{/if}
-		</p> -->
+		</p>
 
 		<div class="flex-1" />
 
