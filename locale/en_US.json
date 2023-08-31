@@ -32,7 +32,7 @@
   "cancel": "Cancel",
   "send-message-in": "Send message in",
   "channel": {
-    "notes": "Notes channel",
+    "notes": "Saved Notes",
     "description": {
       "change": "changed this channel's description"
     },
