@@ -1,5 +1,5 @@
 import { redirect } from '@sveltejs/kit';
 
-export const load = async () => {
+export function load() {
 	throw redirect(302, '/settings/text');
 };

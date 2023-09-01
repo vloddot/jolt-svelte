@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer components {
-	.grid-container {
+	.grid-layout {
 		@apply grid justify-center items-center;
 		grid-template-columns: 256px 1fr;
 	}

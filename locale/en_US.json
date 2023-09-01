@@ -5,6 +5,7 @@
     "notice": "Optionally, if your account uses MFA, use one of these methods, including the previous email and password as well"
   },
   "confirm": "Ok",
+	"go-back": "Go Back",
   "user": {
     "unknown": "Unknown User",
     "is-typing": "is typing",

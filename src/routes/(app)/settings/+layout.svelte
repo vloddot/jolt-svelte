@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { _ } from 'svelte-i18n';
 	import './index.css';
+
 	interface Section {
 		title: string;
 		href: string;
@@ -14,7 +16,7 @@
 	];
 </script>
 
-<div class="grid-container">
+<div class="grid-layout">
 	<div>
 		{#each sections as { title, href }}
 			<a {href}>
@@ -24,7 +26,7 @@
 			</a>
 		{/each}
 
-		<button on:click={() => history.back()}>Leave</button>
+		<button on:click={() => history.back()}>{$_('go-back')}</button>
 	</div>
 	<div>
 		<slot />

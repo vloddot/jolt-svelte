@@ -23,15 +23,9 @@
 		{tooltip}
 	</span>
 	<a {href} aria-label={tooltip}>
-		{#if icon != undefined}
-			<img
-				class="sidebar-icon group-hover:rounded-xl group-hover:bg-green-600 group-hover:text-white"
-				src={icon}
-				alt={tooltip}
-			/>
-		{:else}
+		{#if icon == undefined}
 			<span
-				class="sidebar-icon group-hover:rounded-xl group-hover:bg-green-600 group-hover:text-white"
+				class="sidebar-icon group-hover:rounded-xl group-hover:bg-green-600 group-hover:text-white overflow-ellipsis"
 			>
 				<!-- abbreviation of the tooltip -->
 				{tooltip
@@ -39,6 +33,12 @@
 					.map((s) => s[0]) // first letter
 					.join('')}
 			</span>
+		{:else}
+			<img
+				class="sidebar-icon group-hover:rounded-xl group-hover:bg-green-600 group-hover:text-white"
+				src={icon}
+				alt={tooltip}
+			/>
 		{/if}
 	</a>
 </div>
