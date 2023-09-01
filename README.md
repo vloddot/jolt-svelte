@@ -50,7 +50,7 @@ cargo tauri dev
 
 - [Reywen-Revolt](https://www.github.com/Toastxc/Reywen-Revolt)
 - [reywen-http](https://www.github.com/Toastxc/reywen-http)
-- Support Reywen developer: [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M5J6V1B)
+- [Support Reywen developer](https://ko-fi.com/M4M5J6V1B)
 - [Jolt Development Server on Revolt](https://rvlt.gg/AaCgcvgg)
 - [Tauri](https://tauri.app)
 - [Svelte](https://svelte.dev)
