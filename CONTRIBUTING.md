@@ -15,7 +15,6 @@ All types of contributions are encouraged and valued. See the [Table of Contents
 - [Styleguides](#styleguides)
 	- [Commit Messages](#commit-messages)
 
-
 ## I Have a Question
 
 Before you ask a question, it is best to search for existing [Issues](https://www.github.com/vloddot/jolt/issues) that might help you. In case you have found a suitable issue and still need clarification, you can write your question in this issue. It is also advisable to search the internet for answers first.
@@ -67,9 +66,6 @@ Once it's filed:
 - A team member will try to reproduce the issue with your provided steps. If there are no reproduction steps or no obvious way to reproduce the issue, the team will ask you for those steps and mark the issue as `needs-repro`. Bugs with the `needs-repro` tag will not be addressed until they are reproduced.
 - If the team is able to reproduce the issue, it will be marked `needs-fix`, as well as possibly other tags (such as `critical`), and the issue will be left to be [implemented by someone](#your-first-code-contribution).
 
-<!-- You might want to create an issue template for bugs and errors that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it here in the description. -->
-
-
 ### Suggesting Enhancements
 
 This section guides you through submitting an enhancement suggestion for Jolt, **including completely new features and minor improvements to existing functionality**. Following these guidelines will help maintainers and the community to understand your suggestion and find related suggestions.
@@ -101,5 +97,7 @@ It's recommended to use VS Code as an IDE with the specified extensions in [`.vs
 To test the project on a development server, run `cargo tauri dev` and to build the project, run `cargo tauri build`.
 
 ## Styleguides
+
 ### Commit Messages
+
 We expect usage of [conventional commits](https://www.conventionalcommits.org) to reduce commit message length and to make them follow a specific formula.

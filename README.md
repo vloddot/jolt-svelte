@@ -8,9 +8,15 @@ Custom [Revolt](https://www.github.com/revoltchat) client for desktop made in Ta
 <!-- omit in toc -->
 ## Table of Contents
 
+- [Installation](#installation)
 - [Running and compiling the project](#running-and-compiling-the-project)
 - [Development Server](#development-server)
+- [Links](#links)
 - [Contributing](#contributing)
+
+## Installation
+
+To install, follow the [releases page](https://www.github.com/vloddot/jolt/releases) and pick out the version you need.
 
 ## Running and compiling the project
 
@@ -23,6 +29,7 @@ To compile or launch Jolt in a development server on your own machine, you're go
 ### Build Command
 
 To build, execute this command:
+
 ```bash
 cargo tauri build
 ```
@@ -34,9 +41,21 @@ cargo tauri build
 If you want to test the application before building it or installing the application through [GitHub Releases](https://github.com/vloddot/jolt/releases), you can run it in a development server. It will not have the best performance compared to the built executable.
 
 Just run the following command:
+
 ```bash
 cargo tauri dev
 ```
 
+## Links
+
+- [Reywen-Revolt](https://www.github.com/Toastxc/Reywen-Revolt)
+- [reywen-http](https://www.github.com/Toastxc/reywen-http)
+- Support Reywen developer: [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M5J6V1B)
+- [Jolt Development Server on Revolt](https://rvlt.gg/AaCgcvgg)
+- [Tauri](https://tauri.app)
+- [Svelte](https://svelte.dev)
+- [SvelteKit](https://kit.svelte.dev)
+
 ## Contributing
+
 To contribute, make sure you follow the [CONTRIBUTING.md](CONTRIBUTING.md) guide.
