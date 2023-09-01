@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { usersKey, membersKey, repliesKey, messagesKey } from '.';
 	import { fetchUser, getDisplayAvatar, getDisplayName } from '$lib/util';
-	import { getContext, selectedServerIDKey, sessionKey, settingsKey } from '$lib/context';
+	import { getContext } from '$lib/context';
+	import { selectedServerIDKey, } from '@routes/(app)/context';
+	import { sessionKey } from '@routes/context';
+	import { settingsKey } from '@routes/context';
 	import { _, date, time } from 'svelte-i18n';
 	import Embed from './Embed.svelte';
 	import Attachment from './Attachment.svelte';
@@ -127,7 +130,9 @@
 
 			{#if message.edited != undefined}
 				{@const timestamp = new Date(message.edited)}
-				[{$_('message.edited')} {$date(timestamp)} {$time(timestamp)}]
+				[{$_('message.edited')}
+				{$date(timestamp)}
+				{$time(timestamp)}]
 			{/if}
 		</p>
 

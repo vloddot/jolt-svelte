@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { sessionKey, setContext, settingsKey } from '$lib/context';
+	import { setContext } from '$lib/context';
+	import { settingsKey, sessionKey } from '@routes/context';
 	import { writable } from 'svelte/store';
 	import '$lib/i18n';
 	import { goto } from '$app/navigation';

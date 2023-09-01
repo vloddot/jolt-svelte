@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { getContext, selectedChannelIDKey, selectedServerIDKey } from '$lib/context';
+	import { getContext } from '$lib/context';
+	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
 
 	/**
 	 * Image source to show.

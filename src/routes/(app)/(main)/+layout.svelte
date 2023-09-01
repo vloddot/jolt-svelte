@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { clientReadyKey, getContext, serversKey, sessionKey, settingsKey } from '$lib/context';
+	import { getContext } from '$lib/context';
+	import { clientReadyKey, serversKey } from '@routes/(app)/context';
+	import { sessionKey } from '@routes/context';
+	import { settingsKey } from '@routes/context';
 	import ServerSidebarIcon from '@components/ServerSidebarIcon/index.svelte';
 	import { fetchUser, getDisplayAvatar, getAutumnURL } from '$lib/util';
 

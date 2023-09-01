@@ -2,7 +2,8 @@
 	import { page } from '$app/stores';
 	import { writable } from 'svelte/store';
 	import type { RouteParams } from './$types';
-	import { selectedChannelIDKey, selectedServerIDKey, setContext } from '$lib/context';
+	import { setContext } from '$lib/context';
+	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
 	import ChannelComponent from '@components/ChannelBar/Channel.svelte';
 	import ChannelCategory from '@components/ChannelBar/Category.svelte';
 	import MemberComponent from '@components/Member.svelte';

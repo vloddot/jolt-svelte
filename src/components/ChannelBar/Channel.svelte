@@ -2,7 +2,8 @@
 	import ChannelItem from './ChannelItem.svelte';
 	import { fetchUser, getAutumnURL, getDisplayAvatar, getDisplayName } from '$lib/util';
 	import { _ } from 'svelte-i18n';
-	import { getContext, sessionKey, settingsKey } from '$lib/context';
+	import { getContext } from '$lib/context';
+	import { settingsKey, sessionKey } from '@routes/context';
 
 	const settings = getContext(settingsKey);
 	const session = getContext(sessionKey)!;

@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { getContext, settingsKey } from '$lib/context';
+	import { getContext } from '$lib/context';
+	import { settingsKey } from '@routes/context';
 	import ExternalLink from '@components/ExternalLink.svelte';
 
 	export let embed: Embed;

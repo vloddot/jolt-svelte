@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { getContext, settingsKey } from '$lib/context';
+	import { getContext } from '$lib/context';
+	import { settingsKey } from '@routes/context';
 	import { getAutumnURL } from '$lib/util';
 	import ExternalLink from '@components/ExternalLink.svelte';
 	import { _ } from 'svelte-i18n';

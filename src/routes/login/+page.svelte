@@ -4,7 +4,8 @@
 	import './index.css';
 	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
-	import { getContext, sessionKey } from '$lib/context';
+	import { getContext } from '$lib/context';
+	import { sessionKey } from '@routes/context';
 
 	const session = getContext(sessionKey);
 

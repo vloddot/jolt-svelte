@@ -7,7 +7,8 @@
 	import { fetchUser, getDisplayAvatar, getDisplayName } from '$lib/util';
 	import { _ } from 'svelte-i18n';
 	import { getChannelName } from '$lib/util';
-	import { getContext, sessionKey, settingsKey } from '$lib/context';
+	import { getContext } from '$lib/context';
+	import { settingsKey, sessionKey } from '@routes/context';
 
 	/**
 	 * Which channel to show messages from.

@@ -26,10 +26,3 @@ export const getContext = svelteGetContext as GetContext;
 export const setContext = svelteSetContext as SetContext;
 export const hasContext = svelteHasContext as HasContext;
 
-export const serversKey: ContextInjectionKey<Writable<Server[] | undefined>> = Symbol();
-export const clientReadyKey: ContextInjectionKey<Writable<boolean>> = Symbol();
-export const runningClientKey: ContextInjectionKey<Writable<boolean>> = Symbol();
-export const settingsKey: ContextInjectionKey<Writable<Settings>> = Symbol();
-export const sessionKey: ContextInjectionKey<Writable<Session>> = Symbol();
-export const selectedServerIDKey: ContextInjectionKey<Writable<string | undefined>> = Symbol();
-export const selectedChannelIDKey: ContextInjectionKey<Writable<string | undefined>> = Symbol();

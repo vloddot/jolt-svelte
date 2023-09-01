@@ -10,7 +10,8 @@ const config = {
 	kit: {
 		alias: {
 			'@components': './src/components',
-			'@locale': './locale'
+			'@locale': './locale',
+			'@routes': './src/routes'
 		},
 		adapter: adapter({ fallback: 'app.html' })
 	}

@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { getContext, settingsKey } from '$lib/context';
+	import { getContext } from '$lib/context';
+	import { settingsKey } from '@routes/context';
 
 	/**
 	 * Source for avatar of member.

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '$lib/index.css';
-	import { getContext, settingsKey } from '$lib/context';
+	import { getContext } from '$lib/context';
+	import { settingsKey } from '@routes/context';
 
 	interface DisplayedSetting {
 		title: string;
