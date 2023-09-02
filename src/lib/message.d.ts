@@ -108,7 +108,48 @@ type VideoEmbed = {
 	height: number;
 };
 
-type SpecialEmbed = unknown;
+type LightspeedType = 'Channel';
+type TwitchType = 'Channel' | 'Video' | 'Clip';
+type BandcampType = 'Album' | 'Track';
+
+type SpecialEmbed =
+	| {
+			type: 'None';
+	  }
+	| {
+			type: 'GIF';
+	  }
+	| {
+			type: 'YouTube';
+			id: string;
+			timestamp?: string;
+	  }
+	| {
+			type: 'Lightspeed';
+			content_type: LightspeedType;
+			id: string;
+	  }
+	| {
+			type: 'Twitch';
+			content_type: TwitchType;
+			id: string;
+	  }
+	| {
+			type: 'Spotify';
+			content_type: string;
+			id: string;
+	  }
+	| {
+			type: 'SoundCloud';
+	  }
+	| {
+		type: 'Bandcamp';
+		content_type: BandcampType;
+		id: string;
+	} | {
+		type: 'Streamable';
+		id: string;
+	};
 
 type Embed =
 	| {
@@ -135,6 +176,7 @@ type Embed =
 			icon_url?: string;
 			url?: string;
 			title?: string;
+			description?: string;
 			media?: AutumnFile;
 			colour?: string;
 	  }
