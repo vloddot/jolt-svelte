@@ -8,18 +8,42 @@
 	const settings = getContext(settingsKey)!;
 </script>
 
-{#if $settings.lowDataMode}
-	{#if embed.type != 'None' && embed.url != undefined}
+{#if embed.type == 'Image'}
+	{#if $settings.lowDataMode}
 		<ExternalLink link={embed.url} />
+	{:else}
+		<!-- svelte-ignore a11y-missing-attribute -->
+		<img src={embed.url} width={embed.width} height={embed.height} />
 	{/if}
-{:else if embed.type == 'Image'}
-	<!-- svelte-ignore a11y-missing-attribute -->
-	<img src={embed.url} width={embed.width} height={embed.height} />
 {:else if embed.type == 'Video'}
-	<!-- svelte-ignore a11y-media-has-caption -->
-	<video controls>
-		<source src={embed.url} width={embed.width} height={embed.height} />
-	</video>
-{:else}
-	<span class="text-gray-500">Embed for debugging {JSON.stringify(embed)}</span>
+	{#if $settings.lowDataMode}
+		<ExternalLink link={embed.url} />
+	{:else}
+		<!-- svelte-ignore a11y-media-has-caption -->
+		<video controls>
+			<source src={embed.url} width={embed.width} height={embed.height} />
+		</video>
+	{/if}
+{:else if embed.type == 'Text'}
+	<div style="background-color: {embed.colour}">
+		{#if embed.icon_url && !$settings.lowDataMode}
+			<img
+				src={embed.icon_url}
+				alt={embed.title}
+				width="24"
+				height="24"
+				class="inline aspect-square rounded-3xl"
+			/>
+		{/if}
+
+		{#if embed.title}
+			<h1 class="text-gray-600">{embed.title}</h1>
+		{/if}
+
+		{#if embed.description}
+			<p>{embed.description}</p>
+		{/if}
+	</div>
+{:else if embed.type == 'Website'}
+	<span class="text-gray-600">oop website embed, can't handle that :(</span>
 {/if}
