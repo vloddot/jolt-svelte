@@ -9,6 +9,8 @@
 
 	let selectedSettings = data.sections[0].settings;
 	let selectedHref = data.sections[0].href;
+	$: history.replaceState({}, '', `/settings/${selectedHref}`);
+
 </script>
 
 <div class="grid-layout">
@@ -22,8 +24,6 @@
 					role="link"
 					on:click={() => {
 						selectedHref = href;
-						history.replaceState({}, '', `/settings/${selectedHref}`);
-
 						selectedSettings = settings;
 					}}
 				>
