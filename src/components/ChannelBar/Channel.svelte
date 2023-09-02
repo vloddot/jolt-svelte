@@ -5,7 +5,7 @@
 	import { getContext } from '$lib/context';
 	import { settingsKey, sessionKey } from '@routes/context';
 
-	const settings = getContext(settingsKey);
+	const settings = getContext(settingsKey)!;
 	const session = getContext(sessionKey)!;
 
 	function getChannelIcon(
@@ -14,7 +14,7 @@
 			| (Extract<Channel, { channel_type: 'DirectMessage' }> & { user: User })
 	): string {
 		if (channel.channel_type == 'DirectMessage') {
-			if ($settings?.lowDataMode) {
+			if ($settings.lowDataMode) {
 				return '/user.svg';
 			}
 
@@ -25,7 +25,7 @@
 			return '/note.svg';
 		}
 
-		if (channel.icon != undefined && !$settings?.lowDataMode) {
+		if (channel.icon != undefined && !$settings.lowDataMode) {
 			return getAutumnURL(channel.icon);
 		}
 

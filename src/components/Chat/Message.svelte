@@ -2,7 +2,7 @@
 	import { usersKey, membersKey, repliesKey, messagesKey } from '.';
 	import { fetchUser, getDisplayAvatar, getDisplayName } from '$lib/util';
 	import { getContext } from '$lib/context';
-	import { selectedServerIDKey, } from '@routes/(app)/context';
+	import { selectedServerIDKey } from '@routes/(app)/context';
 	import { sessionKey } from '@routes/context';
 	import { settingsKey } from '@routes/context';
 	import { _, date, time } from 'svelte-i18n';
@@ -22,7 +22,7 @@
 	let member: Member | undefined = undefined;
 
 	const session = getContext(sessionKey)!;
-	const settings = getContext(settingsKey);
+	const settings = getContext(settingsKey)!;
 	const selectedServerID = getContext(selectedServerIDKey);
 
 	const messages = getContext(messagesKey);
@@ -106,13 +106,13 @@
 	$: updateAuthor(message.author);
 	$: $selectedServerID == undefined ? undefined : updateMember($selectedServerID, message.author);
 	$: displayName = getDisplayName(author, member, message);
-	$: displayAvatar = getDisplayAvatar(author, member, message);
+	$: displayAvatar = $settings.lowDataMode ? '/user.svg' : getDisplayAvatar(author, member, message);
 	$: timestamp = decodeTime(message._id);
 </script>
 
 <div class="hover:bg-gray-800 group p-4">
 	<div class="flex">
-		{#if !$settings?.lowDataMode}
+		{#if !$settings.compactMode}
 			<img
 				alt={displayName}
 				src={displayAvatar}

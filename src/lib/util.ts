@@ -4,6 +4,10 @@ import { get } from 'svelte/store';
 
 export const AUTUMN_URL = 'https://autumn.revolt.chat';
 export const API_URL = 'https://api.revolt.chat';
+export const DEFAULT_SETTINGS: Settings = {
+	lowDataMode: false,
+	compactMode: false
+};
 
 export function getAutumnURL(file: AutumnFile): string {
 	return `${AUTUMN_URL}/${file.tag}/${file._id}`;

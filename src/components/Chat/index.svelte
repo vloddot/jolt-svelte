@@ -16,7 +16,7 @@
 	export let channel: Exclude<Channel, { channel_type: 'VoiceChannel' }>;
 
 	const session = getContext(sessionKey)!;
-	const settings = getContext(settingsKey);
+	const settings = getContext(settingsKey)!;
 
 	let messages = writable<Message[]>([]);
 	let members = writable<Member[]>([]);
@@ -146,7 +146,7 @@
 			{@const displayName = getDisplayName(user)}
 			<div>
 				<img
-					src={$settings?.lowDataMode ? '/user.svg' : getDisplayAvatar(user)}
+					src="{$settings.lowDataMode ? '/user.svg' : getDisplayAvatar(user)}}"
 					class="inline aspect-square rounded-3xl"
 					width="16"
 					height="16"

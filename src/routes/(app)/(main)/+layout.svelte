@@ -7,7 +7,7 @@
 	import { fetchUser, getDisplayAvatar, getAutumnURL } from '$lib/util';
 
 	const clientReady = getContext(clientReadyKey);
-	const settings = getContext(settingsKey);
+	const settings = getContext(settingsKey)!;
 	const session = getContext(sessionKey)!;
 	const servers = getContext(serversKey);
 </script>
@@ -15,7 +15,7 @@
 <div class="grid-container">
 	<div class="server-sidebar-container">
 		{#if $clientReady}
-			{#if $settings?.lowDataMode}
+			{#if $settings.lowDataMode}
 				<ServerSidebarIcon href="/" tooltip="Home" icon="/home.svg" />
 			{:else}
 				{#await fetchUser($session.user_id) then user}
@@ -32,7 +32,7 @@
 
 		{#if $servers != undefined}
 			{#each $servers as server}
-				{#if $settings?.lowDataMode}
+				{#if $settings.lowDataMode}
 					<ServerSidebarIcon
 						href="/servers/{server._id}/channels/{server.channels[0]}"
 						tooltip={server.name}

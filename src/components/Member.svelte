@@ -12,11 +12,11 @@
 	 */
 	export let displayName: string;
 
-	const settings = getContext(settingsKey);
+	const settings = getContext(settingsKey)!;
 </script>
 
 <div role="listitem">
-	{#if $settings?.lowDataMode}
+	{#if $settings.lowDataMode}
 		<img
 			src="/user.svg"
 			alt={displayName}

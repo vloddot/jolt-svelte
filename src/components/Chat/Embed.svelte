@@ -5,10 +5,10 @@
 
 	export let embed: Embed;
 
-	const settings = getContext(settingsKey);
+	const settings = getContext(settingsKey)!;
 </script>
 
-{#if $settings?.lowDataMode}
+{#if $settings.lowDataMode}
 	{#if embed.type != 'None' && embed.url != undefined}
 		<ExternalLink link={embed.url} />
 	{/if}

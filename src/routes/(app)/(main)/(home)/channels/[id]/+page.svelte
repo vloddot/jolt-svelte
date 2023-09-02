@@ -27,7 +27,7 @@
 {#if channel != undefined}
 	<Chat {channel} />
 
-	{#if channel.channel_type == 'Group' || channel.channel_type == 'DirectMessage'}
+	{#if channel.channel_type != 'SavedMessages'}
 		{#await Promise.all(channel.recipients.map((id) => fetchUser(id))) then recipients}
 			<div class="members-list-container">
 				{#each recipients as recipient}

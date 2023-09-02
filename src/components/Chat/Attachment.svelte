@@ -5,14 +5,14 @@
 	import ExternalLink from '@components/ExternalLink.svelte';
 	import { _ } from 'svelte-i18n';
 
-	const settings = getContext(settingsKey);
+	const settings = getContext(settingsKey)!;
 
 	export let attachment: AutumnFile;
 </script>
 
 <div>
 	{#if attachment.metadata.type == 'Image'}
-		{#if $settings?.lowDataMode}
+		{#if $settings.lowDataMode}
 			<span class="text-gray-500">[Image <ExternalLink link={getAutumnURL(attachment)} />]</span>
 		{:else}
 			<img src={getAutumnURL(attachment)} alt={attachment.filename} />
@@ -32,7 +32,7 @@
 			<ExternalLink link={getAutumnURL(attachment)} /></span
 		>
 	{:else if attachment.metadata.type == 'Text'}
-		{#if $settings?.lowDataMode}
+		{#if $settings.lowDataMode}
 			<span class="text-gray-500">[Text <ExternalLink link={getAutumnURL(attachment)} />]</span>
 		{:else}
 			{#await fetch(getAutumnURL(attachment)) then response}
