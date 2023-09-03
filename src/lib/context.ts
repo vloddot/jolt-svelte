@@ -3,7 +3,6 @@ import {
 	setContext as svelteSetContext,
 	hasContext as svelteHasContext
 } from 'svelte';
-import type { Writable } from 'svelte/store';
 
 declare const isChecked: unique symbol;
 
@@ -25,4 +24,3 @@ type HasContext = <T>(key: ContextInjectionKey<T>) => key is CheckedContextInjec
 export const getContext = svelteGetContext as GetContext;
 export const setContext = svelteSetContext as SetContext;
 export const hasContext = svelteHasContext as HasContext;
-
