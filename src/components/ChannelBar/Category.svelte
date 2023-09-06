@@ -1,7 +1,9 @@
 <script lang="ts">
-	import { fetchChannel } from '$lib/util';
+	import { getContext } from '$lib/context';
+	import { clientKey } from '@routes/context';
 	import './Category.css';
 
+	const client = getContext(clientKey)!;
 	export let category: Category;
 </script>
 
@@ -9,7 +11,7 @@
 	<summary class="category-summary" role="group">{category.title}</summary>
 	<div class="ml-2">
 		{#each category.channels as id}
-			{#await fetchChannel(id) then channel}
+			{#await client.api.fetchChannel(id) then channel}
 				<slot {channel} />
 			{/await}
 		{/each}

@@ -3,7 +3,7 @@
 	import '$lib/index.css';
 
 	/**
-	 * Link to go to on press.
+	 * Path to go to for navigation.
 	 */
 	export let href: string;
 
@@ -16,6 +16,11 @@
 	 * Icon to show.
 	 */
 	export let icon: string | undefined = undefined;
+
+	$: tooltipAbbreviation = tooltip
+		.split(' ')
+		.map((s) => s[0])
+		.join('');
 </script>
 
 <div class="group m-0">
@@ -28,10 +33,7 @@
 				class="sidebar-icon group-hover:rounded-xl group-hover:bg-green-600 group-hover:text-white overflow-ellipsis"
 			>
 				<!-- abbreviation of the tooltip -->
-				{tooltip
-					.split(' ') // each word
-					.map((s) => s[0]) // first letter
-					.join('')}
+				{tooltipAbbreviation}
 			</span>
 		{:else}
 			<img

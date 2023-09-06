@@ -9,14 +9,14 @@
 </script>
 
 {#if embed.type == 'Image'}
-	{#if $settings.lowDataMode}
+	{#if $settings['jolt:low-data-mode']}
 		<ExternalLink link={embed.url} />
 	{:else}
 		<!-- svelte-ignore a11y-missing-attribute -->
 		<img src={embed.url} width={embed.width} height={embed.height} />
 	{/if}
 {:else if embed.type == 'Video'}
-	{#if $settings.lowDataMode}
+	{#if $settings['jolt:low-data-mode']}
 		<ExternalLink link={embed.url} />
 	{:else}
 		<!-- svelte-ignore a11y-media-has-caption -->
@@ -26,7 +26,7 @@
 	{/if}
 {:else if embed.type == 'Text'}
 	<div style="background-color: {embed.colour}">
-		{#if embed.icon_url && !$settings.lowDataMode}
+		{#if embed.icon_url && !$settings['jolt:low-data-mode']}
 			<img
 				src={embed.icon_url}
 				alt={embed.title}

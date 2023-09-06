@@ -20,7 +20,17 @@ export const load = () => {
 					title: 'Low Data Mode',
 					description: `Blocks media from sources other than the installed app on your system.
 So media installed with the app are shown but not media from the internet.`,
-					key: 'lowDataMode'
+					key: 'jolt:low-data-mode'
+				},
+				{
+					title: 'Send Typing Indicators',
+					description: 'Enables sending typing indicators to other members. (<user> is typing...)',
+					key: 'jolt:send-typing-indicators',
+				},
+				{
+					title: 'Receive Typing Indicators',
+					description: 'Enables receiving typing indicators from other members.',
+					key: 'jolt:receive-typing-indicators'
 				}
 			]
 		},
@@ -31,7 +41,7 @@ So media installed with the app are shown but not media from the internet.`,
 				{
 					title: 'Compact Mode',
 					description: 'Hides user icons. Light on the eyes.',
-					key: 'compactMode'
+					key: 'jolt:compact-mode'
 				}
 			]
 		}

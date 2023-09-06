@@ -6,6 +6,7 @@
   },
   "confirm": "Ok",
 	"go-back": "Go Back",
+	"logout": "Logout",
   "user": {
     "unknown": "Unknown User",
     "is-typing": "is typing",

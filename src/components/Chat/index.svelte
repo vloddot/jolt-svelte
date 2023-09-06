@@ -1,15 +1,13 @@
 <script lang="ts">
-	import { event, invoke } from '@tauri-apps/api';
 	import MessageComponent from './Message.svelte';
 	import { onMount, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { membersKey, repliesKey, usersKey, type Reply, messagesKey } from '.';
-	import { fetchUser, getDisplayAvatar, getDisplayName } from '$lib/util';
 	import { _ } from 'svelte-i18n';
-	import { getChannelName } from '$lib/util';
 	import { getContext } from '$lib/context';
-	import { settingsKey, sessionKey } from '@routes/context';
-
+	import { settingsKey, sessionKey, clientKey } from '@routes/context';
+	import { getDisplayAvatar, getDisplayName } from '$lib/util';
+	import UserProfilePicture from '@components/UserProfilePicture.svelte';
 	/**
 	 * Which channel to show messages from.
 	 */
@@ -17,6 +15,7 @@
 
 	const session = getContext(sessionKey)!;
 	const settings = getContext(settingsKey)!;
+	const client = getContext(clientKey)!;
 
 	let messages = writable<Message[]>([]);
 	let members = writable<Member[]>([]);
@@ -33,107 +32,133 @@
 	let currentlyTypingUsers: User[] = [];
 
 	$: {
-		invoke<BulkMessagePayload>('fetch_messages', { channel_id: channel._id }).then((response) => {
-			if (Array.isArray(response)) {
-				messages.set(response.reverse());
-			} else {
-				messages.set(response.messages?.reverse() ?? []);
-				members.set(response.members ?? []);
-				users.set(response.users ?? []);
-			}
-		});
+		client.api
+			.queryMessages(channel._id, { sort: 'Latest', include_users: true })
+			.then((response) => {
+				if (Array.isArray(response)) {
+					messages.set(response.reverse());
+				} else {
+					messages.set(response.messages.reverse() ?? []);
+					users.set(response.users);
+					members.set(response.members ?? []);
+				}
+			});
 
 		replies.set([]);
 		currentlyTypingUsers = [];
 	}
 
+	async function listenToTypingEvents(receive: boolean) {
+		if (!receive) {
+			client.removeAllListeners('ChannelStartTyping');
+			client.removeAllListeners('ChannelStopTyping');
+			return;
+		}
+
+		client.on('ChannelStartTyping', async ({ id, user }) => {
+			if (user == $session.user_id || id != channel._id) {
+				return;
+			}
+
+			for (const { _id } of currentlyTypingUsers) {
+				if (user == _id) {
+					return;
+				}
+			}
+
+			currentlyTypingUsers[currentlyTypingUsers.length] = await client.api.fetchUser(user);
+		});
+
+		client.on('ChannelStopTyping', ({ id, user }) => {
+			if (id == channel._id) {
+				currentlyTypingUsers = currentlyTypingUsers.filter((u) => u._id != user);
+			}
+		});
+	}
+
+	$: listenToTypingEvents($settings['jolt:receive-typing-indicators']);
+
 	onMount(() => {
-		event.listen<Message>('message', ({ payload: message }) => {
+		client.on('Message', (message) => {
 			if (message.channel == channel._id) {
 				messages.update((messages) => {
-					messages.push(message);
+					messages.push(message as Message);
 					return messages;
 				});
 			}
 		});
 
-		event.listen<ChannelMessageDeletePayload>(
-			'message_delete',
-			({ payload: { id, channel: channel_id } }) => {
-				if (channel_id != channel._id) {
-					return;
+		client.on('MessageDelete', ({ id, channel: channel_id }) => {
+			if (channel_id != channel._id) {
+				return;
+			}
+
+			messages.update((messages) => messages.filter((message) => message._id != id));
+		});
+
+		client.on('MessageUpdate', ({ id, channel: channel_id, data }) => {
+			if (channel_id != channel._id) {
+				return;
+			}
+
+			messages.update((messages) => {
+				const index = messages.findIndex((message) => message._id == id);
+				const message = messages[index];
+
+				if (data.content != undefined) {
+					message.content = data.content;
 				}
 
-				messages.update((messages) => messages.filter((message) => message._id != id));
-			}
-		);
-
-		event.listen<ChannelMessageUpdatePayload>(
-			'message_update',
-			({ payload: { id, channel: channel_id, data } }) => {
-				if (channel_id != channel._id) {
-					return;
+				if (data.embeds != undefined) {
+					message.embeds = data.embeds;
 				}
 
-				messages.update((messages) => {
-					const index = messages.findIndex((message) => message._id == id);
-					const message = messages[index];
+				message.edited = data.edited;
 
-					if (data.content != undefined) {
-						message.content = data.content;
-					}
-
-					if (data.embeds != undefined) {
-						message.embeds = data.embeds;
-					}
-
-					message.edited = data.edited;
-
-					messages[index] = message;
-					return messages;
-				});
-			}
-		);
-
-		event.listen<ChannelTypingPayload>(
-			'channel_start_typing',
-			async ({ payload: { user_id, channel_id } }) => {
-				if (
-					user_id == $session.user_id ||
-					channel_id != channel._id ||
-					currentlyTypingUsers.map((user) => user._id).includes(user_id)
-				) {
-					return;
-				}
-
-				currentlyTypingUsers[currentlyTypingUsers.length] = await fetchUser(user_id);
-			}
-		);
-
-		event.listen<ChannelTypingPayload>(
-			'channel_stop_typing',
-			({ payload: { user_id, channel_id } }) => {
-				if (channel_id == channel._id) {
-					currentlyTypingUsers = currentlyTypingUsers.filter((user) => user._id != user_id);
-				}
-			}
-		);
+				messages[index] = message;
+				return messages;
+			});
+		});
 	});
 
 	async function sendMessage() {
-		const data_message_send: DataMessageSend = {
+		await client.api.sendMessage(channel._id, {
 			content: messageInputNode.value.trim(),
 			replies: $replies.map(({ message: { _id }, mention }) => ({
 				id: _id,
 				mention
 			}))
-		};
+		});
 
 		replies.set([]);
 		messageInputNode.value = '';
-
-		await invoke<Message>('send_message', { channel_id: channel._id, data_message_send });
 	}
+
+	let channelName: string;
+
+	async function updateChannelName(channel: Channel) {
+		if (
+			channel.channel_type == 'TextChannel' ||
+			channel.channel_type == 'VoiceChannel' ||
+			channel.channel_type == 'Group'
+		) {
+			channelName = `#${channel.name}`;
+			return;
+		}
+
+		if (channel.channel_type == 'SavedMessages') {
+			channelName = $_('channel.notes');
+			return;
+		}
+
+		channelName = `@${getDisplayName(
+			await client.api.fetchUser(
+				channel.recipients[0] == $session.user_id ? channel.recipients[1] : channel.recipients[0]
+			)
+		)}`;
+	}
+
+	$: updateChannelName(channel);
 </script>
 
 <div class="main-content-container">
@@ -145,12 +170,11 @@
 		{#each currentlyTypingUsers as user}
 			{@const displayName = getDisplayName(user)}
 			<div>
-				<img
-					src="{$settings.lowDataMode ? '/user.svg' : getDisplayAvatar(user)}}"
-					class="inline aspect-square rounded-3xl"
-					width="16"
-					height="16"
-					alt={displayName}
+				<UserProfilePicture
+					src="{$settings['jolt:low-data-mode'] ? '/user.svg' : getDisplayAvatar(user)}"
+					width={16}
+					height={16}
+					name={displayName}
 				/>
 				{displayName}
 				{$_('user.is-typing')}...
@@ -160,7 +184,7 @@
 			{$_('message.replying-to')}
 		{/if}
 		{#each $replies as reply}
-			{@const user = fetchUser(reply.message.author)}
+			{@const user = client.api.fetchUser(reply.message.author)}
 			<div>
 				<strong>
 					{#await user then user}
@@ -173,24 +197,29 @@
 			</div>
 		{/each}
 		<form class="m-4" on:submit|preventDefault={sendMessage}>
-			{#await getChannelName(channel, $session.user_id) then name}
-				<div class="bg-gray-500 rounded-xl px-2 pt-2">
-					<textarea
-						on:input={() => invoke('start_typing', { channel_id: channel._id })}
-						on:keydown={(event) => {
-							if (event.shiftKey || event.key != 'Enter') {
-								return;
-							}
+			<div class="bg-gray-500 rounded-xl px-2 pt-2">
+				<textarea
+					on:input={() => {
+						if ($settings['jolt:send-typing-indicators']) {
+							client.websocket.send({
+								type: 'BeginTyping',
+								channel: channel._id
+							});
+						}
+					}}
+					on:keydown={(event) => {
+						if (event.shiftKey || event.key != 'Enter') {
+							return;
+						}
 
-							event.preventDefault();
-							sendMessage();
-						}}
-						bind:this={messageInputNode}
-						class="outline-none resize-none bg-inherit w-full"
-						placeholder="{$_('send-message-in')} {name}"
-					/>
-				</div>
-			{/await}
+						event.preventDefault();
+						sendMessage();
+					}}
+					bind:this={messageInputNode}
+					class="outline-none resize-none bg-inherit w-full"
+					placeholder="{$_('send-message-in')} {channelName}"
+				/>
+			</div>
 		</form>
 	</div>
 </div>

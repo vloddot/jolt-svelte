@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { usersKey, membersKey, repliesKey, messagesKey } from '.';
-	import { fetchUser, getDisplayAvatar, getDisplayName } from '$lib/util';
 	import { getContext } from '$lib/context';
 	import { selectedServerIDKey } from '@routes/(app)/context';
-	import { sessionKey } from '@routes/context';
+	import { clientKey, sessionKey } from '@routes/context';
 	import { settingsKey } from '@routes/context';
 	import { _, date, time } from 'svelte-i18n';
 	import Embed from './Embed.svelte';
 	import Attachment from './Attachment.svelte';
 	import SystemMessage from './SystemMessage.svelte';
-	import { invoke } from '@tauri-apps/api';
 	import { decodeTime } from 'ulid';
+	import { getDisplayAvatar, getDisplayName } from '$lib/util';
+	import UserProfilePicture from '@components/UserProfilePicture.svelte';
 
 	/**
 	 * Message to show.
@@ -23,6 +23,7 @@
 
 	const session = getContext(sessionKey)!;
 	const settings = getContext(settingsKey)!;
+	const client = getContext(clientKey)!;
 	const selectedServerID = getContext(selectedServerIDKey);
 
 	const messages = getContext(messagesKey);
@@ -64,16 +65,19 @@
 			src: '/trash.svg',
 			alt: $_('message.delete'),
 			showIf: (message) => message.author == $session.user_id, // TODO: check permissions for message deleting
-			onclick: (message) =>
-				invoke('delete_message', { channel_id: message.channel, message_id: message._id })
+			onclick: (message) => client.api.deleteMessage(message.channel, message._id)
 		}
 	];
 
 	async function updateAuthor(id: string) {
+		if (id == '0'.repeat(26)) {
+			return;
+		}
+
 		const user = $users?.find((user) => user._id == id);
 
 		if (user == undefined) {
-			author = await fetchUser(id);
+			author = await client.api.fetchUser(id);
 			return;
 		}
 
@@ -87,14 +91,8 @@
 	}
 
 	async function editMessage() {
-		const data_edit_message: DataEditMessage = {
+		const editedMessage = await client.api.editMessage(message.channel, message._id, {
 			content: messageContentToEdit
-		};
-
-		const editedMessage = await invoke<Message>('edit_message', {
-			channel_id: message.channel,
-			message_id: message._id,
-			data_edit_message
 		});
 
 		messages?.update((messages) => {
@@ -106,20 +104,16 @@
 	$: updateAuthor(message.author);
 	$: $selectedServerID == undefined ? undefined : updateMember($selectedServerID, message.author);
 	$: displayName = getDisplayName(author, member, message);
-	$: displayAvatar = $settings.lowDataMode ? '/user.svg' : getDisplayAvatar(author, member, message);
+	$: displayAvatar = $settings['jolt:low-data-mode']
+		? '/user.svg'
+		: getDisplayAvatar(author, member, message);
 	$: timestamp = decodeTime(message._id);
 </script>
 
 <div class="hover:bg-gray-800 group p-4">
 	<div class="flex">
-		{#if !$settings.compactMode}
-			<img
-				alt={displayName}
-				src={displayAvatar}
-				width="40"
-				height="40"
-				class="rounded-3xl inline aspect-square"
-			/>
+		{#if !$settings['jolt:compact-mode']}
+			<UserProfilePicture name={displayName} src={displayAvatar} width={40} height={40} />
 		{/if}
 
 		{displayName}

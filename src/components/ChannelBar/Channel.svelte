@@ -1,31 +1,20 @@
 <script lang="ts">
 	import ChannelItem from './ChannelItem.svelte';
-	import { fetchUser, getAutumnURL, getDisplayAvatar, getDisplayName } from '$lib/util';
 	import { _ } from 'svelte-i18n';
 	import { getContext } from '$lib/context';
-	import { settingsKey, sessionKey } from '@routes/context';
+	import { settingsKey, sessionKey, clientKey } from '@routes/context';
+	import { getAutumnURL, getDisplayAvatar, getDisplayName } from '$lib/util';
 
 	const settings = getContext(settingsKey)!;
 	const session = getContext(sessionKey)!;
+	const client = getContext(clientKey)!;
 
-	function getChannelIcon(
-		channel:
-			| Exclude<Channel, { channel_type: 'DirectMessage' }>
-			| (Extract<Channel, { channel_type: 'DirectMessage' }> & { user: User })
-	): string {
-		if (channel.channel_type == 'DirectMessage') {
-			if ($settings.lowDataMode) {
-				return '/user.svg';
-			}
-
-			return getDisplayAvatar(channel.user);
-		}
-
+	function getChannelIcon(channel: Exclude<Channel, { channel_type: 'DirectMessage' }>): string {
 		if (channel.channel_type == 'SavedMessages') {
 			return '/note.svg';
 		}
 
-		if (channel.icon != undefined && !$settings.lowDataMode) {
+		if (channel.icon != undefined && !$settings['jolt:low-data-mode']) {
 			return getAutumnURL(channel.icon);
 		}
 
@@ -44,9 +33,9 @@
 
 {#if channel.channel_type == 'DirectMessage'}
 	{#if channel.active}
-		{#await fetchUser(channel.recipients[0] == $session.user_id ? channel.recipients[1] : channel.recipients[0]) then user}
+		{#await client.api.fetchUser(channel.recipients[0] == $session.user_id ? channel.recipients[1] : channel.recipients[0]) then user}
 			<ChannelItem
-				src={getChannelIcon({ ...channel, user })}
+				src={$settings['jolt:low-data-mode'] ? '/user.svg' : getDisplayAvatar(user)}
 				name={getDisplayName(user)}
 				width={32}
 				height={32}

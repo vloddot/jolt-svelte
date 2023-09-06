@@ -1,13 +1,14 @@
 <script lang="ts">
-	import { invoke } from '@tauri-apps/api';
 	import '$lib/index.css';
 	import './index.css';
-	import { _ } from 'svelte-i18n';
+	import { _, waitLocale } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
 	import { getContext } from '$lib/context';
-	import { sessionKey } from '@routes/context';
+	import { clientKey, sessionKey } from '@routes/context';
+	import detect from 'browser-detect';
 
-	const session = getContext(sessionKey);
+	const session = getContext(sessionKey)!;
+	const client = getContext(clientKey)!;
 
 	// current email input
 	let email = '';
@@ -15,14 +16,43 @@
 	// current password input
 	let password = '';
 
-	// error text to display
-	let error: string | undefined = undefined;
-
-	// MFA Methods with their input fields' values
+	// MFA methods with their input fields' values
 	let mfaMethods: [MFAMethod, string][] = [
 		['Totp', ''],
 		['Recovery', '']
 	];
+
+	// whether to remember the session or not
+	let rememberMe: boolean = true;
+
+	// error text to display
+	let error: string | undefined = undefined;
+
+	function getFriendlyName(): string {
+		const { mobile, os, name } = detect();
+
+		return `Jolt ${mobile ? 'mobile' : 'desktop'} on ${
+			('__TAURI__' in window ? os ?? name : name ?? os) ?? 'Unknown Platform'
+		}`;
+	}
+
+	async function handleLoginResponse(response: Exclude<ResponseLogin, { result: 'MFA' }>) {
+		if (response.result == 'Disabled') {
+			error = `Account ${response.user_id} is disabled.`;
+			return;
+		}
+
+		if (response.result == 'Success') {
+			session.set(response);
+
+			if (rememberMe) {
+				localStorage.setItem('session', JSON.stringify(response));
+			}
+
+			await goto('/');
+			return;
+		}
+	}
 
 	async function login() {
 		let mfa_response:
@@ -43,29 +73,47 @@
 			mfa_response = { password: mfaPassword };
 		}
 
-		const payload = await invoke<LoginPayload>('login', {
-			email,
-			password,
-			mfa_response
-		}).catch((err) => {
-			error = err;
-		});
+		const friendly_name = getFriendlyName();
+		const credentialLoginResponse = await client.api
+			.login({
+				email,
+				password,
+				friendly_name
+			})
+			.catch((err: string) => {
+				error = err;
+			});
 
-		if (payload == undefined) {
+		if (credentialLoginResponse == undefined) {
 			return;
 		}
 
-		if (payload.result == 'Success') {
-			session?.set(payload);
-			localStorage.setItem('session', JSON.stringify(payload));
+		if (credentialLoginResponse.result == 'MFA') {
+			const mfaLoginResponse = await client.api
+				.login({
+					mfa_ticket: credentialLoginResponse.ticket,
+					mfa_response,
+					friendly_name
+				})
+				.catch((err: string) => {
+					error = err;
+				});
 
-			await goto('/');
-		} else if (payload.result == 'Mfa') {
-			mfaMethods = payload.allowed_methods.map((method) => [method, '']);
-			error = 'Invalid MFA method';
-		} else if (payload.result == 'Disabled') {
-			error = `Account ${payload.user_id} is disabled.`;
+			if (mfaLoginResponse == undefined) {
+				return;
+			}
+
+			if (mfaLoginResponse.result == 'MFA') {
+				error = `Invalid MFA method or code.`;
+				mfaMethods = mfaLoginResponse.allowed_methods.map((method) => [method, '']);
+				return;
+			}
+
+			await handleLoginResponse(mfaLoginResponse);
+			return;
 		}
+
+		await handleLoginResponse(credentialLoginResponse);
 	}
 
 	function displayMfaMethod(method: string): string {
@@ -87,14 +135,21 @@
 			<input type="email" placeholder="Email" bind:value={email} />
 			<input type="password" placeholder="Password" bind:value={password} />
 
-			<p class="text-xs text-gray-500">
-				{$_('mfa.notice')}:
-			</p>
-			{#each mfaMethods as [method, value]}
-				<input type="text" placeholder={displayMfaMethod(method)} bind:value />
-			{/each}
+			{#await waitLocale() then}
+				<p class="text-xs text-gray-500">
+					{$_('mfa.notice')}:
+				</p>
+				{#each mfaMethods as [method, value]}
+					<input type="text" placeholder={displayMfaMethod(method)} bind:value />
+				{/each}
 
-			<button type="submit">{$_('login')}</button>
+				<span class="flex justify-center">
+					<label class="pr-2" for="remember-me">Remember me</label>
+					<input type="checkbox" name="remember-me" bind:checked={rememberMe} />
+				</span>
+
+				<button type="submit">{$_('login')}</button>
+			{/await}
 		</form>
 
 		{#if error}
