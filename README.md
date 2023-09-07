@@ -28,13 +28,19 @@ To compile or launch Jolt in a development server on your own machine, you're go
 <!-- omit in toc -->
 ### Build Command
 
-To build, execute this command:
+To build the desktop app (has to build the browser app with it; see below), execute this command:
 
 ```bash
 cargo tauri build
 ```
 
 > Once it is finished, you will find the build files in [`src-tauri/target/bundle`](src-tauri/target/bundle).
+
+To build the browser app, execute this command:
+
+```bash
+pnpm build
+```
 
 ## Development Server
 
@@ -46,11 +52,14 @@ Just run the following command:
 cargo tauri dev
 ```
 
+or if you want to run it in a browser:
+
+```bash
+pnpm dev
+```
+
 ## Links
 
-- [Reywen-Revolt](https://www.github.com/Toastxc/Reywen-Revolt)
-- [reywen-http](https://www.github.com/Toastxc/reywen-http)
-- [Support Reywen developer](https://ko-fi.com/M4M5J6V1B)
 - [Jolt Development Server on Revolt](https://rvlt.gg/AaCgcvgg)
 - [Tauri](https://tauri.app)
 - [Svelte](https://svelte.dev)
