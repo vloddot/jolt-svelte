@@ -13,9 +13,7 @@
 	$: pageParams = $page.params as LayoutParams;
 
 	const client = getContext(clientKey)!;
-
-	const selectedChannelID = writable<string | undefined>(undefined);
-	setContext(selectedChannelIDKey, selectedChannelID);
+	const selectedChannelID = getContext(selectedChannelIDKey) ?? writable();
 
 	$: selectedChannelID.set(pageParams.id);
 

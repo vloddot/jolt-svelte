@@ -21,11 +21,8 @@
 
 	$: pageParams = $page.params as RouteParams;
 
-	const selectedServerID = writable<string>();
-	const selectedChannelID = writable<string>();
-
-	setContext(selectedServerIDKey, selectedServerID);
-	setContext(selectedChannelIDKey, selectedChannelID);
+	const selectedServerID = getContext(selectedServerIDKey) ?? writable();
+	const selectedChannelID = getContext(selectedChannelIDKey) ?? writable();
 
 	$: selectedServerID.set(pageParams.sid);
 	$: selectedChannelID.set(pageParams.cid);
@@ -38,8 +35,8 @@
 		channel.set(await client.api.fetchChannel(cid));
 	}
 
-	$: updateServer($selectedServerID);
-	$: updateChannel($selectedChannelID);
+	$: if ($selectedServerID) updateServer($selectedServerID);
+	$: if ($selectedChannelID) updateChannel($selectedChannelID);
 </script>
 
 {#if $server != undefined}

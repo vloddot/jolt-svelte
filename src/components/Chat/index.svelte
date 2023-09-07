@@ -81,6 +81,7 @@
 	onMount(() => {
 		client.on('Message', (message) => {
 			if (message.channel == channel._id) {
+				client.api.ackMessage(channel._id, message._id);
 				messages.update((messages) => {
 					messages.push(message as Message);
 					return messages;
@@ -171,7 +172,7 @@
 			{@const displayName = getDisplayName(user)}
 			<div>
 				<UserProfilePicture
-					src="{$settings['jolt:low-data-mode'] ? '/user.svg' : getDisplayAvatar(user)}"
+					src={$settings['jolt:low-data-mode'] ? '/user.svg' : getDisplayAvatar(user)}
 					width={16}
 					height={16}
 					name={displayName}
@@ -180,20 +181,49 @@
 				{$_('user.is-typing')}...
 			</div>
 		{/each}
-		{#if $replies.length != 0}
-			{$_('message.replying-to')}
-		{/if}
 		{#each $replies as reply}
 			{@const user = client.api.fetchUser(reply.message.author)}
-			<div>
-				<strong>
-					{#await user then user}
-						{getDisplayName(user)}
-					{:catch}
-						&lt;{$_('user.unknown')}&gt;
-					{/await}
-				</strong>
-				<p class="overflow-ellipsis">{reply.message.content}</p>
+
+			<div class="flex">
+				<p>
+					{$_('message.replying-to')}
+
+					<strong>
+						{#await user then user}
+							{@const displayName = getDisplayName(user)}
+							<UserProfilePicture src={getDisplayAvatar(user)} name={displayName} />
+							{displayName}
+						{:catch}
+							{@const displayName = `<${$_('user.unknown')}>`}
+							<UserProfilePicture src="/user.svg" name={displayName} />
+							{displayName}
+						{/await}
+					</strong>
+				</p>
+
+				<p class="pl-1 text-gray-600 overflow-ellipsis">{reply.message.content}</p>
+
+				<div class="flex-1" />
+
+				<div class="pr-2">
+					<input id="mention" style="display: none;" type="checkbox" bind:checked={reply.mention} />
+					<label class="cursor-pointer" for="mention">
+						<img src="/at.svg" class="inline" alt="mention" />
+						{reply.mention ? 'ON' : 'OFF'}
+					</label>
+				</div>
+
+				<div class="pr-2">
+					<button
+						on:click={() =>
+							replies.update((replies) => {
+								replies = replies.filter((r) => r.message._id != reply.message._id);
+								return replies;
+							})}
+					>
+						<img src="/circle-x.svg" alt="Cancel mention" />
+					</button>
+				</div>
 			</div>
 		{/each}
 		<form class="m-4" on:submit|preventDefault={sendMessage}>

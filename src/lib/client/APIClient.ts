@@ -1,16 +1,22 @@
 export class APIClient {
-	cache:
-		| {
-				channels: Channel[];
-				emojis: Emoji[];
-				members: Member[];
-				servers: Server[];
-				users: User[];
-		  }
-		| undefined;
+	cache: {
+		channels: Channel[];
+		emojis: Emoji[];
+		members: Member[];
+		servers: Server[];
+		users: User[];
+	};
 	token: string | undefined;
 
 	constructor(token?: string) {
+		this.cache = {
+			channels: [],
+			emojis: [],
+			members: [],
+			servers: [],
+			users: []
+		};
+
 		if (token) {
 			this.token = token;
 		}
@@ -73,6 +79,10 @@ export class APIClient {
 		Exclude<Channel, { channel_type: 'TextChannel' | 'VoiceChannel' }>[]
 	> {
 		return this.req('GET', '/users/dms', true);
+	}
+
+	ackMessage(channel_id: string, message_id: string): Promise<void> {
+		return this.req('PUT', `/channels/${channel_id}/ack/${message_id}`, false);
 	}
 
 	async fetchSettings<K extends string>(keys: K[]): Promise<Record<K, [number, string]>> {

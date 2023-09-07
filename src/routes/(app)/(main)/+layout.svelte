@@ -5,11 +5,14 @@
 	import { settingsKey } from '@routes/context';
 	import ServerSidebarIcon from '@components/ServerSidebarIcon/index.svelte';
 	import { getDisplayAvatar, getAutumnURL, DEFAULT_SETTINGS } from '$lib/util';
+	import { selectedServerIDKey } from '@routes/(app)/context';
+	import { goto } from '$app/navigation';
 
 	const settings = getContext(settingsKey)!;
 	const session = getContext(sessionKey)!;
 	const client = getContext(clientKey)!;
-	let servers = client.api.cache?.servers;
+	const selectedServerID = getContext(selectedServerIDKey);
+	let servers = client.api.cache.servers;
 
 	settings.subscribe((settings) => {
 		servers = servers?.sort(
@@ -19,10 +22,34 @@
 		);
 	});
 
+	client.on('ServerCreate', ({ server, channels }) => {
+		client.api.cache.channels = client.api.cache.channels.concat(channels);
+		client.api.cache.servers.push(server);
+		servers = client.api.cache.servers;
+	});
+
+	client.on('ServerDelete', async ({ id }) => {
+		client.api.cache.channels = client.api.cache.channels.filter((channel) => {
+			if (channel.channel_type == 'TextChannel' || channel.channel_type == 'VoiceChannel') {
+				return channel.server != id;
+			}
+
+			return true;
+		});
+
+		client.api.cache.servers = client.api.cache.servers.filter((server) => server._id != id);
+		servers = client.api.cache.servers;
+
+		console.log($selectedServerID);
+		if ($selectedServerID == id) {
+			await goto('/');
+		}
+	});
+
 	client.on('Ready', async (event) => {
 		servers = event.servers;
 
-		const result = await client.api.fetchSettings<keyof Settings>(
+		const result = await client.api.fetchSettings(
 			Object.keys(DEFAULT_SETTINGS) as (keyof Settings)[]
 		);
 
