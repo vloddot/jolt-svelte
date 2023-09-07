@@ -37,16 +37,20 @@ export function getDisplayName(user?: User, member?: Member, message?: Message):
 }
 
 export function getDisplayAvatar(user?: User, member?: Member, message?: Message): string {
+	if (message?.system != undefined) {
+		return '/user.svg';
+	}
+
 	if (message?.webhook?.avatar != undefined) {
 		return message.webhook.avatar;
 	}
 
-	if (member?.avatar != undefined) {
-		return getAutumnURL(member.avatar);
-	}
-
 	if (message?.masquerade?.avatar != undefined) {
 		return message.masquerade.avatar;
+	}
+
+	if (member?.avatar != undefined) {
+		return getAutumnURL(member.avatar);
 	}
 
 	if (user?.avatar == undefined) {
