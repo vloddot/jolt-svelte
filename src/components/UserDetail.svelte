@@ -30,7 +30,7 @@
 
 	{#await client.api.fetchUserProfile(user._id) then profile}
 		{#if profile?.content != undefined}
-			<p>{profile.content}</p>
+			<p style="overflow-wrap: break-word;" class="whitespace-pre-wrap">{profile.content}</p>
 		{/if}
 	{/await}
 </div>

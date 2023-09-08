@@ -15,11 +15,21 @@
 	let servers = client.api.cache.servers;
 
 	settings.subscribe((settings) => {
-		servers = servers?.sort(
-			(s1, s2) =>
-				(settings.ordering.servers?.indexOf(s1._id) ?? -1) -
-				(settings.ordering.servers?.indexOf(s2._id) ?? -1)
-		);
+		servers = servers?.sort((a, b) => {
+			const aIndex = settings.ordering.servers?.indexOf(a._id) ?? -1;
+			const bIndex = settings.ordering.servers?.indexOf(b._id) ?? -1;
+
+			// sort unordered servers to put them at the bottom
+			if (bIndex == -1) {
+				return -1;
+			}
+
+			if (aIndex == -1) {
+				return 1;
+			}
+
+			return aIndex - bIndex;
+		});
 	});
 
 	client.on('ServerCreate', ({ server, channels }) => {
