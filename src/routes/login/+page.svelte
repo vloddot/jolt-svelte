@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '$lib/index.css';
 	import './index.css';
-	import { _, waitLocale } from 'svelte-i18n';
+	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
 	import { getContext } from '$lib/context';
 	import { clientKey, sessionKey } from '@routes/context';
