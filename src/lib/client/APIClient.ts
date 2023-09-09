@@ -32,12 +32,10 @@ export class APIClient {
 			method,
 			body,
 			headers: this.token == undefined ? this.token : { 'x-session-token': this.token }
-		}).catch((error) => {
-			throw new Error(error);
 		});
 
 		if (!response.ok) {
-			throw new Error(await response.text());
+			throw response;
 		}
 
 		if (response.body == null && expectResponse) {
@@ -57,6 +55,10 @@ export class APIClient {
 
 	deleteSession(id: string): Promise<void> {
 		return this.req('DELETE', `/auth/session/${id}`, false);
+	}
+
+	createServer(body: DataCreateServer): Promise<CreateServerResponse> {
+		return this.req('POST', '/servers/create', true, JSON.stringify(body));
 	}
 
 	async fetchChannel(id: string): Promise<Channel> {

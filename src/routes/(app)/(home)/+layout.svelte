@@ -4,10 +4,9 @@
 	import { writable } from 'svelte/store';
 	import type { LayoutParams } from './$types';
 	import { selectedChannelIDKey } from '@routes/(app)/context';
-	import { getContext, setContext } from '$lib/context';
+	import { getContext } from '$lib/context';
 	import ChannelComponent from '@components/ChannelBar/Channel.svelte';
 	import { clientKey } from '@routes/context';
-	import ArrayFind from '@components/ArrayFind.svelte';
 	import { onMount } from 'svelte';
 
 	$: pageParams = $page.params as LayoutParams;

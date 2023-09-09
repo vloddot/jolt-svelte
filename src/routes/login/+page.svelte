@@ -6,6 +6,7 @@
 	import { getContext } from '$lib/context';
 	import { clientKey, sessionKey } from '@routes/context';
 	import detect from 'browser-detect';
+	import { appWindow } from '@tauri-apps/api/window';
 
 	const session = getContext(sessionKey)!;
 	const client = getContext(clientKey)!;
@@ -19,7 +20,8 @@
 	// MFA methods with their input fields' values
 	let mfaMethods: [MFAMethod, string][] = [
 		['Totp', ''],
-		['Recovery', '']
+		['Recovery', ''],
+		['Password', '']
 	];
 
 	// whether to remember the session or not
@@ -125,6 +127,11 @@
 			}[method] ?? 'Unknown MFA Method'
 		);
 	}
+
+	const TITLE = 'Jolt - Login';
+	$: if ('__TAURI__' in window) {
+		appWindow.setTitle(TITLE);
+	}
 </script>
 
 <div class="w-full h-full flex items-center flex-col justify-center relative">
@@ -132,28 +139,33 @@
 		class="rounded-xl relative items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm px-6 py-12 max-w-[90%] mb-auto"
 	>
 		<form class="flex flex-col" on:submit|preventDefault={login}>
+			<h1 class="text-3xl">Jolt</h1>
+
 			<input type="email" placeholder="Email" bind:value={email} />
 			<input type="password" placeholder="Password" bind:value={password} />
 
-			{#await waitLocale() then}
-				<p class="text-xs text-gray-500">
-					{$_('mfa.notice')}:
-				</p>
-				{#each mfaMethods as [method, value]}
-					<input type="text" placeholder={displayMfaMethod(method)} bind:value />
-				{/each}
+			<p class="text-xs text-gray-500">
+				{$_('mfa.notice')}:
+			</p>
 
-				<span class="flex justify-center">
-					<label class="pr-2" for="remember-me">Remember me</label>
-					<input type="checkbox" name="remember-me" bind:checked={rememberMe} />
-				</span>
+			{#each mfaMethods as [method, value]}
+				<input type="text" placeholder={displayMfaMethod(method)} bind:value />
+			{/each}
 
-				<button type="submit">{$_('login')}</button>
-			{/await}
+			<span class="flex justify-center">
+				<label class="pr-2" for="remember-me">Remember me</label>
+				<input type="checkbox" name="remember-me" bind:checked={rememberMe} />
+			</span>
+
+			<button type="submit">{$_('login')}</button>
 		</form>
 
 		{#if error}
-			{error}
+			<p>{error}</p>
 		{/if}
 	</div>
 </div>
+
+<svelte:head>
+	<title>{TITLE}</title>
+</svelte:head>

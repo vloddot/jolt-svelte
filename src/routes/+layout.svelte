@@ -6,6 +6,7 @@
 	import '$lib/i18n';
 	import { goto } from '$app/navigation';
 	import { DEFAULT_SETTINGS } from '$lib/util';
+	import { waitLocale } from 'svelte-i18n';
 
 	const settings = writable<Settings>(DEFAULT_SETTINGS);
 	setContext(settingsKey, settings);
@@ -30,4 +31,6 @@
 	}
 </script>
 
-<slot />
+{#await waitLocale() then}
+	<slot />
+{/await}

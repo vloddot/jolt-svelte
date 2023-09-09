@@ -10,19 +10,23 @@
 	import { clientKey } from '@routes/context';
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
 	import UserProfilePicture from '@components/UserProfilePicture.svelte';
+	import { redirect } from '@sveltejs/kit';
+	import { appWindow } from '@tauri-apps/api/window';
 
 	const client = getContext(clientKey)!;
 
-	const server = writable<Server | undefined>(undefined);
-	const channel = writable<Channel | undefined>(undefined);
+	$: pageParams = $page.params as RouteParams;
+
+	const server = writable<Server | undefined>();
+	const channel = writable<
+		Extract<Channel, { channel_type: 'TextChannel' | 'VoiceChannel' }> | undefined
+	>();
 
 	setContext(serverKey, server);
 	setContext(channelKey, channel);
 
-	$: pageParams = $page.params as RouteParams;
-
-	const selectedServerID = getContext(selectedServerIDKey) ?? writable();
-	const selectedChannelID = getContext(selectedChannelIDKey) ?? writable();
+	const selectedServerID = getContext(selectedServerIDKey) ?? writable(pageParams.sid);
+	const selectedChannelID = getContext(selectedChannelIDKey) ?? writable(pageParams.cid);
 
 	$: selectedServerID.set(pageParams.sid);
 	$: selectedChannelID.set(pageParams.cid);
@@ -32,11 +36,35 @@
 	}
 
 	async function updateChannel(cid: string) {
-		channel.set(await client.api.fetchChannel(cid));
+		const result = await client.api.fetchChannel(cid);
+
+		if (result.channel_type != 'TextChannel' && result.channel_type != 'VoiceChannel') {
+			throw redirect(302, `/channels/${cid}`);
+		}
+
+		channel.set(result);
 	}
 
 	$: if ($selectedServerID) updateServer($selectedServerID);
 	$: if ($selectedChannelID) updateChannel($selectedChannelID);
+
+	$: {
+		let title = 'Jolt';
+
+		if ($server != undefined) {
+			title += ` - ${$server.name}`;
+		}
+
+		if ($channel != undefined) {
+			title += ` | #${$channel.name}`;
+		}
+
+		if ('__TAURI__' in window) {
+			appWindow.setTitle(title);
+		} else {
+			document.title = title;
+		}
+	}
 </script>
 
 {#if $server != undefined}

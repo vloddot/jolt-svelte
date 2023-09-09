@@ -6,6 +6,9 @@
 	import { clientKey, sessionKey } from '@routes/context';
 	import { getContext } from '$lib/context';
 	import { redirect } from '@sveltejs/kit';
+	import { getDisplayName } from '$lib/util';
+	import { _ } from 'svelte-i18n';
+	import { appWindow } from '@tauri-apps/api/window';
 
 	$: pageParams = $page.params as RouteParams;
 
@@ -14,6 +17,8 @@
 
 	let channel: Exclude<Channel, { channel_type: 'TextChannel' | 'VoiceChannel' }> | undefined =
 		undefined;
+
+	let user: User | undefined;
 
 	async function updateChannel(channel_id: string) {
 		const result = await client.api.fetchChannel(channel_id);
@@ -25,17 +30,42 @@
 		channel = result;
 	}
 
+	async function updateUser(
+		channel: Extract<Channel, { channel_type: 'DirectMessage' | 'Group' }>
+	) {
+		user = await client.api.fetchUser(
+			channel.recipients[0] == $session.user_id ? channel.recipients[1] : channel.recipients[0]
+		);
+	}
+
 	$: updateChannel(pageParams.id);
+	$: channel != undefined && channel.channel_type != 'SavedMessages' && updateUser(channel);
+	$: {
+		let title = 'Jolt';
+		if (channel?.channel_type == 'SavedMessages') {
+			title += ` - ${$_('channel.notes')}`;
+		} else if (user == undefined) {
+			title += ` - ${$_('channel.dm.title')}`;
+		} else {
+			title += ` - ${$_('channel.dm.with')} ${getDisplayName(user)}`;
+		}
+
+		if ('__TAURI__' in window) {
+			appWindow.setTitle(title);
+		} else {
+			document.title = title;
+		}
+	}
 </script>
 
 {#if channel != undefined}
 	<Chat {channel} />
 
 	{#if channel.channel_type != 'SavedMessages'}
-		{#await client.api.fetchUser(channel.recipients[0] == $session.user_id ? channel.recipients[1] : channel.recipients[0]) then user}
+		{#if user != undefined}
 			<div class="members-list-container">
 				<UserDetail {user} />
 			</div>
-		{/await}
+		{/if}
 	{/if}
 {/if}

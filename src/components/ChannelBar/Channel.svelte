@@ -57,7 +57,7 @@
 {:else if channel.channel_type == 'TextChannel' || channel.channel_type == 'VoiceChannel' || channel.channel_type == 'Group' || channel.channel_type == 'SavedMessages'}
 	<ChannelItem
 		src={getChannelIcon(channel)}
-		name={channel.channel_type == 'SavedMessages' ? 'Notes' : channel.name}
+		name={channel.channel_type == 'SavedMessages' ? $_('channel.notes') : channel.name}
 		width={24}
 		height={24}
 		id={channel._id}

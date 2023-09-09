@@ -17,7 +17,7 @@ features = []
 
 [dependencies.tauri]
 version = "1.4.1"
-features = ["shell-open", "devtools", "windows7-compat"]
+features = [ "window-set-title", "shell-open", "devtools", "windows7-compat"]
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem and the built-in dev server is disabled.
