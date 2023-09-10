@@ -41,14 +41,16 @@
 	$: updateChannel(pageParams.id);
 	$: channel != undefined && channel.channel_type != 'SavedMessages' && updateUser(channel);
 	$: {
-		let title = 'Jolt';
+		let title = '';
 		if (channel?.channel_type == 'SavedMessages') {
-			title += ` - ${$_('channel.notes')}`;
+			title += $_('channel.notes');
 		} else if (user == undefined) {
-			title += ` - ${$_('channel.dm.title')}`;
+			title += $_('channel.dm.title');
 		} else {
-			title += ` - ${$_('channel.dm.with')} ${getDisplayName(user)}`;
+			title += `${$_('channel.dm.with')} ${getDisplayName(user)}`;
 		}
+
+		title += ' - Jolt';
 
 		if ('__TAURI__' in window) {
 			appWindow.setTitle(title);

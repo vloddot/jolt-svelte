@@ -49,15 +49,19 @@
 	$: if ($selectedChannelID) updateChannel($selectedChannelID);
 
 	$: {
-		let title = 'Jolt';
+		let title: string = '';
 
 		if ($server != undefined) {
-			title += ` - ${$server.name}`;
+			title += $server.name;
+		} else {
+			title += 'Server';
 		}
 
 		if ($channel != undefined) {
 			title += ` | #${$channel.name}`;
 		}
+
+		title += ' - Jolt';
 
 		if ('__TAURI__' in window) {
 			appWindow.setTitle(title);

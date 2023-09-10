@@ -21,20 +21,21 @@
 
 	$: savedMessagesChannel = dms?.find((channel) => channel.channel_type == 'SavedMessages');
 
-	function fetchDMs() {
-		client.api.fetchDirectMessages().then((result) => (dms = result));
+	function updateDMs() {
+		dms = client.api.cache.channels.filter((channel) =>
+			['DirectMessage', 'Group', 'SavedMessages'].includes(channel.channel_type)
+		) as typeof dms;
+
+		if ((dms?.length ?? 0) == 0 && client.ready) {
+			client.api.fetchDirectMessages().then((result) => (dms = result));
+		}
 	}
 
-	onMount(() => {
-		if (client.ready) {
-			fetchDMs();
-		}
-	});
-
-	client.on('Ready', fetchDMs);
+	client.on('Ready', updateDMs);
+	onMount(updateDMs);
 </script>
 
-<div class="channel-bar-container">
+<div role="list" class="channel-bar-container">
 	{#if dms != undefined}
 		{#if savedMessagesChannel != undefined}
 			<ChannelComponent channel={savedMessagesChannel} />

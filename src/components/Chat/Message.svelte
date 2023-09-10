@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { usersKey, membersKey, repliesKey, messagesKey } from '.';
+	import { usersKey, membersKey, repliesKey, messagesKey, getUser } from '.';
 	import { getContext } from '$lib/context';
-	import { selectedServerIDKey } from '@routes/(app)/context';
+	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
 	import { clientKey, sessionKey } from '@routes/context';
 	import { settingsKey } from '@routes/context';
 	import { _, date, time } from 'svelte-i18n';
@@ -11,6 +11,7 @@
 	import { decodeTime } from 'ulid';
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
 	import UserProfilePicture from '@components/UserProfilePicture.svelte';
+	import MessageReply from '@components/Chat/MessageReply.svelte';
 
 	/**
 	 * Message to show.
@@ -25,6 +26,7 @@
 	const settings = getContext(settingsKey)!;
 	const client = getContext(clientKey)!;
 	const selectedServerID = getContext(selectedServerIDKey);
+	const selectedChannelID = getContext(selectedChannelIDKey)!;
 
 	const messages = getContext(messagesKey);
 	const users = getContext(usersKey);
@@ -69,21 +71,6 @@
 		}
 	];
 
-	async function updateAuthor(id: string) {
-		if (id == '0'.repeat(26)) {
-			return;
-		}
-
-		const user = $users?.find((user) => user._id == id);
-
-		if (user == undefined) {
-			author = await client.api.fetchUser(id);
-			return;
-		}
-
-		author = user;
-	}
-
 	async function updateMember(server_id: string, user_id: string) {
 		member = $members?.find(
 			(member) => member._id.server == server_id && member._id.user == user_id
@@ -101,7 +88,7 @@
 		});
 	}
 
-	$: updateAuthor(message.author);
+	$: getUser(client.api, $users ?? [], message.author).then((user) => (author = user));
 	$: $selectedServerID == undefined ? undefined : updateMember($selectedServerID, message.author);
 	$: displayName = getDisplayName(author, member, message);
 	$: displayAvatar = $settings['jolt:low-data-mode']
@@ -110,7 +97,15 @@
 	$: timestamp = decodeTime(message._id);
 </script>
 
-<div class="hover:bg-gray-800 group p-4">
+<div id={message._id} class="flex flex-col hover:bg-gray-800 group p-4">
+	{#if message.replies != undefined && message.replies.length != 0}
+		<div class="flex flex-col">
+			{#each message.replies as id}
+				<MessageReply {id} />
+			{/each}
+		</div>
+	{/if}
+
 	<div class="flex">
 		{#if !$settings['jolt:compact-mode']}
 			<UserProfilePicture name={displayName} src={displayAvatar} width={40} height={40} />
@@ -132,7 +127,7 @@
 
 		<div class="flex-1" />
 
-		<div class="hidden group-hover:block">
+		<div class="hidden group-hover:flex">
 			{#each controls as { src, alt, onclick, showIf }}
 				{#if showIf?.(message) ?? true}
 					<button class="ml-2" aria-label={alt} on:click={() => onclick(message)}>

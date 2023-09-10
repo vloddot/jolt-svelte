@@ -28,7 +28,7 @@
 		await goto(`/servers/${server._id}/channels/${channels[0]._id}`);
 	}
 
-	const TITLE = 'Jolt - Create Server';
+	const TITLE = 'Create Server - Jolt';
 	$: {
 		if ('__TAURI__' in window) {
 			appWindow.setTitle(TITLE);
@@ -36,9 +36,10 @@
 	}
 </script>
 
-<div class="channel-bar-conatiner"></div>
+<!-- TODO: should be populated with things, currently a placeholder to make the main content on the center -->
+<div class="channel-bar-container"></div>
 
-<div class="main-content-container">
+<main class="main-content-container">
 	<div class="w-full h-full flex items-center flex-col justify-center relative">
 		<div
 			class="rounded-xl relative items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm px-6 py-12 w-[90%] mb-auto"
@@ -62,7 +63,7 @@
 				</div>
 
 				<span class="flex justify-center">
-					<label for="nsfw">Is your server NSFW?</label>
+					<label class="pr-2" for="nsfw">Is your server NSFW?</label>
 					<input type="checkbox" name="nsfw" bind:checked={nsfw} />
 				</span>
 
@@ -74,7 +75,7 @@
 			{/if}
 		</div>
 	</div>
-</div>
+</main>
 
 <svelte:head>
 	<title>{TITLE}</title>

@@ -1,14 +1,15 @@
 <script lang="ts">
 	import Modal from '@components/Modal.svelte';
-	import { shell } from '@tauri-apps/api';
 
-	export let link: string;
+	export let href: string;
 	let showModal = false;
 </script>
 
-<Modal on:submit={() => shell.open(link)} bind:showModal>
-	<h1 slot="header">External Link</h1>
+<Modal on:submit={() => window.open(href)} bind:showModal>
+	<h1 class="text-3xl" slot="header">External Link</h1>
 	<p>Are you sure you want to go to this link? External links can be dangerous.</p>
 </Modal>
 
-<button role="link" on:click={() => (showModal = true)}>{link}</button>
+<a {href} on:click|preventDefault={() => (showModal = true)} target="_blank" rel="noreferrer">
+	{href}
+</a>

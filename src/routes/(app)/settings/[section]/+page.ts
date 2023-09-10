@@ -1,5 +1,6 @@
+import sections from '@routes/(app)/settings/sections';
 import { fail } from '@sveltejs/kit';
-import type { PageLoad } from './$types';
+import type { EntryGenerator, PageLoad } from './$types';
 
 export const load = (async ({ params, parent }) => {
 	const { sections } = await parent();
@@ -12,3 +13,7 @@ export const load = (async ({ params, parent }) => {
 
 	return { section };
 }) satisfies PageLoad;
+
+export const entries = (() => {
+	return sections.map((section) => ({ section: section.id }));
+}) satisfies EntryGenerator;

@@ -153,8 +153,9 @@
 			{/each}
 
 			<span class="flex justify-center">
-				<label class="pr-2" for="remember-me">Remember me</label>
-				<input type="checkbox" name="remember-me" bind:checked={rememberMe} />
+				<label>
+					Remember me <input type="checkbox" name="remember-me" bind:checked={rememberMe} />
+				</label>
 			</span>
 
 			<button type="submit">{$_('login')}</button>
@@ -168,4 +169,5 @@
 
 <svelte:head>
 	<title>{TITLE}</title>
+	<meta name="description" content="Jolt - Login" />
 </svelte:head>

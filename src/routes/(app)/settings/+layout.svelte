@@ -6,6 +6,7 @@
 	import { clientKey } from '@routes/context';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+
 	export let data: LayoutData;
 
 	const client = getContext(clientKey)!;
@@ -32,6 +33,6 @@
 	</div>
 </div>
 
-<div class="main-content-container">
+<main class="main-content-container">
 	<slot />
-</div>
+</main>

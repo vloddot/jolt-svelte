@@ -5,20 +5,18 @@
 	import { clientKey } from '@routes/context';
 
 	export let user: User;
-	$: name = getDisplayName(user);
 
 	const client = getContext(clientKey)!;
 	let profile: UserProfile | undefined;
 
-	$: {
-		client.api.fetchUserProfile(user._id).then((result) => (profile = result));
-	}
+	$: name = getDisplayName(user);
+	$: client.api.fetchUserProfile(user._id).then((result) => (profile = result));
 </script>
 
 <div
-	style={(profile?.background != undefined &&
-		`background-image: url(${getAutumnURL(profile.background)})`) ||
-		undefined}
+	style={profile?.background != undefined
+		? `background-image: url(${getAutumnURL(profile.background)})`
+		: undefined}
 >
 	<UserProfilePicture width={64} height={64} src={getDisplayAvatar(user)} {name} />
 

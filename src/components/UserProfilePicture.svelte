@@ -23,5 +23,5 @@
 	alt={name}
 	{width}
 	{height}
-	class="rounded-3xl inline aspect-square"
+	class="rounded-3xl inline"
 />

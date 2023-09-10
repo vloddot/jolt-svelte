@@ -11,11 +11,12 @@
 	}
 </script>
 
-<div class="main-content-container">
+<main class="main-content-container">
 	<p>so um hi this is mr john jolt (home page ig)</p>
 	ig you can join a server
-</div>
+</main>
 
 <svelte:head>
 	<title>{TITLE}</title>
+	<meta name="description" content="Jolt - Home" />
 </svelte:head>

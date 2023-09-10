@@ -1,11 +1,7 @@
+import type { ReadyData } from '$lib/client/WebSocketClient';
+
 export class APIClient {
-	cache: {
-		channels: Channel[];
-		emojis: Emoji[];
-		members: Member[];
-		servers: Server[];
-		users: User[];
-	};
+	cache: ReadyData;
 	token: string | undefined;
 
 	constructor(token?: string) {
@@ -108,6 +104,10 @@ export class APIClient {
 				(member) => member._id.server == server_id && member._id.user == user_id
 			) ?? makeRequest()
 		);
+	}
+
+	fetchMessage(channel_id: string, message_id: string): Promise<Message> {
+		return this.req('GET', `/channels/${channel_id}/messages/${message_id}`, true);
 	}
 
 	queryMessages(

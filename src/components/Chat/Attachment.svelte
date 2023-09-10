@@ -13,7 +13,7 @@
 <div>
 	{#if attachment.metadata.type == 'Image'}
 		{#if $settings['jolt:low-data-mode']}
-			<span class="text-gray-500">[Image <ExternalLink link={getAutumnURL(attachment)} />]</span>
+			<span class="text-gray-500">[Image <ExternalLink href={getAutumnURL(attachment)} />]</span>
 		{:else}
 			<img src={getAutumnURL(attachment)} alt={attachment.filename} />
 		{/if}
@@ -27,13 +27,13 @@
 			<source src={getAutumnURL(attachment)} />
 		</audio>
 	{:else if attachment.metadata.type == 'File'}
-		<span class="text-gray-500"
-			>[File {attachment.filename}]
-			<ExternalLink link={getAutumnURL(attachment)} /></span
-		>
+		<span class="text-gray-500">
+			[File {attachment.filename}]
+			<ExternalLink href={getAutumnURL(attachment)} />
+		</span>
 	{:else if attachment.metadata.type == 'Text'}
 		{#if $settings['jolt:low-data-mode']}
-			<span class="text-gray-500">[Text <ExternalLink link={getAutumnURL(attachment)} />]</span>
+			<span class="text-gray-500">[Text <ExternalLink href={getAutumnURL(attachment)} />]</span>
 		{:else}
 			{#await fetch(getAutumnURL(attachment)) then response}
 				{#await response.text() then text}

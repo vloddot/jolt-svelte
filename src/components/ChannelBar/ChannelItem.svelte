@@ -41,14 +41,15 @@
 	const selectedChannelID = getContext(selectedChannelIDKey);
 </script>
 
-<a
-	href={$selectedServerID == undefined
-		? `/channels/${id}`
-		: `/servers/${$selectedServerID}/channels/${id}`}
->
-	<div role="listitem" class="p-2 {$selectedChannelID == id ? 'bg-gray-400' : 'hover:bg-gray-600'}">
+<div role="listitem" class="{$selectedChannelID == id ? 'bg-gray-400' : 'hover:bg-gray-600'}">
+	<a
+		class="p-2 block"
+		href={$selectedServerID == undefined
+			? `/channels/${id}`
+			: `/servers/${$selectedServerID}/channels/${id}`}
+	>
 		<img {src} {alt} {width} {height} class:rounded-3xl={rounded} class="inline aspect-square" />
 
 		{name}
-	</div>
-</a>
+	</a>
+</div>

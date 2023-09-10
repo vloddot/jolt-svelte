@@ -162,7 +162,7 @@
 	$: updateChannelName(channel);
 </script>
 
-<div class="main-content-container">
+<main class="main-content-container">
 	<div class="flex flex-col h-full overflow-x-hidden overflow-y-scroll">
 		<p>so um hi this is the start, i should make this text box much further down i think</p>
 		{#each $messages as message}
@@ -252,4 +252,4 @@
 			</div>
 		</form>
 	</div>
-</div>
+</main>
