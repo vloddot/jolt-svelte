@@ -23,7 +23,7 @@ To install, follow the [releases page](https://www.github.com/vloddot/jolt/relea
 <!-- omit in toc -->
 ### Prerequisites
 
-To compile or launch Jolt in a development server on your own machine, you're going to need Rust (through [rustup](https://rustup.rs)) and [PNPM](https://pnpm.io/installation), first run the following command to install NPM packages: `pnpm install` (you have to install pnpm to build), then you need to do some setup, if you are on NixOS, just run `nix develop` (recommended) or `nix-shell shell.nix`. If not, you can find the prerequisites in the [`shell.nix`](shell.nix) or [`flake.nix`](flake.nix) files in the Nix language. The things to install are in `packages` and `libraries` keys and a bit of setup to add to a shellrc or such is in `shellHook` key.
+To compile or launch Jolt in a development server on your own machine, you're going to need Rust (through [rustup](https://rustup.rs)) and [Bun](https://bun.sh), first run the following command to install NPM packages: `bun install` (you have to install packages to build), then you need to do some setup, if you are on NixOS, just run `nix develop` (recommended) or `nix-shell shell.nix`. If not, you can find the prerequisites in the [`shell.nix`](shell.nix) or [`flake.nix`](flake.nix) files in the Nix language. The things to install are in `packages` and `libraries` keys and a bit of setup to add to a shellrc or such is in `shellHook` key.
 
 <!-- omit in toc -->
 ### Build Command
@@ -39,7 +39,7 @@ cargo tauri build
 To build the browser app, execute this command:
 
 ```bash
-pnpm build
+bun run build
 ```
 
 ## Development Server
@@ -55,7 +55,7 @@ cargo tauri dev
 or if you want to run it in a browser:
 
 ```bash
-pnpm dev
+bun run dev
 ```
 
 ## Links
