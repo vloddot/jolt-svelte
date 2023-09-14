@@ -1,5 +1,5 @@
-import { PING_HEARTBEAT_INTERVAL, PONG_TIMEOUT } from './util';
 import { EventEmitter } from 'eventemitter3';
+import { PING_HEARTBEAT_INTERVAL, PONG_TIMEOUT } from './util';
 
 /**
  * Messages sent to the server
@@ -179,7 +179,7 @@ export class WebSocketClient extends EventEmitter<{
 	}
 
 	authenticate(token: string) {
-		this.#socket = new WebSocket(`wss://ws.revolt.chat?version=1&format=json&token=${token}`);
+		this.#socket = new WebSocket(`wss://ws.revolt.chat?token=${token}`);
 
 		this.#connectionState = 'connecting';
 
@@ -213,7 +213,7 @@ export class WebSocketClient extends EventEmitter<{
 
 		switch (this.connectionState) {
 			case 'connecting':
-				if (message.type === 'Ready') {
+				if (message.type == 'Ready') {
 					this.emit('serverEvent', message);
 					this.#connectionState = 'connected';
 				} else if (message.type != 'Authenticated') {
@@ -221,7 +221,7 @@ export class WebSocketClient extends EventEmitter<{
 				}
 				break;
 			case 'connected':
-				if (message.type === 'Authenticated' || message.type === 'Ready') {
+				if (message.type == 'Authenticated' || message.type == 'Ready') {
 					throw new Error(`Received ${message.type} in connecting state.`);
 				}
 

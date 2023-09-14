@@ -32,7 +32,7 @@
 				alt={embed.title}
 				width="24"
 				height="24"
-				class="inline aspect-square rounded-3xl"
+				class="inline rounded-3xl"
 			/>
 		{/if}
 

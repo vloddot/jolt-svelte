@@ -2,7 +2,7 @@
 	@apply relative flex items-center justify-center
           h-12 w-12 my-2 mx-auto shadow-lg
           bg-gray-800 text-green-500
-          rounded-3xl
+          rounded-3xl object-cover
           transition-all duration-75
           cursor-pointer;
 }

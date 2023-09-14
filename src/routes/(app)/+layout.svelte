@@ -1,15 +1,13 @@
 <script lang="ts">
-	import '$lib/index.css';
-	import { getContext } from '$lib/context';
-	import { clientKey, sessionKey } from '@routes/context';
-	import { settingsKey } from '@routes/context';
-	import ServerSidebarIcon from '@components/ServerSidebarIcon/index.svelte';
-	import { getDisplayAvatar, getAutumnURL, DEFAULT_SETTINGS } from '$lib/util';
-	import { selectedServerIDKey, selectedChannelIDKey } from '@routes/(app)/context';
 	import { goto } from '$app/navigation';
+	import { getContext, setContext } from '$lib/context';
+	import '$lib/index.css';
+	import { DEFAULT_SETTINGS, getAutumnURL, getDisplayAvatar } from '$lib/util';
+	import ServerSidebarIcon from '@components/ServerSidebarIcon/index.svelte';
+	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
+	import { clientKey, sessionKey, settingsKey } from '@routes/context';
 	import { writable } from 'svelte/store';
 	import './index.css';
-	import { setContext } from '$lib/context';
 
 	const settings = getContext(settingsKey)!;
 	const session = getContext(sessionKey)!;
@@ -115,7 +113,7 @@
 					<ServerSidebarIcon
 						href="/servers/{server._id}/channels/{server.channels[0]}"
 						tooltip={server.name}
-						icon={server.icon == undefined ? undefined : getAutumnURL(server.icon)}
+						icon={server.icon == undefined ? undefined : `${getAutumnURL(server.icon, { max_side: '256' })}`}
 					/>
 				{/if}
 			{/each}

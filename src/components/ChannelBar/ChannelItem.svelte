@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getContext } from '$lib/context';
+	import UserProfilePicture from '@components/UserProfilePicture.svelte';
 	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
 
 	/**
@@ -28,11 +29,6 @@
 	export let height: number;
 
 	/**
-	 * Whether the image is rounded or not.
-	 */
-	export let rounded = false;
-
-	/**
 	 * Channel ID.
 	 */
 	export let id: string;
@@ -48,7 +44,7 @@
 			? `/channels/${id}`
 			: `/servers/${$selectedServerID}/channels/${id}`}
 	>
-		<img {src} {alt} {width} {height} class:rounded-3xl={rounded} class="inline aspect-square" />
+		<UserProfilePicture {src} name={alt} {width} {height} />
 
 		{name}
 	</a>

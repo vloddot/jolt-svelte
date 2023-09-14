@@ -2,13 +2,13 @@ import EventEmitter from 'eventemitter3';
 import { APIClient } from './APIClient';
 import { type ServerMessage, WebSocketClient } from './WebSocketClient';
 
-export type Events = {
-	[K in Exclude<ServerMessage['type'], 'Bulk'>]: (
-		event: Omit<Extract<ServerMessage, { type: K }>, 'type'>
+export type Events<T extends { type: string | number | symbol }> = {
+	[K in Exclude<T['type'], 'Bulk'>]: (
+		event: Omit<Extract<T, { type: K }>, 'type'>
 	) => void;
 };
 
-export class Client extends EventEmitter<Events> {
+export class Client extends EventEmitter<Events<ServerMessage>> {
 	api: APIClient;
 	websocket: WebSocketClient;
 

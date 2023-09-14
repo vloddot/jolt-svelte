@@ -1,9 +1,9 @@
 <script lang="ts">
-	import ChannelItem from './ChannelItem.svelte';
-	import { _ } from 'svelte-i18n';
 	import { getContext } from '$lib/context';
-	import { settingsKey, sessionKey, clientKey } from '@routes/context';
 	import { getAutumnURL, getDisplayAvatar, getDisplayName } from '$lib/util';
+	import { clientKey, sessionKey, settingsKey } from '@routes/context';
+	import { _ } from 'svelte-i18n';
+	import ChannelItem from './ChannelItem.svelte';
 
 	const settings = getContext(settingsKey)!;
 	const session = getContext(sessionKey)!;
@@ -15,7 +15,7 @@
 		}
 
 		if (channel.icon != undefined && !$settings['jolt:low-data-mode']) {
-			return getAutumnURL(channel.icon);
+			return `${getAutumnURL(channel.icon, { max_side: '256' })}`;
 		}
 
 		switch (channel.channel_type) {
@@ -39,7 +39,6 @@
 				name={getDisplayName(user)}
 				width={32}
 				height={32}
-				rounded
 				id={channel._id}
 			/>
 		{:catch}
@@ -49,7 +48,6 @@
 				alt={$_('user.unknown')}
 				width={32}
 				height={32}
-				rounded
 				id={channel._id}
 			/>
 		{/await}

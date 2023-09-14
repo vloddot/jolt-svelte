@@ -57,6 +57,14 @@ export class APIClient {
 		return this.req('POST', '/servers/create', true, JSON.stringify(body));
 	}
 
+	joinCall(channel_id: string): Promise<string> {
+		return new Promise((resolve, reject) => {
+			this.req<{ token: string }>('POST', `/channels/${channel_id}/join_call`, true)
+				.then(({ token }) => resolve(token))
+				.catch(reject);
+		});
+	}
+
 	async fetchChannel(id: string): Promise<Channel> {
 		return (
 			this.cache?.channels.find((channel) => channel._id == id) ??

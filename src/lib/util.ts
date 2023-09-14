@@ -14,15 +14,22 @@ export const DEFAULT_SETTINGS: Settings = {
 	'jolt:send-typing-indicators': true
 };
 
-export function getAutumnURL(file: AutumnFile): string {
-	return `${AUTUMN_URL}/${file.tag}/${file._id}`;
+export function getAutumnURL(
+	file: { _id: string; tag: string },
+	options?: Partial<{ max_side: string }>
+): string {
+	return `${AUTUMN_URL}/${file.tag}/${file._id}?${new URLSearchParams(options)}`;
 }
 
 export function getDefaultUserAvatar(user_id: string): string {
 	return `${API_URL}/users/${user_id}/default_avatar`;
 }
 
-export function getDisplayName(user?: User, member?: Member, message?: Message): string {
+export function getDisplayName(
+	user?: Partial<{ display_name: string; username: string }>,
+	member?: Member,
+	message?: Message
+): string {
 	if (message?.system == undefined) {
 		return (
 			message?.masquerade?.name ??
@@ -36,7 +43,11 @@ export function getDisplayName(user?: User, member?: Member, message?: Message):
 	return get(_)('message.system');
 }
 
-export function getDisplayAvatar(user?: User, member?: Member, message?: Message): string {
+export function getDisplayAvatar(
+	user?: { _id: string; avatar?: { _id: string; tag: string } },
+	member?: Member,
+	message?: Message
+): string {
 	if (message?.system != undefined) {
 		return '/user.svg';
 	}
@@ -50,12 +61,12 @@ export function getDisplayAvatar(user?: User, member?: Member, message?: Message
 	}
 
 	if (member?.avatar != undefined) {
-		return getAutumnURL(member.avatar);
+		return `${getAutumnURL(member.avatar, { max_side: '256' })}`;
 	}
 
 	if (user?.avatar == undefined) {
 		return user == undefined ? '/user.svg' : getDefaultUserAvatar(user._id);
 	}
 
-	return getAutumnURL(user?.avatar);
+	return `${getAutumnURL(user?.avatar, { max_side: '256' })}`;
 }

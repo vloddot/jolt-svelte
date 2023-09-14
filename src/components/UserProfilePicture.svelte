@@ -15,13 +15,14 @@
 	export let width = 24;
 	export let height = 24;
 
+	export let inline = true;
+
 	const settings = getContext(settingsKey)!;
 </script>
 
 <img
 	src={$settings['jolt:low-data-mode'] ? '/user.svg' : src}
 	alt={name}
-	{width}
-	{height}
-	class="rounded-3xl inline"
+	style="width:{width}px;height:{height}px;"
+	class="rounded-3xl object-cover {inline ? 'inline' : ''}"
 />

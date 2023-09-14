@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { setContext } from '$lib/context';
-	import { settingsKey, sessionKey, clientKey } from '@routes/context';
-	import { writable } from 'svelte/store';
-	import { Client } from '$lib/client';
-	import '$lib/i18n';
 	import { goto } from '$app/navigation';
+	import { Client } from '$lib/client';
+	import { setContext } from '$lib/context';
+	import '$lib/i18n';
 	import { DEFAULT_SETTINGS } from '$lib/util';
+	import VoiceClientBrowser, { DEFAULT_CONSUMER } from '@revkit/voice/browser';
+	import { clientKey, sessionKey, settingsKey, voiceClientKey } from '@routes/context';
 	import { waitLocale } from 'svelte-i18n';
+	import { writable } from 'svelte/store';
 
 	const settings = writable<Settings>(DEFAULT_SETTINGS);
 	setContext(settingsKey, settings);
@@ -17,12 +18,17 @@
 	const client = new Client();
 	setContext(clientKey, client);
 
+	const voiceClient = new VoiceClientBrowser(DEFAULT_CONSUMER);
+	setContext(voiceClientKey, voiceClient);
+
 	$: {
-		const token = $session?.token;
-		if (token) {
-			client.authenticate(token);
-		} else {
+		if ($session == null) {
 			client.websocket.disconnect();
+			voiceClient.disconnect();
+		} else {
+			const { token, user_id } = $session;
+			client.authenticate(token);
+			voiceClient.authenticate(token, user_id, 'user');
 		}
 	}
 
