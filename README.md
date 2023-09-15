@@ -60,6 +60,7 @@ bun run dev
 
 ## Links
 
+- [Reywen-Revolt](https://github.com/Toastxc/Reywen-Revolt)
 - [Jolt Development Server on Revolt](https://rvlt.gg/AaCgcvgg)
 - [Tauri](https://tauri.app)
 - [Svelte](https://svelte.dev)
