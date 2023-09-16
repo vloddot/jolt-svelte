@@ -57,6 +57,10 @@ export class APIClient {
 		return this.req('POST', '/servers/create', true, JSON.stringify(body));
 	}
 
+	changeUsername(username: string, password: string): Promise<User> {
+		return this.req('PATCH', '/users/@me/username', true, JSON.stringify({ username, password }))
+	}
+
 	joinCall(channel_id: string): Promise<string> {
 		return new Promise((resolve, reject) => {
 			this.req<{ token: string }>('POST', `/channels/${channel_id}/join_call`, true)

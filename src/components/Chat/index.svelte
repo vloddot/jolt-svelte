@@ -1,13 +1,13 @@
 <script lang="ts">
-	import MessageComponent from './Message.svelte';
-	import { onMount, setContext } from 'svelte';
-	import { writable } from 'svelte/store';
-	import { membersKey, repliesKey, usersKey, type Reply, messagesKey } from '.';
-	import { _ } from 'svelte-i18n';
 	import { getContext } from '$lib/context';
-	import { settingsKey, sessionKey, clientKey } from '@routes/context';
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
 	import UserProfilePicture from '@components/UserProfilePicture.svelte';
+	import { clientKey, sessionKey, settingsKey } from '@routes/context';
+	import { onMount, setContext } from 'svelte';
+	import { _ } from 'svelte-i18n';
+	import { writable } from 'svelte/store';
+	import { membersKey, messagesKey, repliesKey, usersKey, type Reply } from '.';
+	import MessageComponent from './Message.svelte';
 	/**
 	 * Which channel to show messages from.
 	 */
@@ -56,7 +56,7 @@
 		}
 
 		client.on('ChannelStartTyping', async ({ id, user }) => {
-			if (user == $session.user_id || id != channel._id) {
+			if (user == client.user?._id || id != channel._id) {
 				return;
 			}
 
@@ -154,7 +154,7 @@
 
 		channelName = `@${getDisplayName(
 			await client.api.fetchUser(
-				channel.recipients[0] == $session.user_id ? channel.recipients[1] : channel.recipients[0]
+				channel.recipients[0] == client.user?._id ? channel.recipients[1] : channel.recipients[0]
 			)
 		)}`;
 	}

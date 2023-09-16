@@ -1,36 +1,43 @@
 <script lang="ts">
-	import { _ } from 'svelte-i18n';
-	import '$lib/index.css';
-	import type { LayoutData } from './$types';
-	import { getContext } from '$lib/context';
-	import { clientKey } from '@routes/context';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { getContext } from '$lib/context';
+	import '$lib/index.css';
+	import { clientKey, sessionKey } from '@routes/context';
+	import { _ } from 'svelte-i18n';
+	import type { LayoutData } from './$types';
+	import { base } from '$app/paths';
 
 	export let data: LayoutData;
 
 	const client = getContext(clientKey)!;
+	const session = getContext(sessionKey)!;
 </script>
 
 <div class="channel-bar-container">
-	{#each data.sections as { title, id }}
-		<a href="/settings/{id}" class={$page.url.pathname == `/settings/${id}` ? 'bg-gray-400' : 'hover:bg-gray-600'}>
-			<p>{title}</p>
-		</a>
+	{#each data.sections as section}
+		{#if section.type == 'normal'}
+			<a
+				href="{base}/settings/{section.id}"
+				class={$page.url.pathname == `${base}/settings/${section.id}`
+					? 'bg-gray-400'
+					: 'hover:bg-gray-600'}
+			>
+				<p>{section.title}</p>
+			</a>
+		{:else if section.type == 'button'}
+			<div class="hover:bg-gray-600">
+				<button
+					class="w-full text-start"
+					on:click={() => section.type == 'button' && section.onClick(client, session)}
+				>
+					{section.title}
+				</button>
+			</div>
+		{:else if section.type == 'hr'}
+			<hr class="border-gray-600 my-2" />
+		{/if}
 	{/each}
-
-	<hr class="border-gray-600 my-2" />
-
-	<div class="hover:bg-gray-600">
-		<button
-			class="w-full text-start"
-			on:click={async () => {
-				client.api.logout();
-				await goto('/login');
-			}}
-			>{$_('logout')}
-		</button>
-	</div>
 </div>
 
 <main class="main-content-container">

@@ -34,7 +34,7 @@
 		channel: Extract<Channel, { channel_type: 'DirectMessage' | 'Group' }>
 	) {
 		user = await client.api.fetchUser(
-			channel.recipients[0] == $session.user_id ? channel.recipients[1] : channel.recipients[0]
+			channel.recipients[0] == client.user?._id ? channel.recipients[1] : channel.recipients[0]
 		);
 	}
 

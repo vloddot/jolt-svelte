@@ -1,10 +1,11 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import { getContext } from '$lib/context';
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
 	import UserProfilePicture from '@components/UserProfilePicture.svelte';
-	import { messagesKey, getUser, usersKey } from '.';
 	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
 	import { clientKey, settingsKey } from '@routes/context';
+	import { getUser, messagesKey, usersKey } from '.';
 
 	const client = getContext(clientKey)!;
 	const settings = getContext(settingsKey)!;
@@ -17,9 +18,9 @@
 </script>
 
 <a
-	href={$selectedServerID == undefined
+	href="{base}/{$selectedServerID == undefined
 		? `/channels/${$selectedChannelID}#${id}`
-		: `/servers/${$selectedServerID}/channels/${$selectedChannelID}#${id}`}
+		: `/servers/${$selectedServerID}/channels/${$selectedChannelID}#${id}`}"
 >
 	{#if $selectedChannelID != undefined}
 		{#await $messages?.find(({ _id }) => id == _id) ?? client.api.fetchMessage($selectedChannelID, id) then message}

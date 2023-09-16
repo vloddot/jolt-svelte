@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	import { getContext, setContext } from '$lib/context';
 	import '$lib/index.css';
 	import { DEFAULT_SETTINGS, getAutumnURL, getDisplayAvatar } from '$lib/util';
@@ -89,40 +90,40 @@
 <div class="grid-container">
 	<div class="server-sidebar-container">
 		{#if $settings['jolt:low-data-mode']}
-			<ServerSidebarIcon href="/" tooltip="Home" icon="/home.svg" />
-		{:else}
-			{#await client.api.fetchUser($session.user_id) then user}
-				<ServerSidebarIcon
-					href="/"
-					tooltip="{user.username}#{user.discriminator}"
-					icon={getDisplayAvatar(user)}
-				/>
+			<ServerSidebarIcon href={base} tooltip="Home" icon="/home.svg" />
+		{:else if client.user != undefined}
+			<ServerSidebarIcon
+				href={base}
+				tooltip="{client.user.username}#{client.user.discriminator}"
+				icon={getDisplayAvatar(client.user)}
+			/>
 
-				<hr class="border-gray-600 mx-4" />
-			{/await}
+			<hr class="border-gray-600 mx-4" />
 		{/if}
 
 		{#if servers != undefined}
 			{#each servers as server}
 				{#if $settings['jolt:low-data-mode']}
 					<ServerSidebarIcon
-						href="/servers/{server._id}/channels/{server.channels[0]}"
+						href="{base}/servers/{server._id}/channels/{server.channels[0]}"
 						tooltip={server.name}
 					/>
 				{:else}
 					<ServerSidebarIcon
-						href="/servers/{server._id}/channels/{server.channels[0]}"
+						href="{base}/servers/{server._id}/channels/{server.channels[0]}"
 						tooltip={server.name}
-						icon={server.icon == undefined ? undefined : `${getAutumnURL(server.icon, { max_side: '256' })}`}
+						icon={server.icon == undefined
+							? undefined
+							: `${getAutumnURL(server.icon, { max_side: '256' })}`}
 					/>
 				{/if}
 			{/each}
 		{/if}
-		<ServerSidebarIcon href="/servers/create" icon="/plus.svg" tooltip="Create Server" />
+		<ServerSidebarIcon href="{base}/servers/create" icon="/plus.svg" tooltip="Create Server" />
 
 		<div class="flex-1" />
 
-		<ServerSidebarIcon href="/settings" icon="/gears.svg" tooltip="Settings" />
+		<ServerSidebarIcon href="{base}/settings" icon="/gears.svg" tooltip="Settings" />
 	</div>
 
 	<slot />

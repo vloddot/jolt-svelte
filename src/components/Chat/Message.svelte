@@ -58,7 +58,7 @@
 		{
 			src: '/note.svg',
 			alt: $_('message.edit'),
-			showIf: (message) => message.author == $session.user_id,
+			showIf: (message) => message.author == client.user?._id,
 			onclick: (message) =>
 				(messageContentToEdit =
 					messageContentToEdit == undefined ? message.content ?? '' : undefined)
@@ -66,7 +66,7 @@
 		{
 			src: '/trash.svg',
 			alt: $_('message.delete'),
-			showIf: (message) => message.author == $session.user_id, // TODO: check permissions for message deleting
+			showIf: (message) => message.author == client.user?._id, // TODO: check permissions for message deleting
 			onclick: (message) => client.api.deleteMessage(message.channel, message._id)
 		}
 	];

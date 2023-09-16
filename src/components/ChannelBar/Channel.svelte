@@ -33,7 +33,7 @@
 
 {#if channel.channel_type == 'DirectMessage'}
 	{#if channel.active}
-		{#await client.api.fetchUser(channel.recipients[0] == $session.user_id ? channel.recipients[1] : channel.recipients[0]) then user}
+		{#await client.api.fetchUser(channel.recipients[0] == client.user?._id ? channel.recipients[1] : channel.recipients[0]) then user}
 			<ChannelItem
 				src={$settings['jolt:low-data-mode'] ? '/user.svg' : getDisplayAvatar(user)}
 				name={getDisplayName(user)}

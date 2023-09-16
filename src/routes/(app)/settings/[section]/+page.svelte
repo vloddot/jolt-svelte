@@ -1,7 +1,7 @@
 <script lang="ts">
+	import SettingsComponent from '@components/Settings/index.svelte';
 	import { appWindow } from '@tauri-apps/api/window';
 	import type { PageData } from './$types';
-	import Setting from '@components/Setting.svelte';
 
 	export let data: PageData;
 
@@ -16,6 +16,4 @@
 	}
 </script>
 
-{#each data.section.settings as setting}
-	<Setting {...setting} />
-{/each}
+<SettingsComponent settings={data.section.settings} />

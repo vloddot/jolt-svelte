@@ -13,6 +13,9 @@ const config = {
 			'@locale': './locale',
 			'@routes': './src/routes'
 		},
+		paths: {
+			base: process.env.NODE_ENV == 'production' ? '/jolt' : ''
+		},
 		adapter: adapter({ fallback: 'app.html' })
 	}
 };

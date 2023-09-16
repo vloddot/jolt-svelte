@@ -1,22 +1,15 @@
 import EventEmitter from 'eventemitter3';
 import { APIClient } from './APIClient';
-import { type ServerMessage, WebSocketClient } from './WebSocketClient';
+import { WebSocketClient, type ServerMessage } from './WebSocketClient';
 
 export type Events<T extends { type: string | number | symbol }> = {
-	[K in Exclude<T['type'], 'Bulk'>]: (
-		event: Omit<Extract<T, { type: K }>, 'type'>
-	) => void;
+	[K in Exclude<T['type'], 'Bulk'>]: (event: Omit<Extract<T, { type: K }>, 'type'>) => void;
 };
 
 export class Client extends EventEmitter<Events<ServerMessage>> {
-	api: APIClient;
-	websocket: WebSocketClient;
-
-	constructor() {
-		super();
-		this.api = new APIClient();
-		this.websocket = new WebSocketClient();
-	}
+	api: APIClient = new APIClient();
+	websocket: WebSocketClient = new WebSocketClient();
+	user: User | undefined = undefined;
 
 	get ready(): boolean {
 		return this.api.cache != undefined;
@@ -25,6 +18,8 @@ export class Client extends EventEmitter<Events<ServerMessage>> {
 	authenticate(token: string) {
 		this.api.token = token;
 		this.websocket.authenticate(token);
+
+		this.api.fetchUser('@me').then((user) => (this.user = user));
 
 		this.websocket.on('serverEvent', (event) => this.#handleEvent(event));
 	}
