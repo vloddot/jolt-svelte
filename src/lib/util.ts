@@ -1,3 +1,4 @@
+import { base } from '$app/paths';
 import { _ } from 'svelte-i18n';
 import { get } from 'svelte/store';
 
@@ -49,7 +50,7 @@ export function getDisplayAvatar(
 	message?: Message
 ): string {
 	if (message?.system != undefined) {
-		return '/user.svg';
+		return `${base}/user.svg`;
 	}
 
 	if (message?.webhook?.avatar != undefined) {
@@ -65,7 +66,7 @@ export function getDisplayAvatar(
 	}
 
 	if (user?.avatar == undefined) {
-		return user == undefined ? '/user.svg' : getDefaultUserAvatar(user._id);
+		return user == undefined ? `${base}/user.svg` : getDefaultUserAvatar(user._id);
 	}
 
 	return `${getAutumnURL(user?.avatar, { max_side: '256' })}`;

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import { getContext } from '$lib/context';
 	import { getDisplayName } from '$lib/util';
 	import UserProfilePicture from '@components/UserProfilePicture.svelte';
@@ -27,7 +28,7 @@
 
 <div class="main-content-container">
 	<button class="m-2" on:click={() => (voice.connected ? voice.disconnect() : connect())}>
-		<img src="/call.svg" alt="Call" />
+		<img src="{base}/call.svg" alt="Call" />
 	</button>
 
 	<div class="flex justify-center">

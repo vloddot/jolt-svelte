@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import { getContext } from '$lib/context';
 	import { settingsKey } from '@routes/context';
 
@@ -21,7 +22,7 @@
 </script>
 
 <img
-	src={$settings['jolt:low-data-mode'] ? '/user.svg' : src}
+	src={$settings['jolt:low-data-mode'] ? `${base}/user.svg'` : src}
 	alt={name}
 	style="width:{width}px;height:{height}px;"
 	class="rounded-3xl object-cover {inline ? 'inline' : ''}"

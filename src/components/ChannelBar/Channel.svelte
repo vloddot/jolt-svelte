@@ -4,14 +4,14 @@
 	import { clientKey, sessionKey, settingsKey } from '@routes/context';
 	import { _ } from 'svelte-i18n';
 	import ChannelItem from './ChannelItem.svelte';
+	import { base } from '$app/paths';
 
 	const settings = getContext(settingsKey)!;
-	const session = getContext(sessionKey)!;
 	const client = getContext(clientKey)!;
 
 	function getChannelIcon(channel: Exclude<Channel, { channel_type: 'DirectMessage' }>): string {
 		if (channel.channel_type == 'SavedMessages') {
-			return '/note.svg';
+			return `${base}/note.svg`;
 		}
 
 		if (channel.icon != undefined && !$settings['jolt:low-data-mode']) {
@@ -20,11 +20,11 @@
 
 		switch (channel.channel_type) {
 			case 'Group':
-				return '/group.svg';
+				return `${base}/group.svg`;
 			case 'TextChannel':
-				return '/hash.svg';
+				return `${base}/hash.svg`;
 			case 'VoiceChannel':
-				return '/volume.svg';
+				return `${base}/volume.svg`;
 		}
 	}
 
@@ -35,7 +35,7 @@
 	{#if channel.active}
 		{#await client.api.fetchUser(channel.recipients[0] == client.user?._id ? channel.recipients[1] : channel.recipients[0]) then user}
 			<ChannelItem
-				src={$settings['jolt:low-data-mode'] ? '/user.svg' : getDisplayAvatar(user)}
+				src={$settings['jolt:low-data-mode'] ? `${base}/user.svg` : getDisplayAvatar(user)}
 				name={getDisplayName(user)}
 				width={32}
 				height={32}
@@ -43,7 +43,7 @@
 			/>
 		{:catch}
 			<ChannelItem
-				src="/user.svg"
+				src="{base}/user.svg"
 				name="<{$_('user.unknown')}>"
 				alt={$_('user.unknown')}
 				width={32}

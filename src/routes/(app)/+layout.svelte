@@ -90,7 +90,7 @@
 <div class="grid-container">
 	<div class="server-sidebar-container">
 		{#if $settings['jolt:low-data-mode']}
-			<ServerSidebarIcon href={base} tooltip="Home" icon="/home.svg" />
+			<ServerSidebarIcon href={base} tooltip="Home" icon="{base}/home.svg" />
 		{:else if client.user != undefined}
 			<ServerSidebarIcon
 				href={base}
@@ -119,11 +119,11 @@
 				{/if}
 			{/each}
 		{/if}
-		<ServerSidebarIcon href="{base}/servers/create" icon="/plus.svg" tooltip="Create Server" />
+		<ServerSidebarIcon href="{base}/servers/create" icon="{base}/plus.svg" tooltip="Create Server" />
 
 		<div class="flex-1" />
 
-		<ServerSidebarIcon href="{base}/settings" icon="/gears.svg" tooltip="Settings" />
+		<ServerSidebarIcon href="{base}/settings" icon="{base}/gears.svg" tooltip="Settings" />
 	</div>
 
 	<slot />

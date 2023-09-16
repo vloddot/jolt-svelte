@@ -8,6 +8,7 @@
 	import { writable } from 'svelte/store';
 	import { membersKey, messagesKey, repliesKey, usersKey, type Reply } from '.';
 	import MessageComponent from './Message.svelte';
+	import { base } from '$app/paths';
 	/**
 	 * Which channel to show messages from.
 	 */
@@ -172,7 +173,7 @@
 			{@const displayName = getDisplayName(user)}
 			<div>
 				<UserProfilePicture
-					src={$settings['jolt:low-data-mode'] ? '/user.svg' : getDisplayAvatar(user)}
+					src={$settings['jolt:low-data-mode'] ? `${base}/user.svg` : getDisplayAvatar(user)}
 					width={16}
 					height={16}
 					name={displayName}
@@ -195,7 +196,7 @@
 							{displayName}
 						{:catch}
 							{@const displayName = `<${$_('user.unknown')}>`}
-							<UserProfilePicture src="/user.svg" name={displayName} />
+							<UserProfilePicture src="{base}/user.svg" name={displayName} />
 							{displayName}
 						{/await}
 					</strong>
@@ -208,7 +209,7 @@
 				<div class="pr-2">
 					<input id="mention" style="display: none;" type="checkbox" bind:checked={reply.mention} />
 					<label class="cursor-pointer" for="mention">
-						<img src="/at.svg" class="inline" alt="mention" />
+						<img src="{base}/at.svg" class="inline" alt="mention" />
 						{reply.mention ? 'ON' : 'OFF'}
 					</label>
 				</div>
@@ -221,7 +222,7 @@
 								return replies;
 							})}
 					>
-						<img src="/circle-x.svg" alt="Cancel mention" />
+						<img src="{base}/circle-x.svg" alt="Cancel mention" />
 					</button>
 				</div>
 			</div>

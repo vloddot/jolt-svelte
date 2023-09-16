@@ -12,6 +12,7 @@
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
 	import UserProfilePicture from '@components/UserProfilePicture.svelte';
 	import MessageReply from '@components/Chat/MessageReply.svelte';
+	import { base } from '$app/paths';
 
 	/**
 	 * Message to show.
@@ -42,7 +43,7 @@
 
 	const controls: MessageControls[] = [
 		{
-			src: '/reply.svg',
+			src: `${base}reply.svg`,
 			alt: $_('message.reply'),
 			onclick() {
 				if ($replies?.some((reply) => reply.message._id == message._id)) {
@@ -56,7 +57,7 @@
 			}
 		},
 		{
-			src: '/note.svg',
+			src: `${base}note.svg`,
 			alt: $_('message.edit'),
 			showIf: (message) => message.author == client.user?._id,
 			onclick: (message) =>
@@ -64,7 +65,7 @@
 					messageContentToEdit == undefined ? message.content ?? '' : undefined)
 		},
 		{
-			src: '/trash.svg',
+			src: `${base}trash.svg`,
 			alt: $_('message.delete'),
 			showIf: (message) => message.author == client.user?._id, // TODO: check permissions for message deleting
 			onclick: (message) => client.api.deleteMessage(message.channel, message._id)
@@ -92,7 +93,7 @@
 	$: $selectedServerID == undefined ? undefined : updateMember($selectedServerID, message.author);
 	$: displayName = getDisplayName(author, member, message);
 	$: displayAvatar = $settings['jolt:low-data-mode']
-		? '/user.svg'
+		? `${base}/user.svg`
 		: getDisplayAvatar(author, member, message);
 	$: timestamp = decodeTime(message._id);
 </script>
