@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="description" content="Jolt - Unofficial Revolt client." />
+
+		
+		<link rel="modulepreload" href="./_app/immutable/entry/start.24d9644f.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/scheduler.9b2bc230.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/singletons.b08a19ad.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/index.cace4c42.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/control.f2d6eca3.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/app.f847ce17.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/preload-helper.a4192956.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/index.6c81ac7e.js">
+	</head>
+	<noscript>You'll need to enable JavaScript to run this app.</noscript>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">
+			<script>
+				{
+					__sveltekit_aezggl = {
+						base: new URL(".", location).pathname.slice(0, -1),
+						env: {}
+					};
+
+					const element = document.currentScript.parentElement;
+
+					Promise.all([
+						import("./_app/immutable/entry/start.24d9644f.js"),
+						import("./_app/immutable/entry/app.f847ce17.js")
+					]).then(([kit, app]) => {
+						kit.start(app, element);
+					});
+				}
+			</script>
+		</div>
+	</body>
+</html>
