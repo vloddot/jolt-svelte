@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	import { getContext } from '$lib/context';
 	import { clientKey } from '@routes/context';
 	import { appWindow } from '@tauri-apps/api/window';
@@ -25,7 +26,7 @@
 			nsfw
 		});
 
-		await goto(`/servers/${server._id}/channels/${channels[0]._id}`);
+		await goto(`${base}/servers/${server._id}/channels/${channels[0]._id}`);
 	}
 
 	const TITLE = 'Create Server - Jolt';

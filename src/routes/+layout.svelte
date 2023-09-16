@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	import { Client } from '$lib/client';
 	import { setContext } from '$lib/context';
 	import '$lib/i18n';
@@ -33,7 +34,7 @@
 	}
 
 	$: if ($session == null) {
-		goto('/login');
+		goto(`${base}/login`);
 	}
 </script>
 

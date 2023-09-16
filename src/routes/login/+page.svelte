@@ -7,6 +7,7 @@
 	import { clientKey, sessionKey } from '@routes/context';
 	import detect from 'browser-detect';
 	import { appWindow } from '@tauri-apps/api/window';
+	import { base } from '$app/paths';
 
 	const session = getContext(sessionKey)!;
 	const client = getContext(clientKey)!;
@@ -51,7 +52,7 @@
 				localStorage.setItem('session', JSON.stringify(response));
 			}
 
-			await goto('/');
+			await goto(base);
 			return;
 		}
 	}

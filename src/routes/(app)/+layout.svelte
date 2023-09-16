@@ -59,7 +59,7 @@
 		servers = client.api.cache.servers;
 
 		if ($selectedServerID == id) {
-			await goto('/');
+			await goto(base);
 		}
 	});
 

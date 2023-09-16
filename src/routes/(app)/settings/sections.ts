@@ -1,4 +1,5 @@
 import { goto } from '$app/navigation';
+import { base } from '$app/paths';
 import type { Client } from '$lib/client';
 import { getDisplayName } from '$lib/util';
 import type { Writable } from 'svelte/store';
@@ -166,7 +167,7 @@ const sections: SettingsSection[] = [
 		async onClick(client, session) {
 			await client.api.logout();
 			session.set(null);
-			await goto('/login');
+			await goto(`${base}/login`);
 		}
 	}
 ];

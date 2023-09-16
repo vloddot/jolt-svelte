@@ -42,8 +42,8 @@
 	<a
 		class="p-2 block"
 		href="{base}/{$selectedServerID == undefined
-			? `/channels/${id}`
-			: `/servers/${$selectedServerID}/channels/${id}`}"
+			? `channels/${id}`
+			: `servers/${$selectedServerID}/channels/${id}`}"
 	>
 		<UserProfilePicture {src} name={alt} {width} {height} />
 
