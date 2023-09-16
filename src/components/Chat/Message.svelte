@@ -43,7 +43,7 @@
 
 	const controls: MessageControls[] = [
 		{
-			src: `${base}reply.svg`,
+			src: `${base}/reply.svg`,
 			alt: $_('message.reply'),
 			onclick() {
 				if ($replies?.some((reply) => reply.message._id == message._id)) {
@@ -57,7 +57,7 @@
 			}
 		},
 		{
-			src: `${base}note.svg`,
+			src: `${base}/note.svg`,
 			alt: $_('message.edit'),
 			showIf: (message) => message.author == client.user?._id,
 			onclick: (message) =>
@@ -65,7 +65,7 @@
 					messageContentToEdit == undefined ? message.content ?? '' : undefined)
 		},
 		{
-			src: `${base}trash.svg`,
+			src: `${base}/trash.svg`,
 			alt: $_('message.delete'),
 			showIf: (message) => message.author == client.user?._id, // TODO: check permissions for message deleting
 			onclick: (message) => client.api.deleteMessage(message.channel, message._id)
