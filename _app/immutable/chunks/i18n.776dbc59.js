@@ -1,1 +1,0 @@
-import{_ as r}from"./preload-helper.a4192956.js";import{r as i,i as o,a as t}from"./runtime.esm.a3f7b725.js";i("en_US",()=>r(()=>import("./en_US.86109005.js"),[],import.meta.url));i("it",()=>r(()=>import("./it.93031651.js"),[],import.meta.url));i("ar",()=>r(()=>import("./ar.b1c16596.js"),[],import.meta.url));o({fallbackLocale:"en_US",initialLocale:t()});
