@@ -52,7 +52,7 @@
 				localStorage.setItem('session', JSON.stringify(response));
 			}
 
-			await goto(base);
+			await goto(`${base}/`);
 			return;
 		}
 	}

@@ -1,13 +1,13 @@
 <script lang="ts">
-	import '$lib/index.css';
 	import { page } from '$app/stores';
-	import { writable } from 'svelte/store';
-	import type { LayoutParams } from './$types';
-	import { selectedChannelIDKey } from '@routes/(app)/context';
 	import { getContext } from '$lib/context';
+	import '$lib/index.css';
 	import ChannelComponent from '@components/ChannelBar/Channel.svelte';
+	import { selectedChannelIDKey } from '@routes/(app)/context';
 	import { clientKey } from '@routes/context';
 	import { onMount } from 'svelte';
+	import { writable } from 'svelte/store';
+	import type { LayoutParams } from './$types';
 
 	$: pageParams = $page.params as LayoutParams;
 
@@ -35,17 +35,19 @@
 	onMount(updateDMs);
 </script>
 
-<div role="list" class="channel-bar-container">
-	{#if dms != undefined}
-		{#if savedMessagesChannel != undefined}
-			<ChannelComponent channel={savedMessagesChannel} />
-		{/if}
-		{#each dms as dm}
-			{#if dm.channel_type != 'SavedMessages'}
-				<ChannelComponent channel={dm} />
+{#key $selectedChannelID}
+	<div role="list" class="channel-bar-container">
+		{#if dms != undefined}
+			{#if savedMessagesChannel != undefined}
+				<ChannelComponent channel={savedMessagesChannel} />
 			{/if}
-		{/each}
-	{/if}
-</div>
+			{#each dms as dm}
+				{#if dm.channel_type != 'SavedMessages'}
+					<ChannelComponent channel={dm} />
+				{/if}
+			{/each}
+		{/if}
+	</div>
+{/key}
 
 <slot />

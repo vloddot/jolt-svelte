@@ -16,7 +16,10 @@ const config = {
 		paths: {
 			base: process.env.NODE_ENV == 'production' ? '/jolt' : ''
 		},
-		adapter: adapter({ fallback: 'app.html' })
+		files: {
+			appTemplate: 'src/404.html'
+		},
+		adapter: adapter({ fallback: '404.html' })
 	}
 };
 

@@ -10,14 +10,11 @@ type FilterMapType<T, F> = {
 
 type CheckValidKey<T, K extends keyof T> = T[K] extends never ? never : K;
 
-type SettingsWithType<T> = {
+export type SettingsWithType<T> = {
 	[K in keyof Settings as CheckValidKey<FilterMapType<Settings, T>, K>]: Settings[K];
 };
 
 export type Action<T> =
-	| {
-			readonly type: 'none';
-	  }
 	| {
 			readonly type: 'update-custom-setting';
 			readonly key: keyof SettingsWithType<T>;
@@ -51,7 +48,7 @@ export type DisplayedSetting = (
 			readonly getDefaultValue?: (client: Client) => Promise<string>;
 	  })
 ) & {
-	readonly action: Action<unknown>;
+	readonly action?: Action<unknown>;
 	readonly title: string;
 	readonly id: string;
 	readonly description?: string;
@@ -93,13 +90,12 @@ const sections: SettingsSection[] = [
 					{
 						type: 'text',
 						title: 'Username',
-						action: { type: 'none' },
 						async getDefaultValue(client: Client) {
 							return getDisplayName(client.user);
 						},
 						id: 'username'
 					},
-					{ type: 'password', title: 'Password', action: { type: 'none' }, id: 'password' }
+					{ type: 'password', title: 'Password', id: 'password' }
 				]
 			}
 		]

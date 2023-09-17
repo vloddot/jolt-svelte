@@ -1,5 +1,5 @@
 import sections from '@routes/(app)/settings/sections';
-import { fail } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { EntryGenerator, PageLoad } from './$types';
 
 export const load = (async ({ params, parent }) => {
@@ -9,8 +9,8 @@ export const load = (async ({ params, parent }) => {
 		(section) => section.type == 'normal' && params.section == section.id
 	);
 
-	if (section == undefined) {
-		throw fail(404);
+	if (section == undefined || section.type != 'normal') {
+		throw error(404);
 	}
 
 	return { section };

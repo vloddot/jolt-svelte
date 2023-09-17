@@ -6,12 +6,11 @@
 	import { DEFAULT_SETTINGS, getAutumnURL, getDisplayAvatar } from '$lib/util';
 	import ServerSidebarIcon from '@components/ServerSidebarIcon/index.svelte';
 	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
-	import { clientKey, sessionKey, settingsKey } from '@routes/context';
+	import { clientKey, settingsKey } from '@routes/context';
 	import { writable } from 'svelte/store';
 	import './index.css';
 
 	const settings = getContext(settingsKey)!;
-	const session = getContext(sessionKey)!;
 	const client = getContext(clientKey)!;
 
 	const selectedServerID = writable<string | undefined>();
@@ -119,7 +118,11 @@
 				{/if}
 			{/each}
 		{/if}
-		<ServerSidebarIcon href="{base}/servers/create" icon="{base}/plus.svg" tooltip="Create Server" />
+		<ServerSidebarIcon
+			href="{base}/servers/create"
+			icon="{base}/plus.svg"
+			tooltip="Create Server"
+		/>
 
 		<div class="flex-1" />
 

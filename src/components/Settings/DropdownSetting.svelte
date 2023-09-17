@@ -1,21 +1,16 @@
 <script lang="ts">
 	import { getContext } from '$lib/context';
 	import type { DisplayedSetting } from '@routes/(app)/settings/sections';
-	import { clientKey } from '@routes/context';
+	import { clientKey, sessionKey, settingsKey } from '@routes/context';
+	import { dispatchAction } from '.';
 	import SettingsComponent from './index.svelte';
 
 	export let setting: Extract<DisplayedSetting, { type: 'dropdown' }>;
-
+	const session = getContext(sessionKey)!;
 	const client = getContext(clientKey)!;
-	let formNode: HTMLFormElement;
-	async function handleSubmitEvent(event: SubmitEvent) {
-		if (setting.action.type == 'change-username') {
-			const username = formNode.querySelector<HTMLInputElement>(`#${setting.action.usernameId}`)!.value;
-			const password = formNode.querySelector<HTMLInputElement>(`#${setting.action.passwordId}`)!.value;
+	const settings = getContext(settingsKey)!;
 
-			client.user = await client.api.changeUsername(username, password);
-		}
-	}
+	let node: HTMLFormElement;
 </script>
 
 <details>
@@ -25,7 +20,34 @@
 			<p class="ml-4 whitespace-pre-wrap">{setting.description}</p>
 		{/if}
 	</summary>
-	<form on:submit={handleSubmitEvent} bind:this={formNode}>
+	<form
+		on:submit={() => {
+			const action = setting.action;
+			if (action == undefined) {
+				return;
+			}
+
+			switch (action.type) {
+				case 'change-username': {
+					dispatchAction({
+						...action,
+						client,
+						node
+					});
+					break;
+				}
+				case 'logout': {
+					dispatchAction({
+						...action,
+						client,
+						session
+					});
+					break;
+				}
+			}
+		}}
+		bind:this={node}
+	>
 		<SettingsComponent settings={setting.form} />
 		<button type="submit">Submit</button>
 	</form>

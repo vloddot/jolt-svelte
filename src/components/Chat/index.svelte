@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import { getContext } from '$lib/context';
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
 	import UserProfilePicture from '@components/UserProfilePicture.svelte';
@@ -8,7 +9,6 @@
 	import { writable } from 'svelte/store';
 	import { membersKey, messagesKey, repliesKey, usersKey, type Reply } from '.';
 	import MessageComponent from './Message.svelte';
-	import { base } from '$app/paths';
 	/**
 	 * Which channel to show messages from.
 	 */
@@ -81,13 +81,15 @@
 
 	onMount(() => {
 		client.on('Message', (message) => {
-			if (message.channel == channel._id) {
-				client.api.ackMessage(channel._id, message._id);
-				messages.update((messages) => {
-					messages.push(message as Message);
-					return messages;
-				});
+			if (message.channel != channel._id) {
+				return;
 			}
+
+			client.api.ackMessage(channel._id, message._id);
+			messages.update((messages) => {
+				messages.push(message as Message);
+				return messages;
+			});
 		});
 
 		client.on('MessageDelete', ({ id, channel: channel_id }) => {
