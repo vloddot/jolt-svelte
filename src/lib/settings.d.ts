@@ -1,5 +1,4 @@
 type Settings = {
-	appearance: { 'appearence:emoji'?: string };
 	ordering: { servers?: string[] };
 	'jolt:low-data-mode': boolean;
 	'jolt:compact-mode': boolean;

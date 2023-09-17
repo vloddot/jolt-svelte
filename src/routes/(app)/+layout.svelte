@@ -3,10 +3,11 @@
 	import { base } from '$app/paths';
 	import { getContext, setContext } from '$lib/context';
 	import '$lib/index.css';
-	import { DEFAULT_SETTINGS, getAutumnURL, getDisplayAvatar } from '$lib/util';
+	import { getAutumnURL, getDisplayAvatar } from '$lib/util';
 	import ServerSidebarIcon from '@components/ServerSidebarIcon/index.svelte';
 	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
 	import { clientKey, settingsKey } from '@routes/context';
+	import { onMount } from 'svelte';
 	import { writable } from 'svelte/store';
 	import './index.css';
 
@@ -58,31 +59,36 @@
 		servers = client.api.cache.servers;
 
 		if ($selectedServerID == id) {
-			await goto(base);
+			await goto(`${base}/`);
 		}
+	});
+
+	onMount(() => {
+		const localSettings = localStorage.getItem('settings');
+		if (localSettings != null) {
+			settings.set(JSON.parse(localSettings));
+		}
+
+		settings.subscribe((settings) => {
+			localStorage.setItem('settings', JSON.stringify(settings));
+		});
 	});
 
 	client.on('Ready', async (event) => {
 		servers = event.servers;
 
-		const result = await client.api.fetchSettings(
-			Object.keys(DEFAULT_SETTINGS) as (keyof Settings)[]
-		);
+		const result = await client.api.fetchSettings(['ordering']);
 
-		settings.update((settings) => {
-			for (const [key, [revision, value]] of Object.entries(result)) {
-				const revisionID = `revision:${key}`;
+		if (result.ordering == undefined) {
+			return;
+		}
 
-				if (revision < Number(localStorage.getItem(revisionID)) ?? 0) {
-					continue;
-				}
+		const [revision, ordering] = result.ordering;
 
-				settings[key as keyof Settings] = JSON.parse(value);
-				localStorage.setItem(revisionID, revision.toString());
-			}
-
-			return settings;
-		});
+		if (revision > Number(localStorage.getItem('revision:ordering')) ?? 0) {
+			localStorage.setItem('revision:ordering', revision.toString());
+			settings.update((settings) => (settings.ordering = JSON.parse(ordering).servers));
+		}
 	});
 </script>
 

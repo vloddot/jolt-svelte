@@ -7,7 +7,6 @@ export const PONG_TIMEOUT = 10;
 export const AUTUMN_URL = 'https://autumn.revolt.chat';
 export const API_URL = 'https://api.revolt.chat';
 export const DEFAULT_SETTINGS: Settings = {
-	appearance: {},
 	ordering: {},
 	'jolt:low-data-mode': false,
 	'jolt:compact-mode': false,

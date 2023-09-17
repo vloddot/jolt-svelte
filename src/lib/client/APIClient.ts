@@ -1,3 +1,5 @@
+import { goto } from '$app/navigation';
+import { base } from '$app/paths';
 import type { ReadyData } from '$lib/client/WebSocketClient';
 
 export class APIClient {
@@ -30,12 +32,15 @@ export class APIClient {
 			headers: this.token == undefined ? this.token : { 'x-session-token': this.token }
 		});
 
-		if (!response.ok) {
-			throw response;
+		if (response.status == 401) {
+			localStorage.removeItem('session');
+			await goto(`${base}/login`);
 		}
 
 		if (response.body == null && expectResponse) {
-			throw new Error(`expected response from route ${path}`);
+			throw new Error(
+				`expected response from route ${path}, got ${response.status}: ${response.statusText}`
+			);
 		}
 
 		return response.json();
@@ -58,7 +63,7 @@ export class APIClient {
 	}
 
 	changeUsername(username: string, password: string): Promise<User> {
-		return this.req('PATCH', '/users/@me/username', true, JSON.stringify({ username, password }))
+		return this.req('PATCH', '/users/@me/username', true, JSON.stringify({ username, password }));
 	}
 
 	joinCall(channel_id: string): Promise<string> {
@@ -76,15 +81,6 @@ export class APIClient {
 		);
 	}
 
-	setSettings(settings: Partial<Record<keyof Settings, unknown>>): Promise<void> {
-		return this.req(
-			'POST',
-			`/sync/settings/set?timestamp=${Date.now()}`,
-			false,
-			JSON.stringify(settings)
-		);
-	}
-
 	fetchDirectMessages(): Promise<
 		Exclude<Channel, { channel_type: 'TextChannel' | 'VoiceChannel' }>[]
 	> {
@@ -95,7 +91,7 @@ export class APIClient {
 		return this.req('PUT', `/channels/${channel_id}/ack/${message_id}`, false);
 	}
 
-	async fetchSettings<K extends string>(keys: K[]): Promise<Record<K, [number, string]>> {
+	async fetchSettings<K extends string>(keys: K[]): Promise<Record<K, [number, string] | undefined>> {
 		return this.req('POST', '/sync/settings/fetch', true, JSON.stringify({ keys }));
 	}
 
