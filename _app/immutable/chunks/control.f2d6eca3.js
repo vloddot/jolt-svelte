@@ -1,1 +1,0 @@
-class i{constructor(t,s){this.status=t,typeof s=="string"?this.body={message:s}:s?this.body=s:this.body={message:`Error: ${t}`}}toString(){return JSON.stringify(this.body)}}class o{constructor(t,s){this.status=t,this.location=s}}class a{constructor(t,s){this.status=t,this.data=s}}export{a as A,i as H,o as R};
