@@ -1,1 +1,0 @@
-import{b as t}from"../chunks/paths.eac7acc4.js";import{e as r,r as s}from"../chunks/index.5e2a9a64.js";const a=async({parent:e})=>{const{sections:[o]}=await e();throw o.type!="normal"?r(404,"Not Found"):s(302,`${t}/settings/${o.id}`)},c=Object.freeze(Object.defineProperty({__proto__:null,load:a},Symbol.toStringTag,{value:"Module"}));export{c as universal};
