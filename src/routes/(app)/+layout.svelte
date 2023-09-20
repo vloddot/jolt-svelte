@@ -96,14 +96,17 @@
 	<div class="server-sidebar-container">
 		{#if $settings['jolt:low-data-mode']}
 			<ServerSidebarIcon href={base} tooltip="Home" icon="{base}/home.svg" />
-		{:else if client.user != undefined}
-			<ServerSidebarIcon
-				href={base}
-				tooltip="{client.user.username}#{client.user.discriminator}"
-				icon={getDisplayAvatar(client.user)}
-			/>
-
 			<hr class="border-gray-600 mx-4" />
+		{:else}
+			{#await client.user ?? client.api.fetchUser('@me') then user}
+				<ServerSidebarIcon
+					href="{base}/"
+					tooltip="{user.username}#{user.discriminator}"
+					icon={getDisplayAvatar(client.user)}
+				/>
+
+				<hr class="border-gray-600 mx-4" />
+			{/await}
 		{/if}
 
 		{#if servers != undefined}

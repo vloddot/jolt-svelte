@@ -25,7 +25,7 @@
 	{#if $selectedChannelID != undefined}
 		{#await $messages?.find(({ _id }) => id == _id) ?? client.api.fetchMessage($selectedChannelID, id) then message}
 			{#if !$settings['jolt:low-data-mode']}
-				{#await getUser(client.api, $users ?? [], message.author)}
+				{#await getUser(client.api, $users ?? client.api.cache.users, message.author)}
 					&lt;Unknown User&gt;
 				{:then author}
 					{@const displayName = getDisplayName(author)}

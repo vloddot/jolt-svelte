@@ -15,7 +15,7 @@
 		"format": "prettier --plugin-search-dir . --write ."
 	},
 	"devDependencies": {
-		"@revkit/voice": "link:../revkit-no-core/voice",
+		"@revkit/voice": "link:../revkit/voice",
 		"@sveltejs/adapter-auto": "^2.0.0",
 		"@sveltejs/adapter-static": "1.0.0-next.50",
 		"@sveltejs/kit": "^1.20.4",

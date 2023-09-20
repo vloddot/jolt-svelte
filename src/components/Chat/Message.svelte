@@ -1,18 +1,17 @@
 <script lang="ts">
-	import { usersKey, membersKey, repliesKey, messagesKey, getUser } from '.';
-	import { getContext } from '$lib/context';
-	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
-	import { clientKey, sessionKey } from '@routes/context';
-	import { settingsKey } from '@routes/context';
-	import { _, date, time } from 'svelte-i18n';
-	import Embed from './Embed.svelte';
-	import Attachment from './Attachment.svelte';
-	import SystemMessage from './SystemMessage.svelte';
-	import { decodeTime } from 'ulid';
-	import { getDisplayAvatar, getDisplayName } from '$lib/util';
-	import UserProfilePicture from '@components/UserProfilePicture.svelte';
-	import MessageReply from '@components/Chat/MessageReply.svelte';
 	import { base } from '$app/paths';
+	import { getContext } from '$lib/context';
+	import { getDisplayAvatar, getDisplayName } from '$lib/util';
+	import MessageReply from '@components/Chat/MessageReply.svelte';
+	import UserProfilePicture from '@components/UserProfilePicture.svelte';
+	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
+	import { clientKey, sessionKey, settingsKey } from '@routes/context';
+	import { _, date, time } from 'svelte-i18n';
+	import { decodeTime } from 'ulid';
+	import { getUser, membersKey, messagesKey, repliesKey, usersKey } from '.';
+	import Attachment from './Attachment.svelte';
+	import Embed from './Embed.svelte';
+	import SystemMessage from './SystemMessage.svelte';
 
 	/**
 	 * Message to show.
@@ -89,7 +88,9 @@
 		});
 	}
 
-	$: getUser(client.api, $users ?? [], message.author).then((user) => (author = user));
+	$: getUser(client.api, $users ?? client.api.cache.users, message.author).then(
+		(user) => (author = user)
+	);
 	$: $selectedServerID == undefined ? undefined : updateMember($selectedServerID, message.author);
 	$: displayName = getDisplayName(author, member, message);
 	$: displayAvatar = $settings['jolt:low-data-mode']

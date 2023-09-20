@@ -7,20 +7,22 @@ export interface Reply {
 	mention: boolean;
 }
 
-export function getUser(api: APIClient, users: User[], id: string): Promise<User | undefined> {
-	return new Promise((resolve, reject) => {
-		if (id == '0'.repeat(26)) {
-			resolve(undefined);
-		}
+export async function getUser(
+	api: APIClient,
+	users: User[],
+	id: string
+): Promise<User | undefined> {
+	if (id == '0'.repeat(26)) {
+		return;
+	}
 
-		const user = users.find((user) => user._id == id);
+	const user = users.find((user) => user._id == id);
 
-		if (user == undefined) {
-			api.fetchUser(id).then(resolve).catch(reject);
-		}
+	if (user == undefined) {
+		return await api.fetchUser(id);
+	}
 
-		resolve(user);
-	});
+	return user;
 }
 export const messagesKey: ContextInjectionKey<Writable<Message[]>> = Symbol();
 export const membersKey: ContextInjectionKey<Writable<Member[]>> = Symbol();

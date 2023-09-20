@@ -39,7 +39,7 @@
 				if (Array.isArray(response)) {
 					messages.set(response.reverse());
 				} else {
-					messages.set(response.messages.reverse() ?? []);
+					messages.set(response.messages.reverse());
 					users.set(response.users);
 					members.set(response.members ?? []);
 				}

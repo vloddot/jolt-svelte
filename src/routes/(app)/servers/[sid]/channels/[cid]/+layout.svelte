@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { writable } from 'svelte/store';
-	import type { RouteParams } from './$types';
 	import { getContext, setContext } from '$lib/context';
-	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
-	import ChannelComponent from '@components/ChannelBar/Channel.svelte';
-	import ChannelCategory from '@components/ChannelBar/Category.svelte';
-	import { channelKey, serverKey } from './context';
-	import { clientKey } from '@routes/context';
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
+	import ChannelCategory from '@components/ChannelBar/Category.svelte';
+	import ChannelComponent from '@components/ChannelBar/Channel.svelte';
 	import UserProfilePicture from '@components/UserProfilePicture.svelte';
+	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
+	import { clientKey } from '@routes/context';
 	import { redirect } from '@sveltejs/kit';
 	import { appWindow } from '@tauri-apps/api/window';
+	import { writable } from 'svelte/store';
+	import type { RouteParams } from './$types';
+	import { channelKey, serverKey } from './context';
 
 	const client = getContext(clientKey)!;
 

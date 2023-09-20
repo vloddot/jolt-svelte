@@ -19,17 +19,18 @@
 	const client = new Client();
 	setContext(clientKey, client);
 
-	const voiceClient = new VoiceClientBrowser(DEFAULT_CONSUMER);
+	const voiceClient = writable<VoiceClientBrowser | undefined>();
 	setContext(voiceClientKey, voiceClient);
 
 	$: {
 		if ($session == null) {
 			client.websocket.disconnect();
-			voiceClient.disconnect();
+			$voiceClient?.disconnect();
 		} else {
-			const { token, user_id } = $session;
+			const { token } = $session;
+			voiceClient.set(new VoiceClientBrowser({ token, type: 'user' }, DEFAULT_CONSUMER));
+
 			client.authenticate(token);
-			voiceClient.authenticate(token, user_id, 'user');
 		}
 	}
 

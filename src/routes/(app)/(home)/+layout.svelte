@@ -3,7 +3,7 @@
 	import { getContext } from '$lib/context';
 	import '$lib/index.css';
 	import ChannelComponent from '@components/ChannelBar/Channel.svelte';
-	import { selectedChannelIDKey } from '@routes/(app)/context';
+	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
 	import { clientKey } from '@routes/context';
 	import { onMount } from 'svelte';
 	import { writable } from 'svelte/store';
@@ -13,7 +13,9 @@
 
 	const client = getContext(clientKey)!;
 	const selectedChannelID = getContext(selectedChannelIDKey) ?? writable();
+	const selectedServerID = getContext(selectedServerIDKey) ?? writable();
 
+	$: selectedServerID.set(undefined);
 	$: selectedChannelID.set(pageParams.id);
 
 	let dms: Exclude<Channel, { channel_type: 'TextChannel' | 'VoiceChannel' }>[] | undefined =
@@ -35,19 +37,17 @@
 	onMount(updateDMs);
 </script>
 
-{#key $selectedChannelID}
-	<div role="list" class="channel-bar-container">
-		{#if dms != undefined}
-			{#if savedMessagesChannel != undefined}
-				<ChannelComponent channel={savedMessagesChannel} />
-			{/if}
-			{#each dms as dm}
-				{#if dm.channel_type != 'SavedMessages'}
-					<ChannelComponent channel={dm} />
-				{/if}
-			{/each}
+<div role="list" class="channel-bar-container">
+	{#if dms != undefined}
+		{#if savedMessagesChannel != undefined}
+			<ChannelComponent channel={savedMessagesChannel} />
 		{/if}
-	</div>
-{/key}
+		{#each dms as dm}
+			{#if dm.channel_type != 'SavedMessages'}
+				<ChannelComponent channel={dm} />
+			{/if}
+		{/each}
+	{/if}
+</div>
 
 <slot />
