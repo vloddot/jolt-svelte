@@ -26,6 +26,6 @@
 
 	.main-content-container {
 		grid-area: 'main-content';
-		@apply h-screen overflow-x-hidden overflow-y-scroll;
+		@apply h-screen overflow-x-hidden;
 	}
 }

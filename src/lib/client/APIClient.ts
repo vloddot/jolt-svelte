@@ -37,6 +37,10 @@ export class APIClient {
 			await goto(`${base}/login`);
 		}
 
+		if (!response.ok) {
+			throw response.statusText;
+		}
+
 		if (response.body == null && expectResponse) {
 			throw new Error(
 				`expected response from route ${path}, got ${response.status}: ${response.statusText}`

@@ -1,13 +1,17 @@
 import { base } from '$app/paths';
 import { error, redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
+import type { SettingsSection } from './sections';
 
 export const load = (async ({ parent }) => {
-	const {
-		sections: [section]
-	} = await parent();
+	const { sections } = await parent();
 
-	if (section.type != 'normal') {
+	const section = sections.find((section) => section.type == 'link') as Extract<
+		SettingsSection,
+		{ type: 'link' }
+	>;
+
+	if (section == undefined) {
 		throw error(404, 'Not Found');
 	}
 

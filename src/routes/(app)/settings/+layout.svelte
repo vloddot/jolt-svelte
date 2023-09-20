@@ -15,7 +15,7 @@
 
 <div class="channel-bar-container">
 	{#each data.sections as section}
-		{#if section.type == 'normal'}
+		{#if section.type == 'link'}
 			<a
 				href="{base}/settings/{section.id}"
 				class={$page.url.pathname == `${base}/settings/${section.id}`
@@ -24,17 +24,8 @@
 			>
 				<p>{section.title}</p>
 			</a>
-		{:else if section.type == 'button'}
-			<div class="hover:bg-gray-600">
-				<button
-					class="w-full text-start"
-					on:click={() => section.type == 'button' && section.onClick(client, session)}
-				>
-					{section.title}
-				</button>
-			</div>
-		{:else if section.type == 'hr'}
-			<hr class="border-gray-600 my-2" />
+		{:else if section.type == 'header'}
+			<h1 class="text-xl uppercase my-2">{section.title}</h1>
 		{/if}
 	{/each}
 </div>

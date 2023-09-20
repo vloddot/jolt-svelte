@@ -3,18 +3,18 @@
 	import { getContext } from '$lib/context';
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
 	import UserProfilePicture from '@components/UserProfilePicture.svelte';
-	import { clientKey, sessionKey, settingsKey } from '@routes/context';
+	import { clientKey, settingsKey } from '@routes/context';
 	import { onMount, setContext } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { writable } from 'svelte/store';
 	import { membersKey, messagesKey, repliesKey, usersKey, type Reply } from '.';
 	import MessageComponent from './Message.svelte';
+
 	/**
 	 * Which channel to show messages from.
 	 */
 	export let channel: Exclude<Channel, { channel_type: 'VoiceChannel' }>;
 
-	const session = getContext(sessionKey)!;
 	const settings = getContext(settingsKey)!;
 	const client = getContext(clientKey)!;
 
@@ -162,6 +162,23 @@
 		)}`;
 	}
 
+	function endTyping() {
+		if ($settings['jolt:send-typing-indicators']) {
+			client.websocket.send({ type: 'EndTyping', channel: channel._id });
+		}
+	}
+
+	function startTyping() {
+		if ($settings['jolt:send-typing-indicators']) {
+			if (messageInputNode.value == '') {
+				client.websocket.send({ type: 'EndTyping', channel: channel._id });
+				return;
+			}
+
+			client.websocket.send({ type: 'BeginTyping', channel: channel._id });
+		}
+	}
+
 	$: updateChannelName(channel);
 </script>
 
@@ -229,30 +246,15 @@
 				</div>
 			</div>
 		{/each}
-		<form class="m-4" on:submit|preventDefault={sendMessage}>
-			<div class="bg-gray-500 rounded-xl px-2 pt-2">
-				<textarea
-					on:input={() => {
-						if ($settings['jolt:send-typing-indicators']) {
-							client.websocket.send({
-								type: 'BeginTyping',
-								channel: channel._id
-							});
-						}
-					}}
-					on:keydown={(event) => {
-						if (event.shiftKey || event.key != 'Enter') {
-							return;
-						}
-
-						event.preventDefault();
-						sendMessage();
-					}}
-					bind:this={messageInputNode}
-					class="outline-none resize-none bg-inherit w-full"
-					placeholder="{$_('send-message-in')} {channelName}"
-				/>
-			</div>
-		</form>
 	</div>
+	<form class="sticky bg-gray-500 rounded-xl px-2 pt-2 m-4">
+		<textarea
+			on:blur={endTyping}
+			on:input={startTyping}
+			bind:this={messageInputNode}
+			maxlength="2000"
+			class="outline-none resize-none bg-inherit w-full h-12"
+			placeholder="{$_('send-message-in')} {channelName}"
+		/>
+	</form>
 </main>
