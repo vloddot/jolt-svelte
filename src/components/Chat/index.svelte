@@ -182,7 +182,7 @@
 	$: updateChannelName(channel);
 </script>
 
-<main class="main-content-container">
+<main class="main-content-container flex flex-col">
 	<div class="flex flex-col h-full overflow-x-hidden overflow-y-scroll">
 		<p>so um hi this is the start, i should make this text box much further down i think</p>
 		{#each $messages as message}
@@ -247,7 +247,7 @@
 			</div>
 		{/each}
 	</div>
-	<form class="sticky bg-gray-500 rounded-xl px-2 pt-2 m-4">
+	<form class="bg-gray-500 rounded-xl px-2 pt-2 m-4">
 		<textarea
 			on:blur={endTyping}
 			on:input={startTyping}
