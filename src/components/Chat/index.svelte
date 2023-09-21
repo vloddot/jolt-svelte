@@ -4,7 +4,7 @@
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
 	import UserProfilePicture from '@components/UserProfilePicture.svelte';
 	import { clientKey, settingsKey } from '@routes/context';
-	import { onMount, setContext, tick } from 'svelte';
+	import { beforeUpdate, onMount, setContext, tick } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { writable } from 'svelte/store';
 	import { membersKey, messagesKey, repliesKey, usersKey, type Reply } from '.';
@@ -50,7 +50,7 @@
 		currentlyTypingUsers = [];
 	}
 
-	$: {
+	beforeUpdate(() => {
 		if (messagesList) {
 			// reference `messages` so that this code re-runs whenever it changes
 			$messages;
@@ -62,7 +62,7 @@
 				});
 			}
 		}
-	}
+	});
 
 	async function listenToTypingEvents(receive: boolean) {
 		if (!receive) {
