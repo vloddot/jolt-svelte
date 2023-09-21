@@ -1,11 +1,12 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	import { page } from '$app/stores';
 	import { getContext } from '$lib/context';
 	import '$lib/index.css';
 	import { clientKey, sessionKey } from '@routes/context';
-	import { _ } from 'svelte-i18n';
 	import type { LayoutData } from './$types';
-	import { base } from '$app/paths';
+	import { _ } from 'svelte-i18n';
 
 	export let data: LayoutData;
 
@@ -28,6 +29,21 @@
 			<h1 class="text-xl uppercase my-2">{section.title}</h1>
 		{/if}
 	{/each}
+
+	<hr class="my-2 border-gray-500" />
+
+	<div class="hover:bg-gray-600">
+		<button
+			class="w-full text-start"
+			on:click={async () => {
+				await client.api.logout();
+				session.set(null);
+				await goto('/login');
+			}}
+		>
+			{$_('logout')}
+		</button>
+	</div>
 </div>
 
 <main class="main-content-container">

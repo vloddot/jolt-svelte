@@ -4,7 +4,7 @@
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
 	import UserProfilePicture from '@components/UserProfilePicture.svelte';
 	import { clientKey, settingsKey } from '@routes/context';
-	import { onMount, setContext } from 'svelte';
+	import { onMount, setContext, tick } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { writable } from 'svelte/store';
 	import { membersKey, messagesKey, repliesKey, usersKey, type Reply } from '.';
@@ -30,6 +30,7 @@
 	setContext(repliesKey, replies);
 
 	let messageInputNode: HTMLTextAreaElement;
+	let messagesList: HTMLDivElement;
 	let currentlyTypingUsers: User[] = [];
 
 	$: {
@@ -47,6 +48,20 @@
 
 		replies.set([]);
 		currentlyTypingUsers = [];
+	}
+
+	$: {
+		if (messagesList) {
+			// reference `messages` so that this code re-runs whenever it changes
+			$messages;
+
+			// autoscroll when new messages are added
+			if (messagesList.offsetHeight + messagesList.scrollTop > messagesList.scrollHeight - 20) {
+				tick().then(() => {
+					messagesList.scrollTo(0, messagesList.scrollHeight);
+				});
+			}
+		}
 	}
 
 	async function listenToTypingEvents(receive: boolean) {
@@ -87,7 +102,7 @@
 
 			client.api.ackMessage(channel._id, message._id);
 			messages.update((messages) => {
-				messages.push(message as Message);
+				messages.push(message);
 				return messages;
 			});
 		});
@@ -183,74 +198,83 @@
 </script>
 
 <main class="main-content-container flex flex-col">
-	<div class="flex flex-col h-full overflow-x-hidden overflow-y-scroll">
+	<div bind:this={messagesList} class="flex flex-col h-full overflow-x-hidden overflow-y-scroll">
 		<p>so um hi this is the start, i should make this text box much further down i think</p>
 		{#each $messages as message}
 			<MessageComponent {message} />
 		{/each}
-		{#each currentlyTypingUsers as user}
-			{@const displayName = getDisplayName(user)}
-			<div>
-				<UserProfilePicture
-					src={$settings['jolt:low-data-mode'] ? `${base}/user.svg` : getDisplayAvatar(user)}
-					width={16}
-					height={16}
-					name={displayName}
-				/>
-				{displayName}
-				{$_('user.is-typing')}...
-			</div>
-		{/each}
-		{#each $replies as reply}
-			{@const user = client.api.fetchUser(reply.message.author)}
-
-			<div class="flex">
-				<p>
-					{$_('message.replying-to')}
-
-					<strong>
-						{#await user then user}
-							{@const displayName = getDisplayName(user)}
-							<UserProfilePicture src={getDisplayAvatar(user)} name={displayName} />
-							{displayName}
-						{:catch}
-							{@const displayName = `<${$_('user.unknown')}>`}
-							<UserProfilePicture src="{base}/user.svg" name={displayName} />
-							{displayName}
-						{/await}
-					</strong>
-				</p>
-
-				<p class="pl-1 text-gray-600 overflow-ellipsis">{reply.message.content}</p>
-
-				<div class="flex-1" />
-
-				<div class="pr-2">
-					<input id="mention" style="display: none;" type="checkbox" bind:checked={reply.mention} />
-					<label class="cursor-pointer" for="mention">
-						<img src="{base}/at.svg" class="inline" alt="mention" />
-						{reply.mention ? 'ON' : 'OFF'}
-					</label>
-				</div>
-
-				<div class="pr-2">
-					<button
-						on:click={() =>
-							replies.update((replies) => {
-								replies = replies.filter((r) => r.message._id != reply.message._id);
-								return replies;
-							})}
-					>
-						<img src="{base}/circle-x.svg" alt="Cancel mention" />
-					</button>
-				</div>
-			</div>
-		{/each}
 	</div>
-	<form class="bg-gray-500 rounded-xl px-2 pt-2 m-4">
+	{#each currentlyTypingUsers as user}
+		{@const displayName = getDisplayName(user)}
+		<div>
+			<UserProfilePicture
+				src={$settings['jolt:low-data-mode'] ? `${base}/user.svg` : getDisplayAvatar(user)}
+				width={16}
+				height={16}
+				name={displayName}
+			/>
+			{displayName}
+			{$_('user.is-typing')}...
+		</div>
+	{/each}
+	{#each $replies as reply}
+		{@const user = client.api.fetchUser(reply.message.author)}
+
+		<div class="flex">
+			<p>
+				{$_('message.replying-to')}
+
+				<strong>
+					{#await user then user}
+						{@const displayName = getDisplayName(user)}
+						<UserProfilePicture src={getDisplayAvatar(user)} name={displayName} />
+						{displayName}
+					{:catch}
+						{@const displayName = `<${$_('user.unknown')}>`}
+						<UserProfilePicture src="{base}/user.svg" name={displayName} />
+						{displayName}
+					{/await}
+				</strong>
+			</p>
+
+			<p class="pl-1 text-gray-600 overflow-ellipsis">{reply.message.content}</p>
+
+			<div class="flex-1" />
+
+			<div class="pr-2">
+				<input id="mention" style="display: none;" type="checkbox" bind:checked={reply.mention} />
+				<label class="cursor-pointer" for="mention">
+					<img src="{base}/at.svg" class="inline" alt="mention" />
+					{reply.mention ? 'ON' : 'OFF'}
+				</label>
+			</div>
+
+			<div class="pr-2">
+				<button
+					on:click={() =>
+						replies.update((replies) => {
+							replies = replies.filter((r) => r.message._id != reply.message._id);
+							return replies;
+						})}
+				>
+					<img src="{base}/circle-x.svg" alt="Cancel mention" />
+				</button>
+			</div>
+		</div>
+	{/each}
+	<form on:submit={sendMessage} class="bg-gray-500 rounded-xl px-2 pt-2 m-4">
 		<textarea
 			on:blur={endTyping}
 			on:input={startTyping}
+			on:keydown={(event) => {
+				if (event.shiftKey || event.key != 'Enter') {
+					return;
+				}
+
+				event.preventDefault();
+
+				sendMessage();
+			}}
 			bind:this={messageInputNode}
 			maxlength="2000"
 			class="outline-none resize-none bg-inherit w-full h-12"
