@@ -6,5 +6,5 @@ import type { Writable } from 'svelte/store';
 export const settingsKey: ContextInjectionKey<Writable<Settings>> = Symbol();
 export const sessionKey: ContextInjectionKey<Writable<Session>> = Symbol();
 export const clientKey: ContextInjectionKey<Client> = Symbol();
-export const voiceClientKey: ContextInjectionKey<Writable<VoiceClientBrowser | undefined>> =
+export const voiceClientKey: ContextInjectionKey<Writable<VoiceClientBrowser>> =
 	Symbol();

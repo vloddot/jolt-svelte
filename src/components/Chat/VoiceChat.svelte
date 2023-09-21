@@ -11,23 +11,24 @@
 	const voice = getContext(voiceClientKey)!;
 
 	let participants = new Map<string, VoiceParticipant>();
-	voice.participants.onUpdate(() => (participants = voice.participants));
+
+	$voice.participants.onUpdate(() => (participants = $voice.participants));
 
 	function connect() {
 		Promise.all([
 			navigator.mediaDevices.getUserMedia({
 				audio: true
 			}),
-			voice.connect(channel._id)
+			$voice.connect(channel._id)
 		]).then(([stream, voice]) => {
 			const track = stream.getAudioTracks()[0];
-			voice.play('audio', track);
+			$voice.play('audio', track);
 		});
 	}
 </script>
 
 <div class="main-content-container">
-	<button class="m-2" on:click={() => (voice.connected ? voice.disconnect() : connect())}>
+	<button class="m-2" on:click={() => ($voice.connected ? $voice.disconnect() : connect())}>
 		<img src="{base}/call.svg" alt="Call" />
 	</button>
 
