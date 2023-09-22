@@ -20,12 +20,11 @@ export class APIClient {
 		}
 	}
 
-	async req<T>(
+	async req(
 		method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
 		path: string,
-		expectResponse: boolean,
 		body?: string
-	): Promise<T> {
+	): Promise<Response> {
 		const response = await fetch(`https://api.revolt.chat${path}`, {
 			method,
 			body,
@@ -41,38 +40,40 @@ export class APIClient {
 			throw response.statusText;
 		}
 
-		if (response.body == null && expectResponse) {
-			throw new Error(
-				`expected response from route ${path}, got ${response.status}: ${response.statusText}`
-			);
-		}
-
-		return response.json();
+		return response;
 	}
 
-	login(data: DataLogin): Promise<ResponseLogin> {
-		return this.req('POST', '/auth/session/login', true, JSON.stringify(data));
+	async login(data: DataLogin): Promise<ResponseLogin> {
+		const response = await this.req('POST', '/auth/session/login', JSON.stringify(data));
+		return await response.json();
 	}
 
-	logout(): Promise<void> {
-		return this.req('POST', '/auth/session/logout', false);
+	async logout(): Promise<void> {
+		await this.req('POST', '/auth/session/logout');
 	}
 
-	deleteSession(id: string): Promise<void> {
-		return this.req('DELETE', `/auth/session/${id}`, false);
+	async deleteSession(id: string): Promise<void> {
+		await this.req('DELETE', `/auth/session/${id}`);
 	}
 
-	createServer(body: DataCreateServer): Promise<CreateServerResponse> {
-		return this.req('POST', '/servers/create', true, JSON.stringify(body));
+	async createServer(body: DataCreateServer): Promise<CreateServerResponse> {
+		const response = await this.req('POST', '/servers/create', JSON.stringify(body));
+		return await response.json();
 	}
 
-	changeUsername(username: string, password: string): Promise<User> {
-		return this.req('PATCH', '/users/@me/username', true, JSON.stringify({ username, password }));
+	async changeUsername(username: string, password: string): Promise<User> {
+		const response = await this.req(
+			'PATCH',
+			'/users/@me/username',
+			JSON.stringify({ username, password })
+		);
+		return await response.json();
 	}
 
 	joinCall(channel_id: string): Promise<string> {
 		return new Promise((resolve, reject) => {
-			this.req<{ token: string }>('POST', `/channels/${channel_id}/join_call`, true)
+			this.req('POST', `/channels/${channel_id}/join_call`)
+				.then((response) => response.json())
 				.then(({ token }) => resolve(token))
 				.catch(reject);
 		});
@@ -81,31 +82,38 @@ export class APIClient {
 	async fetchChannel(id: string): Promise<Channel> {
 		return (
 			this.cache?.channels.find((channel) => channel._id == id) ??
-			this.req('GET', `/channels/${id}`, true)
+			this.req('GET', `/channels/${id}`).then((response) => response.json())
 		);
 	}
 
-	fetchDirectMessages(): Promise<
+	async fetchDirectMessages(): Promise<
 		Exclude<Channel, { channel_type: 'TextChannel' | 'VoiceChannel' }>[]
 	> {
-		return this.req('GET', '/users/dms', true);
+		const response = await this.req('GET', '/users/dms');
+		return await response.json();
 	}
 
-	ackMessage(channel_id: string, message_id: string): Promise<void> {
-		return this.req('PUT', `/channels/${channel_id}/ack/${message_id}`, false);
+	async ackMessage(channel_id: string, message_id: string): Promise<void> {
+		await this.req('PUT', `/channels/${channel_id}/ack/${message_id}`);
 	}
 
-	async fetchSettings<K extends string>(keys: K[]): Promise<Record<K, [number, string] | undefined>> {
-		return this.req('POST', '/sync/settings/fetch', true, JSON.stringify({ keys }));
+	async fetchSettings<K extends string>(
+		keys: K[]
+	): Promise<Record<K, [number, string] | undefined>> {
+		const response = await this.req('POST', '/sync/settings/fetch', JSON.stringify({ keys }));
+		return await response.json();
 	}
 
-	fetchMembers(server_id: string): Promise<AllMemberResponse> {
-		return this.req('GET', `/servers/${server_id}/members`, true);
+	async fetchMembers(server_id: string): Promise<AllMemberResponse> {
+		const response = await this.req('GET', `/servers/${server_id}/members`);
+		return await response.json();
 	}
 
 	async fetchMember(server_id: string, member_id: string, user_id?: string): Promise<Member> {
-		const makeRequest = () =>
-			this.req<Member>('GET', `/servers/${server_id}/members/${member_id}`, true);
+		const makeRequest = (): Promise<Member> =>
+			this.req('GET', `/servers/${server_id}/members/${member_id}`).then((response) =>
+				response.json()
+			);
 
 		if (user_id == undefined) {
 			return makeRequest();
@@ -118,11 +126,12 @@ export class APIClient {
 		);
 	}
 
-	fetchMessage(channel_id: string, message_id: string): Promise<Message> {
-		return this.req('GET', `/channels/${channel_id}/messages/${message_id}`, true);
+	async fetchMessage(channel_id: string, message_id: string): Promise<Message> {
+		const response = await this.req('GET', `/channels/${channel_id}/messages/${message_id}`);
+		return await response.json();
 	}
 
-	queryMessages(
+	async queryMessages(
 		channel_id: string,
 		data_query_messages: Omit<OptionsMessageSearch, 'query'>
 	): Promise<BulkMessageResponse> {
@@ -131,53 +140,59 @@ export class APIClient {
 			new URLSearchParams(
 				Object.entries(data_query_messages).map(([key, value]) => [key, value.toString()])
 			);
-		return this.req('GET', `/channels/${channel_id}/messages${params}`, true);
+		const response = await this.req('GET', `/channels/${channel_id}/messages${params}`);
+		return await response.json();
 	}
 
-	sendMessage(channel_id: string, data_message_send: DataMessageSend): Promise<Message> {
-		return this.req(
+	async sendMessage(channel_id: string, data_message_send: DataMessageSend): Promise<Message> {
+		const response = await this.req(
 			'POST',
 			`/channels/${channel_id}/messages`,
-			true,
 			JSON.stringify(data_message_send)
 		);
+
+		return await response.json();
 	}
 
-	editMessage(
+	async editMessage(
 		channel_id: string,
 		message_id: string,
 		data_edit_message: DataEditMessage
 	): Promise<Message> {
-		return this.req(
+		const response = await this.req(
 			'PATCH',
 			`/channels/${channel_id}/messages/${message_id}`,
-			true,
 			JSON.stringify(data_edit_message)
 		);
+
+		return await response.json();
 	}
 
-	deleteMessage(channel_id: string, message_id: string): Promise<void> {
-		return this.req('DELETE', `/channels/${channel_id}/messages/${message_id}`, false);
+	async deleteMessage(channel_id: string, message_id: string): Promise<void> {
+		await this.req('DELETE', `/channels/${channel_id}/messages/${message_id}`);
 	}
 
 	async fetchServer(id: string): Promise<Server> {
 		return (
 			this.cache?.servers.find((server) => server._id == id) ??
-			(await this.req('GET', `/servers/${id}`, true))
+			this.req('GET', `/servers/${id}`).then((response) => response.json())
 		);
 	}
 
-	fetchSessions(): Promise<SessionInfo[]> {
-		return this.req('GET', '/auth/session/all', true);
+	async fetchSessions(): Promise<SessionInfo[]> {
+		const response = await this.req('GET', '/auth/session/all');
+		return response.json();
 	}
 
 	async fetchUser(id: string): Promise<User> {
 		return (
-			this.cache?.users.find((user) => user._id == id) ?? this.req('GET', `/users/${id}`, true)
+			this.cache?.users.find((user) => user._id == id) ??
+			this.req('GET', `/users/${id}`).then((response) => response.json())
 		);
 	}
 
-	fetchUserProfile(id: string): Promise<UserProfile> {
-		return this.req('GET', `/users/${id}/profile`, true);
+	async fetchUserProfile(id: string): Promise<UserProfile> {
+		const response = await this.req('GET', `/users/${id}/profile`);
+		return response.json();
 	}
 }

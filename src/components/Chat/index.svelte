@@ -30,8 +30,10 @@
 	setContext(repliesKey, replies);
 
 	let messageInputNode: HTMLTextAreaElement;
-	let messagesList: HTMLDivElement;
+	let messagesListNode: HTMLDivElement;
 	let currentlyTypingUsers: User[] = [];
+	let fileUploadNode: HTMLInputElement | null;
+	let files: FileList | null;
 
 	$: {
 		client.api
@@ -51,16 +53,18 @@
 	}
 
 	beforeUpdate(() => {
-		if (messagesList) {
-			// reference `messages` so that this code re-runs whenever it changes
-			$messages;
+		if (!messagesListNode) {
+			return;
+		}
 
-			// autoscroll when new messages are added
-			if (messagesList.offsetHeight + messagesList.scrollTop > messagesList.scrollHeight - 20) {
-				tick().then(() => {
-					messagesList.scrollTo(0, messagesList.scrollHeight);
-				});
-			}
+		// autoscroll when new messages are added
+		if (
+			messagesListNode.offsetHeight + messagesListNode.scrollTop >
+			messagesListNode.scrollHeight - 20
+		) {
+			tick().then(() => {
+				messagesListNode.scrollTo(0, messagesListNode.scrollHeight);
+			});
 		}
 	});
 
@@ -141,12 +145,22 @@
 	});
 
 	async function sendMessage() {
+		let attachments: string[] = [];
+		if (fileUploadNode?.files != null) {
+			attachments = await Promise.all(
+				Array.from(fileUploadNode.files).map((file) => client.autumn.uploadFile(file))
+			);
+			fileUploadNode.value = '';
+			files = null;
+		}
+
 		await client.api.sendMessage(channel._id, {
 			content: messageInputNode.value.trim(),
 			replies: $replies.map(({ message: { _id }, mention }) => ({
 				id: _id,
 				mention
-			}))
+			})),
+			attachments
 		});
 
 		replies.set([]);
@@ -198,12 +212,40 @@
 </script>
 
 <main class="main-content-container flex flex-col">
-	<div bind:this={messagesList} class="flex flex-col h-full overflow-x-hidden overflow-y-scroll">
+	<div
+		bind:this={messagesListNode}
+		id="messages-list"
+		class="flex flex-col h-full overflow-x-hidden overflow-y-scroll"
+	>
 		<p>so um hi this is the start, i should make this text box much further down i think</p>
 		{#each $messages as message}
 			<MessageComponent {message} />
 		{/each}
 	</div>
+	{#if files != null && files.length != 0}
+		<div class="flex">
+			<p>
+				Uploading
+				{Array.from(files)
+					.map((file) => file.name)
+					.join(', ')}
+			</p>
+
+			<div class="flex-1" />
+
+			<button
+				class="pr-2"
+				on:click={() => {
+					if (fileUploadNode != null) {
+						fileUploadNode.value = '';
+						files = null;
+					}
+				}}
+			>
+				<img src="{base}/circle-x.svg" alt="Cancel Upload" />
+			</button>
+		</div>
+	{/if}
 	{#each currentlyTypingUsers as user}
 		{@const displayName = getDisplayName(user)}
 		<div>
@@ -262,7 +304,19 @@
 			</div>
 		</div>
 	{/each}
-	<form on:submit={sendMessage} class="bg-gray-500 rounded-xl px-2 pt-2 m-4">
+	<form on:submit={sendMessage} class="flex bg-gray-500 rounded-xl px-2 pt-2 m-4">
+		<label for="file-upload" class="cursor-pointer">
+			<img src="/plus.svg" alt="Upload File" />
+		</label>
+		<input
+			id="file-upload"
+			class="opacity-0 w-0 p-1"
+			type="file"
+			multiple
+			max={5}
+			bind:this={fileUploadNode}
+			bind:files
+		/>
 		<textarea
 			on:blur={endTyping}
 			on:input={startTyping}

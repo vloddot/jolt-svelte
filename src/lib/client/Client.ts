@@ -1,6 +1,7 @@
 import EventEmitter from 'eventemitter3';
 import { APIClient } from './APIClient';
 import { WebSocketClient, type ServerMessage } from './WebSocketClient';
+import { AutumnClient } from './AutumnClient';
 
 export type Events<T extends { type: string | number | symbol }> = {
 	[K in Exclude<T['type'], 'Bulk'>]: (event: Omit<Extract<T, { type: K }>, 'type'>) => void;
@@ -9,6 +10,7 @@ export type Events<T extends { type: string | number | symbol }> = {
 export class Client extends EventEmitter<Events<ServerMessage>> {
 	api: APIClient = new APIClient();
 	websocket: WebSocketClient = new WebSocketClient();
+	autumn: AutumnClient = new AutumnClient();
 	user: User | undefined = undefined;
 
 	get ready(): boolean {
