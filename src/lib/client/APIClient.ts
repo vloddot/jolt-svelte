@@ -1,20 +1,24 @@
 import { goto } from '$app/navigation';
 import { base } from '$app/paths';
-import type { ReadyData } from '$lib/client/WebSocketClient';
 
 export class APIClient {
-	cache: ReadyData;
+	cache: {
+		channels: Map<string, Channel>;
+		emojis: Map<string, Emoji>;
+		members: Map<{ user: string; server: string }, Member>;
+		servers: Map<string, Server>;
+		users: Map<string, User>;
+	} = {
+		channels: new Map(),
+		emojis: new Map(),
+		members: new Map(),
+		servers: new Map(),
+		users: new Map()
+	};
+
 	token: string | undefined;
 
 	constructor(token?: string) {
-		this.cache = {
-			channels: [],
-			emojis: [],
-			members: [],
-			servers: [],
-			users: []
-		};
-
 		if (token) {
 			this.token = token;
 		}
@@ -80,10 +84,17 @@ export class APIClient {
 	}
 
 	async fetchChannel(id: string): Promise<Channel> {
-		return (
-			this.cache?.channels.find((channel) => channel._id == id) ??
-			this.req('GET', `/channels/${id}`).then((response) => response.json())
-		);
+		const channel = this.cache.channels.get(id);
+
+		if (channel == undefined) {
+			const result: Channel = await this.req('GET', `/channels/${id}`).then((response) =>
+				response.json()
+			);
+			this.cache.channels.set(result._id, result);
+			return result;
+		}
+
+		return channel;
 	}
 
 	async fetchDirectMessages(): Promise<
@@ -107,23 +118,6 @@ export class APIClient {
 	async fetchMembers(server_id: string): Promise<AllMemberResponse> {
 		const response = await this.req('GET', `/servers/${server_id}/members`);
 		return await response.json();
-	}
-
-	async fetchMember(server_id: string, member_id: string, user_id?: string): Promise<Member> {
-		const makeRequest = (): Promise<Member> =>
-			this.req('GET', `/servers/${server_id}/members/${member_id}`).then((response) =>
-				response.json()
-			);
-
-		if (user_id == undefined) {
-			return makeRequest();
-		}
-
-		return (
-			this.cache?.members.find(
-				(member) => member._id.server == server_id && member._id.user == user_id
-			) ?? makeRequest()
-		);
 	}
 
 	async fetchMessage(channel_id: string, message_id: string): Promise<Message> {
@@ -173,10 +167,17 @@ export class APIClient {
 	}
 
 	async fetchServer(id: string): Promise<Server> {
-		return (
-			this.cache?.servers.find((server) => server._id == id) ??
-			this.req('GET', `/servers/${id}`).then((response) => response.json())
-		);
+		const server = this.cache.servers.get(id);
+
+		if (server == undefined) {
+			const result: Server = await this.req('GET', `/servers/${id}`).then((response) =>
+				response.json()
+			);
+			this.cache.servers.set(result._id, result);
+			return result;
+		}
+
+		return server;
 	}
 
 	async fetchSessions(): Promise<SessionInfo[]> {
@@ -185,10 +186,17 @@ export class APIClient {
 	}
 
 	async fetchUser(id: string): Promise<User> {
-		return (
-			this.cache?.users.find((user) => user._id == id) ??
-			this.req('GET', `/users/${id}`).then((response) => response.json())
-		);
+		const user = this.cache.users.get(id);
+
+		if (user == undefined) {
+			const result: User = await this.req('GET', `/users/${id}`).then((response) =>
+				response.json()
+			);
+			this.cache.users.set(result._id, result);
+			return result;
+		}
+
+		return user;
 	}
 
 	async fetchUserProfile(id: string): Promise<UserProfile> {

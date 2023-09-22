@@ -1,13 +1,17 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import { getContext } from '$lib/context';
 	import { getAutumnURL, getDisplayAvatar, getDisplayName } from '$lib/util';
-	import { clientKey, sessionKey, settingsKey } from '@routes/context';
+	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
+	import { clientKey, settingsKey } from '@routes/context';
 	import { _ } from 'svelte-i18n';
 	import ChannelItem from './ChannelItem.svelte';
-	import { base } from '$app/paths';
 
 	const settings = getContext(settingsKey)!;
 	const client = getContext(clientKey)!;
+
+	const selectedChannelID = getContext(selectedChannelIDKey);
+	const selectedServerID = getContext(selectedServerIDKey);
 
 	function getChannelIcon(channel: Exclude<Channel, { channel_type: 'DirectMessage' }>): string {
 		if (channel.channel_type == 'SavedMessages') {
@@ -29,6 +33,14 @@
 	}
 
 	export let channel: Channel;
+
+	function getChannelHref(id: string): string {
+		return `${base}/${
+			$selectedServerID == undefined
+				? `channels/${id}`
+				: `servers/${$selectedServerID}/channels/${id}`
+		}`;
+	}
 </script>
 
 {#if channel.channel_type == 'DirectMessage'}
@@ -39,16 +51,17 @@
 				name={getDisplayName(user)}
 				width={32}
 				height={32}
-				id={channel._id}
+				href={getChannelHref(channel._id)}
+				selected={$selectedChannelID == channel._id}
 			/>
 		{:catch}
 			<ChannelItem
 				src="{base}/user.svg"
 				name="<{$_('user.unknown')}>"
-				alt={$_('user.unknown')}
 				width={32}
 				height={32}
-				id={channel._id}
+				href={getChannelHref(channel._id)}
+				selected={$selectedChannelID == channel._id}
 			/>
 		{/await}
 	{/if}
@@ -58,6 +71,7 @@
 		name={channel.channel_type == 'SavedMessages' ? $_('channel.notes') : channel.name}
 		width={24}
 		height={24}
-		id={channel._id}
+		href={getChannelHref(channel._id)}
+		selected={$selectedChannelID == channel._id}
 	/>
 {/if}

@@ -20,10 +20,10 @@
 	setContext(selectedChannelIDKey, selectedChannelID);
 	setContext(selectedServerIDKey, selectedServerID);
 
-	let servers = client.api.cache.servers;
+	let servers = Array.from(client.api.cache.servers.values());
 
 	settings.subscribe((settings) => {
-		servers = servers?.sort((a, b) => {
+		servers = servers.sort((a, b) => {
 			const aIndex = settings.ordering.servers?.indexOf(a._id) ?? -1;
 			const bIndex = settings.ordering.servers?.indexOf(b._id) ?? -1;
 
@@ -40,38 +40,16 @@
 		});
 	});
 
-	client.on('ServerCreate', ({ server, channels }) => {
-		client.api.cache.channels = client.api.cache.channels.concat(channels);
-		client.api.cache.servers.push(server);
-		servers = client.api.cache.servers;
+	client.on('ServerCreate', () => {
+		servers = Array.from(client.api.cache.servers.values());
 	});
 
 	client.on('ServerDelete', async ({ id }) => {
-		client.api.cache.channels = client.api.cache.channels.filter((channel) => {
-			if (channel.channel_type == 'TextChannel' || channel.channel_type == 'VoiceChannel') {
-				return channel.server != id;
-			}
-
-			return true;
-		});
-
-		client.api.cache.servers = client.api.cache.servers.filter((server) => server._id != id);
-		servers = client.api.cache.servers;
+		servers = Array.from(client.api.cache.servers.values());
 
 		if ($selectedServerID == id) {
 			await goto(`${base}/`);
 		}
-	});
-
-	onMount(() => {
-		const localSettings = localStorage.getItem('settings');
-		if (localSettings != null) {
-			settings.set(JSON.parse(localSettings));
-		}
-
-		settings.subscribe((settings) => {
-			localStorage.setItem('settings', JSON.stringify(settings));
-		});
 	});
 
 	client.on('Ready', async (event) => {
@@ -89,6 +67,42 @@
 			localStorage.setItem('revision:ordering', revision.toString());
 			settings.update((settings) => (settings.ordering = JSON.parse(ordering).servers));
 		}
+	});
+
+	client.on('UserSettingsUpdate', ({ id, update }) => {
+		if (id != client.user?._id) {
+			return;
+		}
+
+		let data: Partial<Settings> = {};
+		for (const [key, [revision, value]] of Object.entries(update)) {
+			const revisionID = `revision:${key}`;
+
+			if (revision > Number(localStorage.getItem(revisionID)) ?? 0) {
+				localStorage.setItem(revisionID, revision.toString());
+				// @ts-expect-error thinks you can't access with `key`
+				data[key] = value;
+			}
+		}
+
+		settings.update((settings) => {
+			for (const [key, value] of Object.entries(data)) {
+				// @ts-expect-error thinks you can't access with `key`
+				settings[key] = value;
+			}
+			return settings;
+		});
+	});
+
+	onMount(() => {
+		const localSettings = localStorage.getItem('settings');
+		if (localSettings != null) {
+			settings.set(JSON.parse(localSettings));
+		}
+
+		settings.subscribe((settings) => {
+			localStorage.setItem('settings', JSON.stringify(settings));
+		});
 	});
 </script>
 

@@ -25,5 +25,5 @@
 	src={$settings['jolt:low-data-mode'] ? `${base}/user.svg'` : src}
 	alt={name}
 	style="width:{width}px;height:{height}px;"
-	class="rounded-3xl object-cover {inline ? 'inline' : ''}"
+	class="rounded-full object-cover {inline ? 'inline' : ''}"
 />
