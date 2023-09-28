@@ -1,6 +1,6 @@
 [package]
 name = "jolt"
-version = "0.3.5"
+version = "0.3.6"
 description = "Tauri binary for the Jolt app."
 authors = ["vloddot (vladpriwalov08@gmail.com)"]
 keywords = ["revolt", "custom-client", "rust", "svelte", "tauri", "chatapp"]
