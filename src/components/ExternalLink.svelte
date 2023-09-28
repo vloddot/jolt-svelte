@@ -6,7 +6,9 @@
 </script>
 
 <Modal on:submit={() => window.open(href)} bind:showModal>
-	<h1 class="text-3xl" slot="header">External Link</h1>
+	<h1 class="text-3xl">External Link</h1>
+	<hr />
+
 	<p>Are you sure you want to go to this link? External links can be dangerous.</p>
 </Modal>
 

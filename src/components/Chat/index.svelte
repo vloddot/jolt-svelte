@@ -304,9 +304,9 @@
 			</div>
 		</div>
 	{/each}
-	<form on:submit={sendMessage} class="flex bg-gray-500 rounded-xl px-2 pt-2 m-4">
+	<form id="message-send-form" on:submit={sendMessage} class="flex bg-gray-500 rounded-xl px-2 pt-2 m-4">
 		<label for="file-upload" class="cursor-pointer">
-			<img src="/plus.svg" alt="Upload File" />
+			<img src="{base}/plus.svg" alt="Upload File" />
 		</label>
 		<input
 			id="file-upload"

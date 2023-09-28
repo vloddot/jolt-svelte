@@ -30,14 +30,14 @@
 	<a {href} aria-label={tooltip}>
 		{#if icon == undefined}
 			<span
-				class="sidebar-icon group-hover:rounded-xl group-hover:bg-green-600 group-hover:text-white overflow-ellipsis"
+				class="sidebar-icon group-hover:rounded-xl group-hover:bg-blue-500 overflow-ellipsis"
 			>
 				<!-- abbreviation of the tooltip -->
 				{tooltipAbbreviation}
 			</span>
 		{:else}
 			<img
-				class="sidebar-icon group-hover:rounded-xl group-hover:bg-green-600 group-hover:text-white"
+				class="sidebar-icon group-hover:rounded-xl group-hover:bg-blue-500 group-hover:text-white"
 				src={icon}
 				alt={tooltip}
 			/>

@@ -1,5 +1,30 @@
 import type { LayoutLoad } from './$types';
-import sections from '@routes/(app)/settings/sections';
+
+const sections: SettingsSection[] = [
+	{
+		type: 'header',
+		title: 'User Settings'
+	},
+	{
+		type: 'link',
+		title: 'Account',
+		id: 'account'
+	},
+	{
+		type: 'header',
+		title: 'Client Settings'
+	},
+	{
+		type: 'link',
+		title: 'Text & Images',
+		id: 'text'
+	},
+	{
+		type: 'link',
+		title: 'Appearence',
+		id: 'appearence'
+	}
+];
 
 export const load = (() => {
 	return { sections };

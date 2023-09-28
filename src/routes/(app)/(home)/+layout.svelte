@@ -42,7 +42,7 @@
 <div role="list" class="channel-bar-container">
 	<ChannelItem
 		name="Friends"
-		src="/user-heart.svg"
+		src="{base}/user-heart.svg"
 		width={24}
 		height={24}
 		href="{base}/friends"

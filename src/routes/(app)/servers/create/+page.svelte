@@ -45,7 +45,7 @@
 		<div
 			class="rounded-xl relative items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm px-6 py-12 w-[90%] mb-auto"
 		>
-			<form class="flex flex-col" on:submit|preventDefault={createServer}>
+			<form id="create-server-form" class="flex flex-col" on:submit|preventDefault={createServer}>
 				<h1 class="text-3xl">{$_('server.create')}</h1>
 
 				<input

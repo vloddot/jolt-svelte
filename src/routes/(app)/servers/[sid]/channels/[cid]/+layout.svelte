@@ -5,35 +5,29 @@
 	import ChannelCategory from '@components/ChannelBar/Category.svelte';
 	import ChannelComponent from '@components/ChannelBar/Channel.svelte';
 	import UserProfilePicture from '@components/UserProfilePicture.svelte';
-	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
+	import { selectedChannelIDKey } from '@routes/(app)/context';
 	import { clientKey } from '@routes/context';
 	import { redirect } from '@sveltejs/kit';
 	import { appWindow } from '@tauri-apps/api/window';
 	import { writable } from 'svelte/store';
 	import type { RouteParams } from './$types';
-	import { channelKey, serverKey } from './context';
+	import { channelKey } from './context';
+	import { serverKey } from '../../context';
 
 	const client = getContext(clientKey)!;
+	const server = getContext(serverKey);
 
 	$: pageParams = $page.params as RouteParams;
 
-	const server = writable<Server | undefined>();
 	const channel = writable<
 		Extract<Channel, { channel_type: 'TextChannel' | 'VoiceChannel' }> | undefined
 	>();
 
-	setContext(serverKey, server);
 	setContext(channelKey, channel);
 
-	const selectedServerID = getContext(selectedServerIDKey) ?? writable(pageParams.sid);
 	const selectedChannelID = getContext(selectedChannelIDKey) ?? writable(pageParams.cid);
 
-	$: selectedServerID.set(pageParams.sid);
 	$: selectedChannelID.set(pageParams.cid);
-
-	async function updateServer(sid: string) {
-		server.set(await client.api.fetchServer(sid));
-	}
 
 	async function updateChannel(cid: string) {
 		const result = await client.api.fetchChannel(cid);
@@ -45,16 +39,15 @@
 		channel.set(result);
 	}
 
-	$: if ($selectedServerID) updateServer($selectedServerID);
 	$: if ($selectedChannelID) updateChannel($selectedChannelID);
 
 	$: {
-		let title: string = '';
+		let title = '';
 
-		if ($server != undefined) {
-			title += $server.name;
-		} else {
+		if ($server == undefined) {
 			title += 'Server';
+		} else {
+			title += $server.name;
 		}
 
 		if ($channel != undefined) {

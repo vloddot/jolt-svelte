@@ -9,12 +9,12 @@ export class APIClient {
 		servers: Map<string, Server>;
 		users: Map<string, User>;
 	} = {
-		channels: new Map(),
-		emojis: new Map(),
-		members: new Map(),
-		servers: new Map(),
-		users: new Map()
-	};
+			channels: new Map(),
+			emojis: new Map(),
+			members: new Map(),
+			servers: new Map(),
+			users: new Map()
+		};
 
 	token: string | undefined;
 
@@ -74,13 +74,14 @@ export class APIClient {
 		return await response.json();
 	}
 
-	joinCall(channel_id: string): Promise<string> {
-		return new Promise((resolve, reject) => {
-			this.req('POST', `/channels/${channel_id}/join_call`)
-				.then((response) => response.json())
-				.then(({ token }) => resolve(token))
-				.catch(reject);
-		});
+	async joinCall(channel_id: string): Promise<string> {
+		return this.req('POST', `/channels/${channel_id}/join_call`)
+			.then((response) => response.json())
+			.then(({ token }) => token)
+	}
+
+	async editServer(id: string, data: DataEditServer) {
+		return await this.req('PATCH', `/servers/${id}`, JSON.stringify(data));
 	}
 
 	async fetchChannel(id: string): Promise<Channel> {

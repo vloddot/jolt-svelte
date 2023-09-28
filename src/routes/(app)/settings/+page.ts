@@ -1,9 +1,8 @@
 import { base } from '$app/paths';
 import { error, redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
-import type { SettingsSection } from './sections';
 
-export const load = (async ({ parent }) => {
+export const load = (async ({ parent, url }) => {
 	const { sections } = await parent();
 
 	const section = sections.find((section) => section.type == 'link') as Extract<
@@ -15,5 +14,5 @@ export const load = (async ({ parent }) => {
 		throw error(404, 'Not Found');
 	}
 
-	throw redirect(302, `${base}/settings/${section.id}`);
+	throw redirect(302, `${url.pathname}/${section.id}`);
 }) satisfies PageLoad;

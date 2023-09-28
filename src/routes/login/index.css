@@ -1,3 +1,11 @@
 input {
-	@apply bg-gray-500 mb-3;
+	@apply bg-gray-800 mb-2;
+}
+
+.login-base {
+	@apply flex justify-center;
+}
+
+.login-wrapper {
+	@apply rounded-xl bg-gray-900 px-6 py-12;
 }

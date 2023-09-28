@@ -12,6 +12,7 @@
 
 <DropdownSetting title="Change username" id="change-username">
 	<form
+		id="change-username-form"
 		on:submit|preventDefault={() =>
 			(changeUsernamePromise = client.api.changeUsername(username, password))}
 	>

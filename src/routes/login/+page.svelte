@@ -1,13 +1,13 @@
 <script lang="ts">
-	import '$lib/index.css';
-	import './index.css';
-	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
-	import { getContext } from '$lib/context';
-	import { clientKey, sessionKey } from '@routes/context';
-	import detect from 'browser-detect';
-	import { appWindow } from '@tauri-apps/api/window';
 	import { base } from '$app/paths';
+	import { getContext } from '$lib/context';
+	import '$lib/index.css';
+	import { clientKey, sessionKey } from '@routes/context';
+	import { appWindow } from '@tauri-apps/api/window';
+	import detect from 'browser-detect';
+	import { _ } from 'svelte-i18n';
+	import './index.css';
 
 	const session = getContext(sessionKey)!;
 	const client = getContext(clientKey)!;
@@ -135,17 +135,15 @@
 	}
 </script>
 
-<div class="w-full h-full flex items-center flex-col justify-center relative">
-	<div
-		class="rounded-xl relative items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm px-6 py-12 max-w-[90%] mb-auto"
-	>
-		<form class="flex flex-col" on:submit|preventDefault={login}>
+<div class="login-base">
+	<div class="login-wrapper">
+		<form id="login-form" class="flex flex-col" on:submit|preventDefault={login}>
 			<h1 class="text-3xl">Jolt</h1>
 
 			<input type="email" placeholder="Email" bind:value={email} />
 			<input type="password" placeholder="Password" bind:value={password} />
 
-			<p class="text-xs text-gray-500">
+			<p class="text-xs">
 				{$_('mfa.notice')}:
 			</p>
 

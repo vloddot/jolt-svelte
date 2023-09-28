@@ -141,7 +141,7 @@
 	</div>
 
 	{#if messageContentToEdit != undefined}
-		<form class="bg-gray-500 rounded-xl px-2 pt-2" on:submit={editMessage}>
+		<form id="message-edit-form" class="bg-gray-500 rounded-xl px-2 pt-2" on:submit={editMessage}>
 			<textarea
 				on:keydown={(event) => {
 					if (event.defaultPrevented) {
