@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { getContext } from '$lib/context';
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
-	import UserProfilePicture from '@components/UserProfilePicture.svelte';
+	import RoundedImage from '@components/RoundedImage.svelte';
 	import { clientKey } from '@routes/context';
-	import { _ } from 'svelte-i18n';
 
 	const client = getContext(clientKey)!;
 	export let system: SystemMessage;
@@ -14,20 +13,20 @@
 {:else if system.type == 'channel_description_changed' || system.type == 'channel_icon_changed' || system.type == 'channel_renamed' || system.type == 'user_added' || system.type == 'user_remove'}
 	{#await client.api.fetchUser(system.by) then user}
 		{@const displayName = getDisplayName(user)}
-		<UserProfilePicture src={getDisplayAvatar(user)} width={24} height={24} name={displayName} />
+		<RoundedImage src={getDisplayAvatar(user)} width={24} height={24} name={displayName} />
 		{displayName}
 		{#if system.type == 'channel_description_changed'}
-			{$_('channel.description.change')}.
+			changed this channel's description.
 		{:else if system.type == 'channel_icon_changed'}
-			{$_('channel.icon.change')}.
+			changes this channel icon.
 		{:else if system.type == 'channel_renamed'}
-			{$_('channel.rename-to')} {system.name}.
+			renamed this channel to {system.name}.
 		{:else if system.type == 'user_added' || system.type == 'user_remove'}
 			{#await client.api.fetchUser(system.id) then user}
 				{#if system.type == 'user_added'}
-					{$_('added')}
+					added
 				{:else if system.type == 'user_remove'}
-					{$_('removed')}
+					removed
 				{/if}
 				{getDisplayName(user)}.
 			{/await}
@@ -35,22 +34,21 @@
 	{/await}
 {:else if system.type == 'channel_ownership_changed'}
 	{#await Promise.all([system.from, system.to].map( (id) => client.api.fetchUser(id) )) then [from, to]}
-		{$_('channel.ownership.changed-from')}
-		{getDisplayName(from)} to {getDisplayName(to)}.
+		Channel ownership changed from {getDisplayName(from)} to {getDisplayName(to)}.
 	{/await}
 {:else if system.type == 'user_banned' || system.type == 'user_joined' || system.type == 'user_kicked' || system.type == 'user_left'}
 	{#await client.api.fetchUser(system.id) then user}
 		{@const displayName = getDisplayName(user)}
-		<UserProfilePicture src={getDisplayAvatar(user)} width={24} height={24} name={displayName} />
+		<RoundedImage src={getDisplayAvatar(user)} width={24} height={24} name={displayName} />
 		{displayName}
 		{#if system.type == 'user_banned'}
-			{$_('user.was-banned')}.
+			was banned.
 		{:else if system.type == 'user_joined'}
-			{$_('user.chat.joined')}.
+			has joined the chat.
 		{:else if system.type == 'user_kicked'}
-			{$_('user.was-kicked')}.
+			was kicked.
 		{:else if system.type == 'user_left'}
-			{$_('user.chat.left')}.
+			left the chat.
 		{/if}
 	{/await}
 {/if}

@@ -1,29 +1,20 @@
 <script lang="ts">
 	import { getContext } from '$lib/context';
 	import { settingsKey } from '@routes/context';
-	import ExternalLink from '@components/ExternalLink.svelte';
 
 	export let embed: Embed;
 
 	const settings = getContext(settingsKey)!;
 </script>
 
-{#if embed.type == 'Image'}
-	{#if $settings['jolt:low-data-mode']}
-		<ExternalLink href={embed.url} />
-	{:else}
-		<!-- svelte-ignore a11y-missing-attribute -->
-		<img src={embed.url} width={embed.width} height={embed.height} />
-	{/if}
-{:else if embed.type == 'Video'}
-	{#if $settings['jolt:low-data-mode']}
-		<ExternalLink href={embed.url} />
-	{:else}
-		<!-- svelte-ignore a11y-media-has-caption -->
-		<video controls>
-			<source src={embed.url} width={embed.width} height={embed.height} />
-		</video>
-	{/if}
+{#if embed.type == 'Image' && !$settings['jolt:low-data-mode']}
+	<!-- svelte-ignore a11y-missing-attribute -->
+	<img src={embed.url} width={embed.width} height={embed.height} />
+{:else if embed.type == 'Video' && !$settings['jolt:low-data-mode']}
+	<!-- svelte-ignore a11y-media-has-caption -->
+	<video controls>
+		<source src={embed.url} width={embed.width} height={embed.height} />
+	</video>
 {:else if embed.type == 'Text'}
 	<div style="background-color: {embed.colour}">
 		{#if embed.icon_url && !$settings['jolt:low-data-mode']}

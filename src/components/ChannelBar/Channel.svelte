@@ -4,7 +4,11 @@
 	import { getAutumnURL, getDisplayAvatar, getDisplayName } from '$lib/util';
 	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
 	import { clientKey, settingsKey } from '@routes/context';
-	import { _ } from 'svelte-i18n';
+	import PencilSquare from '$lib/icons/pencil-square.svg';
+	import UserGroup from '$lib/icons/user-group.svg';
+	import Hash from '$lib/icons/hash.svg';
+	import SpeakerWave from '$lib/icons/speaker-wave.svg';
+	import User from '$lib/icons/user.svg';
 	import ChannelItem from './ChannelItem.svelte';
 
 	const settings = getContext(settingsKey)!;
@@ -15,20 +19,21 @@
 
 	function getChannelIcon(channel: Exclude<Channel, { channel_type: 'DirectMessage' }>): string {
 		if (channel.channel_type == 'SavedMessages') {
-			return `${base}/note.svg`;
+			return PencilSquare;
 		}
 
 		if (channel.icon != undefined && !$settings['jolt:low-data-mode']) {
-			return `${getAutumnURL(channel.icon, { max_side: '256' })}`;
+			return getAutumnURL(channel.icon, { max_side: '256' });
 		}
 
 		switch (channel.channel_type) {
 			case 'Group':
-				return `${base}/group.svg`;
+				return UserGroup;
 			case 'TextChannel':
-				return `${base}/hash.svg`;
+				console.log(`returning hash: ${Hash}`);
+				return Hash;
 			case 'VoiceChannel':
-				return `${base}/volume.svg`;
+				return SpeakerWave;
 		}
 	}
 
@@ -47,7 +52,7 @@
 	{#if channel.active}
 		{#await client.api.fetchUser(channel.recipients[0] == client.user?._id ? channel.recipients[1] : channel.recipients[0]) then user}
 			<ChannelItem
-				src={$settings['jolt:low-data-mode'] ? `${base}/user.svg` : getDisplayAvatar(user)}
+				src={$settings['jolt:low-data-mode'] ? User : getDisplayAvatar(user)}
 				name={getDisplayName(user)}
 				width={32}
 				height={32}
@@ -56,8 +61,8 @@
 			/>
 		{:catch}
 			<ChannelItem
-				src="{base}/user.svg"
-				name="<{$_('user.unknown')}>"
+				src={User}
+				name="Unknown User"
 				width={32}
 				height={32}
 				href={getChannelHref(channel._id)}
@@ -68,7 +73,7 @@
 {:else if channel.channel_type == 'TextChannel' || channel.channel_type == 'VoiceChannel' || channel.channel_type == 'Group' || channel.channel_type == 'SavedMessages'}
 	<ChannelItem
 		src={getChannelIcon(channel)}
-		name={channel.channel_type == 'SavedMessages' ? $_('channel.notes') : channel.name}
+		name={channel.channel_type == 'SavedMessages' ? 'Saved Notes' : channel.name}
 		width={24}
 		height={24}
 		href={getChannelHref(channel._id)}

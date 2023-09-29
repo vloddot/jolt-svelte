@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getContext } from '$lib/context';
 	import { getAutumnURL, getDisplayAvatar, getDisplayName } from '$lib/util';
-	import UserProfilePicture from '@components/UserProfilePicture.svelte';
+	import RoundedImage from '@components/RoundedImage.svelte';
 	import { clientKey } from '@routes/context';
 
 	export let user: User;
@@ -18,7 +18,7 @@
 		? `background-image: url(${getAutumnURL(profile.background)})`
 		: undefined}
 >
-	<UserProfilePicture width={64} height={64} src={getDisplayAvatar(user)} {name} />
+	<RoundedImage width={64} height={64} src={getDisplayAvatar(user)} {name} />
 
 	<p>
 		{name}

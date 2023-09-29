@@ -10,6 +10,9 @@
 	import { onMount } from 'svelte';
 	import { writable } from 'svelte/store';
 	import './index.css';
+	import Home from '$lib/icons/home.svg';
+	import Plus from '$lib/icons/plus.svg';
+	import Cog6Tooth from '$lib/icons/cog-6-tooth.svg';
 
 	const settings = getContext(settingsKey)!;
 	const client = getContext(clientKey)!;
@@ -109,7 +112,7 @@
 <div class="grid-container">
 	<div class="server-sidebar-container">
 		{#if $settings['jolt:low-data-mode']}
-			<ServerSidebarIcon href={base} tooltip="Home" icon="{base}/home.svg" />
+			<ServerSidebarIcon href="{base}/" tooltip="Home" icon={Home} />
 			<hr class="border-gray-600 mx-4" />
 		{:else}
 			{#await client.user ?? client.api.fetchUser('@me') then user}
@@ -141,15 +144,11 @@
 				{/if}
 			{/each}
 		{/if}
-		<ServerSidebarIcon
-			href="{base}/servers/create"
-			icon="{base}/plus.svg"
-			tooltip="Create Server"
-		/>
+		<ServerSidebarIcon href="{base}/servers/create" icon={Plus} tooltip="Create Server" />
 
 		<div class="flex-1" />
 
-		<ServerSidebarIcon href="{base}/settings" icon="{base}/gears.svg" tooltip="Settings" />
+		<ServerSidebarIcon href="{base}/settings" icon={Cog6Tooth} tooltip="Settings" />
 	</div>
 
 	<slot />

@@ -4,13 +4,13 @@
 	import { serverKey } from '@routes/(app)/servers/[sid]/context';
 	import { clientKey } from '@routes/context';
 
-	const server = getContext(serverKey);
+	const server = getContext(serverKey)!;
 	const client = getContext(clientKey)!;
 
 	let name: string;
 	let description: string;
 
-	server?.subscribe((server) => {
+	server.subscribe((server) => {
 		if (server == undefined) {
 			return;
 		}
@@ -31,11 +31,12 @@
 	}
 </script>
 
-<form class="main-content-container" on:submit|preventDefault={submit}>
+<form id="edit-server-form" on:submit|preventDefault={submit}>
 	<h1 class="text-xl uppercase">Server Name</h1>
 	<InputSetting type="text" bind:value={name} />
 
 	<h1 class="text-xl uppercase">Server Description</h1>
+
 	<InputSetting
 		type="textarea"
 		bind:value={description}

@@ -10,6 +10,7 @@
 	import type { LayoutParams } from './$types';
 	import ChannelItem from '@components/ChannelBar/ChannelItem.svelte';
 	import { base } from '$app/paths';
+	import Users from '$lib/icons/users.svg';
 
 	$: pageParams = $page.params as LayoutParams;
 
@@ -42,7 +43,7 @@
 <div role="list" class="channel-bar-container">
 	<ChannelItem
 		name="Friends"
-		src="{base}/user-heart.svg"
+		src={Users}
 		width={24}
 		height={24}
 		href="{base}/friends"

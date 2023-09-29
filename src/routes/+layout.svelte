@@ -3,12 +3,12 @@
 	import { base } from '$app/paths';
 	import { Client } from '$lib/client';
 	import { setContext } from '$lib/context';
-	import '$lib/i18n';
 	import { DEFAULT_SETTINGS } from '$lib/util';
 	import VoiceClientBrowser, { DEFAULT_CONSUMER } from '@revkit/voice/browser';
 	import { clientKey, sessionKey, settingsKey, voiceClientKey } from '@routes/context';
 	import { waitLocale } from 'svelte-i18n';
 	import { writable } from 'svelte/store';
+	import '$lib/i18n';
 
 	const settings = writable<Settings>(DEFAULT_SETTINGS);
 	setContext(settingsKey, settings);

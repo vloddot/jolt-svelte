@@ -6,22 +6,20 @@
 	export let value = '';
 </script>
 
-{#if type == "textarea"}
-	<textarea
-		class="bg-gray-500"
-		{placeholder}
-		bind:value
-	/>
-{:else}
-	<input
-		class="bg-gray-500"
-		{type}
-		{placeholder}
-		{value}
-		on:input={(event) => (value = event.currentTarget.value)}
-	/>
-{/if}
+<div>
+	{#if type == 'textarea'}
+		<textarea class="bg-gray-500" {placeholder} bind:value />
+	{:else}
+		<input
+			class="bg-gray-500"
+			{type}
+			{placeholder}
+			{value}
+			on:input={(event) => (value = event.currentTarget.value)}
+		/>
+	{/if}
 
-{#if description != undefined}
-	<p class="ml-4">{description}</p>
-{/if}
+	{#if description != undefined}
+		<p class="ml-4">{description}</p>
+	{/if}
+</div>

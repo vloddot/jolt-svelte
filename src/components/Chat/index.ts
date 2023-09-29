@@ -2,7 +2,7 @@ import type { APIClient } from '$lib/client';
 import type { ContextInjectionKey } from '$lib/context';
 import type { Writable } from 'svelte/store';
 
-export interface Reply {
+export interface SendableReply {
 	message: Message;
 	mention: boolean;
 }
@@ -29,7 +29,8 @@ export async function getUser(
 
 	return user;
 }
+export const channelKey: ContextInjectionKey<Exclude<Channel, { type: 'VoiceChannel' }>> = Symbol();
 export const messagesKey: ContextInjectionKey<Writable<Message[]>> = Symbol();
 export const membersKey: ContextInjectionKey<Writable<Member[]>> = Symbol();
 export const usersKey: ContextInjectionKey<Writable<User[]>> = Symbol();
-export const repliesKey: ContextInjectionKey<Writable<Reply[]>> = Symbol();
+export const repliesKey: ContextInjectionKey<Writable<SendableReply[]>> = Symbol();

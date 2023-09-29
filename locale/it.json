@@ -1,8 +1,0 @@
-{
-	"error": "Errore",
-	"login": "Accesso",
-	"mfa": {
-		"notice": "Facoltativamente, se il tuo account utilizza l'autenticazione a più fattori, utilizza uno di questi metodi, includendo anche l'e-mail e la password precedenti"
-	},
-	"confirm": "Ok"
-}

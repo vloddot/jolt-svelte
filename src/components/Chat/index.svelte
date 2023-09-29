@@ -1,13 +1,15 @@
 <script lang="ts">
-	import { base } from '$app/paths';
 	import { getContext } from '$lib/context';
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
-	import UserProfilePicture from '@components/UserProfilePicture.svelte';
+	import RoundedImage from '@components/RoundedImage.svelte';
 	import { clientKey, settingsKey } from '@routes/context';
 	import { beforeUpdate, onMount, setContext, tick } from 'svelte';
-	import { _ } from 'svelte-i18n';
 	import { writable } from 'svelte/store';
-	import { membersKey, messagesKey, repliesKey, usersKey, type Reply } from '.';
+	import { membersKey, messagesKey, repliesKey, usersKey, type SendableReply } from '.';
+	import XCircle from '$lib/icons/x-circle.svg';
+	import User from '$lib/icons/user.svg';
+	import AtSymbol from '$lib/icons/at-symbol.svg';
+	import Plus from '$lib/icons/plus.svg';
 	import MessageComponent from './Message.svelte';
 
 	/**
@@ -22,7 +24,7 @@
 	let members = writable<Member[]>([]);
 	let users = writable<User[]>([]);
 
-	const replies = writable<Reply[]>([]);
+	const replies = writable<SendableReply[]>([]);
 
 	setContext(messagesKey, messages);
 	setContext(membersKey, members);
@@ -180,7 +182,7 @@
 		}
 
 		if (channel.channel_type == 'SavedMessages') {
-			channelName = $_('channel.notes');
+			channelName = 'Saved Notes';
 			return;
 		}
 
@@ -242,21 +244,20 @@
 					}
 				}}
 			>
-				<img src="{base}/circle-x.svg" alt="Cancel Upload" />
+				<img src={XCircle} alt="Cancel Upload" />
 			</button>
 		</div>
 	{/if}
 	{#each currentlyTypingUsers as user}
 		{@const displayName = getDisplayName(user)}
 		<div>
-			<UserProfilePicture
-				src={$settings['jolt:low-data-mode'] ? `${base}/user.svg` : getDisplayAvatar(user)}
+			<RoundedImage
+				src={$settings['jolt:low-data-mode'] ? User : getDisplayAvatar(user)}
 				width={16}
 				height={16}
 				name={displayName}
 			/>
-			{displayName}
-			{$_('user.is-typing')}...
+			{displayName} is typing...
 		</div>
 	{/each}
 	{#each $replies as reply}
@@ -264,16 +265,16 @@
 
 		<div class="flex">
 			<p>
-				{$_('message.replying-to')}
+				replying to
 
 				<strong>
 					{#await user then user}
 						{@const displayName = getDisplayName(user)}
-						<UserProfilePicture src={getDisplayAvatar(user)} name={displayName} />
+						<RoundedImage src={getDisplayAvatar(user)} name={displayName} />
 						{displayName}
 					{:catch}
-						{@const displayName = `<${$_('user.unknown')}>`}
-						<UserProfilePicture src="{base}/user.svg" name={displayName} />
+						{@const displayName = '<Unknown User>'}
+						<RoundedImage src={User} name={displayName} />
 						{displayName}
 					{/await}
 				</strong>
@@ -286,7 +287,7 @@
 			<div class="pr-2">
 				<input id="mention" style="display: none;" type="checkbox" bind:checked={reply.mention} />
 				<label class="cursor-pointer" for="mention">
-					<img src="{base}/at.svg" class="inline" alt="mention" />
+					<img src={AtSymbol} class="inline" alt="mention" />
 					{reply.mention ? 'ON' : 'OFF'}
 				</label>
 			</div>
@@ -299,14 +300,18 @@
 							return replies;
 						})}
 				>
-					<img src="{base}/circle-x.svg" alt="Cancel mention" />
+					<img src={XCircle} alt="Cancel mention" />
 				</button>
 			</div>
 		</div>
 	{/each}
-	<form id="message-send-form" on:submit={sendMessage} class="flex bg-gray-500 rounded-xl px-2 pt-2 m-4">
+	<form
+		id="message-send-form"
+		on:submit={sendMessage}
+		class="flex bg-gray-500 rounded-xl px-2 pt-2 m-4"
+	>
 		<label for="file-upload" class="cursor-pointer">
-			<img src="{base}/plus.svg" alt="Upload File" />
+			<img src={Plus} alt="Upload File" />
 		</label>
 		<input
 			id="file-upload"
@@ -332,7 +337,7 @@
 			bind:this={messageInputNode}
 			maxlength="2000"
 			class="outline-none resize-none bg-inherit w-full h-12"
-			placeholder="{$_('send-message-in')} {channelName}"
+			placeholder="Send message in {channelName}"
 		/>
 	</form>
 </main>

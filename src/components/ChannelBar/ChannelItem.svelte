@@ -1,5 +1,5 @@
 <script lang="ts">
-	import UserProfilePicture from '@components/UserProfilePicture.svelte';
+	import RoundedImage from '@components/RoundedImage.svelte';
 
 	/**
 	 * Image source to show.
@@ -34,7 +34,7 @@
 
 <div role="listitem" class={selected ? 'bg-gray-400' : 'hover:bg-gray-600'}>
 	<a {href} class="p-2 block">
-		<UserProfilePicture {src} {name} {width} {height} />
+		<RoundedImage {src} {name} {width} {height} />
 
 		{name}
 	</a>

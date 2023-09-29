@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { _ } from 'svelte-i18n';
-
 	export let showModal: boolean;
 	let dialogElement: HTMLDialogElement;
 
@@ -14,8 +12,8 @@
 		<hr />
 
 		<form id="modal-form" on:submit method="dialog">
-			<button type="submit">{$_('confirm')}</button>
-			<button on:click={() => (showModal = false)} type="reset">{$_('cancel')}</button>
+			<button type="submit">Ok</button>
+			<button on:click={() => (showModal = false)} type="reset">Cancel</button>
 		</form>
 	</div>
 </dialog>

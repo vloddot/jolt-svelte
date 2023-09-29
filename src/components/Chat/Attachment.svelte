@@ -3,7 +3,6 @@
 	import { getAutumnURL } from '$lib/util';
 	import ExternalLink from '@components/ExternalLink.svelte';
 	import { settingsKey } from '@routes/context';
-	import { _ } from 'svelte-i18n';
 
 	const settings = getContext(settingsKey)!;
 
@@ -41,7 +40,7 @@
 					<p>{text}</p>
 				{/await}
 			{:catch error}
-				<p>{$_('file.download.error')} {attachment.filename}: {error}</p>
+				<p>Unable to download {attachment.filename}: {error}</p>
 			{/await}
 		{/if}
 	{/if}

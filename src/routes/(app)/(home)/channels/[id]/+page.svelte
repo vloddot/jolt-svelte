@@ -7,13 +7,12 @@
 	import { getContext } from '$lib/context';
 	import { redirect } from '@sveltejs/kit';
 	import { getDisplayName } from '$lib/util';
-	import { _ } from 'svelte-i18n';
+
 	import { appWindow } from '@tauri-apps/api/window';
 
 	$: pageParams = $page.params as RouteParams;
 
 	const client = getContext(clientKey)!;
-	const session = getContext(sessionKey)!;
 
 	let channel: Exclude<Channel, { channel_type: 'TextChannel' | 'VoiceChannel' }> | undefined =
 		undefined;
@@ -40,14 +39,15 @@
 
 	$: updateChannel(pageParams.id);
 	$: channel != undefined && channel.channel_type != 'SavedMessages' && updateUser(channel);
+
 	$: {
 		let title = '';
 		if (channel?.channel_type == 'SavedMessages') {
-			title += $_('channel.notes');
+			title += 'Saved Messages';
 		} else if (user == undefined) {
-			title += $_('channel.dm.title');
+			title += 'DM';
 		} else {
-			title += `${$_('channel.dm.with')} ${getDisplayName(user)}`;
+			title += `DM with ${getDisplayName(user)}`;
 		}
 
 		title += ' - Jolt';

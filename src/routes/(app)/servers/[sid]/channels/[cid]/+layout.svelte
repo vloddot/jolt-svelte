@@ -4,17 +4,19 @@
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
 	import ChannelCategory from '@components/ChannelBar/Category.svelte';
 	import ChannelComponent from '@components/ChannelBar/Channel.svelte';
-	import UserProfilePicture from '@components/UserProfilePicture.svelte';
+	import RoundedImage from '@components/RoundedImage.svelte';
 	import { selectedChannelIDKey } from '@routes/(app)/context';
-	import { clientKey } from '@routes/context';
+	import { clientKey, settingsKey } from '@routes/context';
 	import { redirect } from '@sveltejs/kit';
 	import { appWindow } from '@tauri-apps/api/window';
 	import { writable } from 'svelte/store';
 	import type { RouteParams } from './$types';
 	import { channelKey } from './context';
 	import { serverKey } from '../../context';
+	import User from '$lib/icons/user.svg';
 
 	const client = getContext(clientKey)!;
+	const settings = getContext(settingsKey)!;
 	const server = getContext(serverKey);
 
 	$: pageParams = $page.params as RouteParams;
@@ -104,7 +106,10 @@
 				{#await user then user}
 					{@const name = getDisplayName(user, member)}
 					<div>
-						<UserProfilePicture src={getDisplayAvatar(user, member)} {name} />
+						<RoundedImage
+							src={$settings['jolt:low-data-mode'] ? User : getDisplayAvatar(user, member)}
+							{name}
+						/>
 
 						{name}
 					</div>

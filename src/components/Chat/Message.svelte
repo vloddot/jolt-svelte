@@ -1,17 +1,20 @@
 <script lang="ts">
-	import { base } from '$app/paths';
 	import { getContext } from '$lib/context';
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
 	import MessageReply from '@components/Chat/MessageReply.svelte';
-	import UserProfilePicture from '@components/UserProfilePicture.svelte';
-	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
-	import { clientKey, sessionKey, settingsKey } from '@routes/context';
-	import { _, date, time } from 'svelte-i18n';
+	import RoundedImage from '@components/RoundedImage.svelte';
+	import { selectedServerIDKey } from '@routes/(app)/context';
+	import { date, time } from 'svelte-i18n';
 	import { decodeTime } from 'ulid';
 	import { getUser, membersKey, messagesKey, repliesKey, usersKey } from '.';
 	import Attachment from './Attachment.svelte';
 	import Embed from './Embed.svelte';
 	import SystemMessage from './SystemMessage.svelte';
+	import User from '$lib/icons/user.svg';
+	import ArrowUturnLeft from '$lib/icons/arrow-uturn-left.svg';
+	import PencilSquare from '$lib/icons/pencil-square.svg';
+	import Trash from '$lib/icons/trash.svg';
+	import { clientKey, settingsKey } from '@routes/context';
 
 	/**
 	 * Message to show.
@@ -22,11 +25,9 @@
 	let author: User | undefined = undefined;
 	let member: Member | undefined = undefined;
 
-	const session = getContext(sessionKey)!;
 	const settings = getContext(settingsKey)!;
 	const client = getContext(clientKey)!;
 	const selectedServerID = getContext(selectedServerIDKey);
-	const selectedChannelID = getContext(selectedChannelIDKey)!;
 
 	const messages = getContext(messagesKey);
 	const users = getContext(usersKey);
@@ -42,8 +43,8 @@
 
 	const controls: MessageControls[] = [
 		{
-			src: `${base}/reply.svg`,
-			alt: $_('message.reply'),
+			src: ArrowUturnLeft,
+			alt: 'Reply',
 			onclick() {
 				if ($replies?.some((reply) => reply.message._id == message._id)) {
 					return;
@@ -56,16 +57,16 @@
 			}
 		},
 		{
-			src: `${base}/note.svg`,
-			alt: $_('message.edit'),
+			src: PencilSquare,
+			alt: 'Edit',
 			showIf: (message) => message.author == client.user?._id,
 			onclick: (message) =>
 				(messageContentToEdit =
 					messageContentToEdit == undefined ? message.content ?? '' : undefined)
 		},
 		{
-			src: `${base}/trash.svg`,
-			alt: $_('message.delete'),
+			src: Trash,
+			alt: 'Delete',
 			showIf: (message) => message.author == client.user?._id, // TODO: check permissions for message deleting
 			onclick: (message) => client.api.deleteMessage(message.channel, message._id)
 		}
@@ -94,7 +95,7 @@
 	$: $selectedServerID == undefined ? undefined : updateMember($selectedServerID, message.author);
 	$: displayName = getDisplayName(author, member, message);
 	$: displayAvatar = $settings['jolt:low-data-mode']
-		? `${base}/user.svg`
+		? User
 		: getDisplayAvatar(author, member, message);
 	$: timestamp = decodeTime(message._id);
 </script>
@@ -110,7 +111,7 @@
 
 	<div class="flex">
 		{#if !$settings['jolt:compact-mode']}
-			<UserProfilePicture name={displayName} src={displayAvatar} width={40} height={40} />
+			<RoundedImage name={displayName} src={displayAvatar} width={40} height={40} />
 		{/if}
 
 		{displayName}
@@ -121,7 +122,7 @@
 
 			{#if message.edited != undefined}
 				{@const timestamp = new Date(message.edited)}
-				[{$_('message.edited')}
+				[edited
 				{$date(timestamp)}
 				{$time(timestamp)}]
 			{/if}

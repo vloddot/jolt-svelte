@@ -2,7 +2,7 @@
 	import { base } from '$app/paths';
 	import { getContext } from '$lib/context';
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
-	import UserProfilePicture from '@components/UserProfilePicture.svelte';
+	import RoundedImage from '@components/RoundedImage.svelte';
 	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
 	import { clientKey, settingsKey } from '@routes/context';
 	import { getUser, messagesKey, usersKey } from '.';
@@ -29,12 +29,7 @@
 					&lt;Unknown User&gt;
 				{:then author}
 					{@const displayName = getDisplayName(author)}
-					<UserProfilePicture
-						src={getDisplayAvatar(author)}
-						name={displayName}
-						width={24}
-						height={24}
-					/>
+					<RoundedImage src={getDisplayAvatar(author)} name={displayName} width={24} height={24} />
 					{displayName}
 				{/await}:
 			{/if}

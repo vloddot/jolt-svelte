@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { base } from '$app/paths';
+	import Phone from '$lib/icons/phone.svg';
 	import { getContext } from '$lib/context';
 	import { getDisplayName } from '$lib/util';
-	import UserProfilePicture from '@components/UserProfilePicture.svelte';
+	import RoundedImage from '@components/RoundedImage.svelte';
 	import type { VoiceParticipant } from '@revkit/voice';
 	import { voiceClientKey } from '@routes/context';
 
@@ -29,14 +29,14 @@
 
 <div class="main-content-container">
 	<button class="m-2" on:click={() => ($voice.connected ? $voice.disconnect() : connect())}>
-		<img src="{base}/call.svg" alt="Call" />
+		<img src={Phone} alt="Call" />
 	</button>
 
 	<div class="flex justify-center">
 		{#each participants.values() as { user }}
 			{@const name = getDisplayName(user)}
 			<div class="flex flex-col m-2">
-				<UserProfilePicture
+				<RoundedImage
 					{name}
 					src={user.generateAvatarURL({ max_side: 256 })}
 					width={100}

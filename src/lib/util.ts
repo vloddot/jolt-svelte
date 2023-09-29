@@ -1,7 +1,4 @@
-import { base } from '$app/paths';
-import { _ } from 'svelte-i18n';
-import { get } from 'svelte/store';
-
+import User from '$lib/icons/user.svg';
 export const PING_HEARTBEAT_INTERVAL = 30;
 export const PONG_TIMEOUT = 10;
 export const AUTUMN_URL = 'https://autumn.revolt.chat';
@@ -36,11 +33,11 @@ export function getDisplayName(
 			member?.nickname ??
 			user?.display_name ??
 			user?.username ??
-			`<${get(_)('user.unknown')}>`
+			'Unknown User'
 		);
 	}
 
-	return get(_)('message.system');
+	return 'System Message';
 }
 
 export function getDisplayAvatar(
@@ -48,10 +45,6 @@ export function getDisplayAvatar(
 	member?: Member,
 	message?: Message
 ): string {
-	if (message?.system != undefined) {
-		return `${base}/user.svg`;
-	}
-
 	if (message?.webhook?.avatar != undefined) {
 		return message.webhook.avatar;
 	}
@@ -64,9 +57,13 @@ export function getDisplayAvatar(
 		return `${getAutumnURL(member.avatar, { max_side: '256' })}`;
 	}
 
-	if (user?.avatar == undefined) {
-		return user == undefined ? `${base}/user.svg` : getDefaultUserAvatar(user._id);
+	if (user == undefined || message?.system != undefined) {
+		return User;
 	}
 
-	return `${getAutumnURL(user?.avatar, { max_side: '256' })}`;
+	if (user.avatar == undefined) {
+		return getDefaultUserAvatar(user._id);
+	}
+
+	return `${getAutumnURL(user.avatar, { max_side: '256' })}`;
 }

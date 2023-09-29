@@ -6,7 +6,7 @@
 	import { clientKey, sessionKey } from '@routes/context';
 	import { appWindow } from '@tauri-apps/api/window';
 	import detect from 'browser-detect';
-	import { _ } from 'svelte-i18n';
+
 	import './index.css';
 
 	const session = getContext(sessionKey)!;
@@ -144,7 +144,8 @@
 			<input type="password" placeholder="Password" bind:value={password} />
 
 			<p class="text-xs">
-				{$_('mfa.notice')}:
+				Optionally, if your account uses MFA, use one of these methods, including the previous email
+				and password as well
 			</p>
 
 			{#each mfaMethods as [method, value]}
@@ -157,7 +158,7 @@
 				</label>
 			</span>
 
-			<button type="submit">{$_('login')}</button>
+			<button type="submit">Login</button>
 		</form>
 
 		{#if error}
