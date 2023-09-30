@@ -4,7 +4,7 @@
 	import { Client } from '$lib/client';
 	import { setContext } from '$lib/context';
 	import { DEFAULT_SETTINGS } from '$lib/util';
-	import { clientKey, sessionKey, settingsKey, voiceClientKey } from '@routes/context';
+	import { clientKey, sessionKey, settingsKey } from '@routes/context';
 	import { waitLocale } from 'svelte-i18n';
 	import { writable } from 'svelte/store';
 	import '$lib/i18n';
