@@ -4,7 +4,6 @@
 	import { Client } from '$lib/client';
 	import { setContext } from '$lib/context';
 	import { DEFAULT_SETTINGS } from '$lib/util';
-	import VoiceClientBrowser, { DEFAULT_CONSUMER } from '@revkit/voice/browser';
 	import { clientKey, sessionKey, settingsKey, voiceClientKey } from '@routes/context';
 	import { waitLocale } from 'svelte-i18n';
 	import { writable } from 'svelte/store';
@@ -19,16 +18,11 @@
 	const client = new Client();
 	setContext(clientKey, client);
 
-	const voiceClient = writable<VoiceClientBrowser | undefined>();
-	setContext(voiceClientKey, voiceClient);
-
 	$: {
 		if ($session == null) {
 			client.websocket.disconnect();
-			$voiceClient?.disconnect();
 		} else {
 			const { token } = $session;
-			voiceClient.set(new VoiceClientBrowser({ token, type: 'user' }, DEFAULT_CONSUMER));
 
 			client.authenticate(token);
 		}
