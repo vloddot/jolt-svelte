@@ -217,7 +217,7 @@
 	<div
 		bind:this={messagesListNode}
 		id="messages-list"
-		class="flex flex-col justify-end h-full overflow-x-hidden overflow-y-scroll"
+		class="flex flex-col justify-items-end h-full overflow-x-hidden overflow-y-scroll"
 	>
 		{#each $messages as message}
 			<MessageComponent {message} />
