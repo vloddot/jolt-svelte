@@ -6,8 +6,8 @@ settings:
 
 devDependencies:
   '@revkit/voice':
-    specifier: 0.1.1
-    version: 0.1.1(ws@8.14.2)
+    specifier: ^0.1.2
+    version: 0.1.2(ws@8.14.2)
   '@sveltejs/adapter-auto':
     specifier: ^2.0.0
     version: 2.0.0(@sveltejs/kit@1.20.4)
@@ -633,8 +633,8 @@ packages:
     resolution: {integrity: sha512-C16M+IYz0rgRhWZdCmK+h58JMv8vijAA61gmz2rspCSwKwzBebpdcsiUmwrtJRdphuY30i6BSLEOP8ppbNLyLg==}
     dev: true
 
-  /@revkit/voice@0.1.1(ws@8.14.2):
-    resolution: {integrity: sha512-5DRGMy4WfiZZNc28fyqjPObiRZ2DlrJJ89e7eU9dswvsFxkezm+0f6eXrfoR5GH2PsJs2yplm+G4JTtUNFLSmw==}
+  /@revkit/voice@0.1.2(ws@8.14.2):
+    resolution: {integrity: sha512-1oTm6TDdoQAwZ9LjICFgetlFw6MSHrEhqNyJ+9724BmLUdzLTN8CHeQEvWZgJg1V91XMaHLzgZa/4bCCVegb4Q==}
     dependencies:
       '@insertish/isomorphic-ws': 4.0.1(ws@8.14.2)
       dgram: 1.0.1
@@ -643,7 +643,7 @@ packages:
       mediasoup-client: 3.6.101
       msc-node: 0.0.10
       prism-media: github.com/itzTheMeow/prism-media/f3e33538bbd00cd9f2a2184a75a832f961ba5409(ffmpeg-static@5.2.0)
-      revkit: 1.1.11(ws@8.14.2)
+      revkit: 1.1.12(ws@8.14.2)
     transitivePeerDependencies:
       - '@discordjs/opus'
       - debug
@@ -2986,8 +2986,8 @@ packages:
     engines: {iojs: '>=1.0.0', node: '>=0.10.0'}
     dev: true
 
-  /revkit@1.1.11(ws@8.14.2):
-    resolution: {integrity: sha512-/dQwmg+CaPxfKEJylxGXUBdCxXo8hp7O2B42iQ6dx0KkAE0Odq1SRwwbnDMW0O8VwA2RiJZAimiv8EghWekXWQ==}
+  /revkit@1.1.12(ws@8.14.2):
+    resolution: {integrity: sha512-/lxEjFMBV5CloHGrLJyK5UJ4UnkhybHpKBxi5b+1SK11u6JfP/n+jDYkEOQOnmWpkF2M5CBzzuBQ6dpXSQmp6Q==}
     dependencies:
       '@insertish/exponential-backoff': 3.1.0-patch.2
       '@insertish/isomorphic-ws': 4.0.1(ws@8.14.2)

@@ -9,7 +9,7 @@
 
 {#if $channel != undefined}
 	{#if $channel.channel_type == 'VoiceChannel'}
-		<VoiceChat />
+		<VoiceChat channel={$channel} />
 	{:else}
 		<Chat channel={$channel} />
 	{/if}
