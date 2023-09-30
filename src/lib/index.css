@@ -5,5 +5,12 @@
 @layer components {
 	body {
 		@apply bg-gray-700 text-white overflow-hidden;
+		font-family: 'Inter', sans-serif;
+	}
+
+	@supports (font-variation-settings: normal) {
+		body {
+			font-family: 'Inter var', sans-serif;
+		}
 	}
 }

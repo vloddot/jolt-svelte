@@ -30,7 +30,6 @@
 			case 'Group':
 				return UserGroup;
 			case 'TextChannel':
-				console.log(`returning hash: ${Hash}`);
 				return Hash;
 			case 'VoiceChannel':
 				return SpeakerWave;

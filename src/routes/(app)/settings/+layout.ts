@@ -11,6 +11,11 @@ const sections: SettingsSection[] = [
 		id: 'account'
 	},
 	{
+		type: 'link',
+		title: 'Sessions',
+		id: 'sessions'
+	},
+	{
 		type: 'header',
 		title: 'Client Settings'
 	},

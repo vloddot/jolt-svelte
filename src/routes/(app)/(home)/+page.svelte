@@ -11,11 +11,7 @@
 	}
 </script>
 
-<main class="main-content-container">
-	<p>so um hi this is mr john jolt (home page ig)</p>
-	ig you can join a server
-</main>
-
+Page reserved for future use...
 <svelte:head>
 	<title>{TITLE}</title>
 	<meta name="description" content="Jolt - Home" />

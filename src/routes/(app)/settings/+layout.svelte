@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import SettingsSection from '@components/Settings/Section.svelte';
 	import { getContext } from '$lib/context';
 	import '$lib/index.css';
@@ -13,23 +12,24 @@
 </script>
 
 <div class="channel-bar-container">
-	{#each data.sections as section}
-		<SettingsSection {section} />
-	{/each}
+	<div class="ml-2">
+		{#each data.sections as section}
+			<SettingsSection {section} />
+		{/each}
 
-	<hr class="my-2 border-gray-500" />
+		<hr class="my-2 mr-2 border-gray-500" />
 
-	<div class="hover:bg-gray-600">
-		<button
-			class="w-full text-start"
-			on:click={async () => {
-				await client.api.logout();
-				session.set(null);
-				await goto('/login');
-			}}
-		>
-			Logout
-		</button>
+		<div class="hover:bg-gray-600">
+			<button
+				class="w-full text-start"
+				on:click={async () => {
+					await client.destroy();
+					session.set(null);
+				}}
+			>
+				Logout
+			</button>
+		</div>
 	</div>
 </div>
 

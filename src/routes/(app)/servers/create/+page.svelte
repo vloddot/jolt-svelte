@@ -7,9 +7,9 @@
 
 	const client = getContext(clientKey)!;
 
-	let name: string = '';
-	let description: string = '';
-	let nsfw: boolean = false;
+	let name = '';
+	let description = '';
+	let nsfw = false;
 
 	let error: string | undefined;
 

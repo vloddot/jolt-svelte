@@ -1,4 +1,3 @@
-import { base } from '$app/paths';
 import { error, redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 

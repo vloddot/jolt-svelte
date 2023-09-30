@@ -8,12 +8,11 @@
 </script>
 
 {#if section.type == 'link'}
-	<a
-		href="{root}/{section.id}"
-		class={$page.url.pathname == `${root}/${section.id}` ? 'bg-gray-400' : 'hover:bg-gray-600'}
-	>
-		<p>{section.title}</p>
-	</a>
+	<div class={$page.url.pathname == `${root}/${section.id}` ? 'bg-gray-400' : 'hover:bg-gray-600'}>
+		<a href="{root}/{section.id}">
+			<p>{section.title}</p>
+		</a>
+	</div>
 {:else if section.type == 'header'}
 	<h1 class="text-xl uppercase my-2">{section.title}</h1>
 {/if}

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getContext } from '$lib/context';
-	import Chat from '@components/Chat/index.svelte';
+	import Chat from '@components/Chat/TextChat.svelte';
 	import VoiceChat from '@components/Chat/VoiceChat.svelte';
 	import { channelKey } from './context';
 
@@ -9,7 +9,7 @@
 
 {#if $channel != undefined}
 	{#if $channel.channel_type == 'VoiceChannel'}
-		<VoiceChat channel={$channel} />
+		<VoiceChat />
 	{:else}
 		<Chat channel={$channel} />
 	{/if}

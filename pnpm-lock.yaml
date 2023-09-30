@@ -107,8 +107,8 @@ packages:
       '@jridgewell/trace-mapping': 0.3.19
     dev: true
 
-  /@babel/runtime@7.22.15:
-    resolution: {integrity: sha512-T0O+aa+4w0u06iNmapipJXMV4HoUir03hpx3/YqXXhu9xim3w+dVphjFWl1OH8NbZHw5Lbm9k45drDkgq2VNNA==}
+  /@babel/runtime@7.23.1:
+    resolution: {integrity: sha512-hC2v6p8ZSI/W0HUzh3V8C5g+NwSKzKPtJwSpTjwl0o297GP9+ZLQSkdvHz46CM3LqyoXxq+5G9komY+eSqSO0g==}
     engines: {node: '>=6.9.0'}
     dependencies:
       regenerator-runtime: 0.14.0
@@ -643,7 +643,7 @@ packages:
       mediasoup-client: 3.6.101
       msc-node: 0.0.10
       prism-media: github.com/itzTheMeow/prism-media/f3e33538bbd00cd9f2a2184a75a832f961ba5409(ffmpeg-static@5.2.0)
-      revkit: 1.1.10(ws@8.14.2)
+      revkit: 1.1.11(ws@8.14.2)
     transitivePeerDependencies:
       - '@discordjs/opus'
       - debug
@@ -756,26 +756,26 @@ packages:
     resolution: {integrity: sha512-DBpRoJGKJZn7RY92dPrgoMew8xCWc2P71beqsjyhEI/Ds9mOyVmBwtekyfhpwFIVt1WrxTonFifiOZ62V8CnNA==}
     dev: true
 
-  /@types/debug@4.1.8:
-    resolution: {integrity: sha512-/vPO1EPOs306Cvhwv7KfVfYvOJqA/S/AXjaHQiJboCZzcNDb+TIJFN9/2C9DZ//ijSKWioNyUxD792QmDJ+HKQ==}
+  /@types/debug@4.1.9:
+    resolution: {integrity: sha512-8Hz50m2eoS56ldRlepxSBa6PWEVCtzUo/92HgLc2qTMnotJNIm7xP+UZhyWoYsyOdd5dxZ+NZLb24rsKyFs2ow==}
     dependencies:
-      '@types/ms': 0.7.31
+      '@types/ms': 0.7.32
     dev: true
 
   /@types/estree@1.0.1:
     resolution: {integrity: sha512-LG4opVs2ANWZ1TJoKc937iMmNstM/d0ae1vNbnBvBhqCSezgVUOzcLCqbI5elV8Vy6WKwKjaqR+zO9VKirBBCA==}
     dev: true
 
-  /@types/events@3.0.0:
-    resolution: {integrity: sha512-EaObqwIvayI5a8dCzhFrjKzVwKLxjoG9T6Ppd5CEo07LRKfQ8Yokw54r5+Wq7FaBQ+yXRvQAYPrHwya1/UFt9g==}
+  /@types/events@3.0.1:
+    resolution: {integrity: sha512-QfUFdKjGSc+iCf8OFZhqJKfDuqB6lP57kSMkPw8ba3yNDANicUwCdaPt5ytZ4nDXXVFxQkvT8v73I4stSVrCxA==}
     dev: true
 
   /@types/json-schema@7.0.12:
     resolution: {integrity: sha512-Hr5Jfhc9eYOQNPYO5WLDq/n4jqijdHNlDXjuAQkkt+mWdQR+XJToOHrsD4cPaMXpn6KO7y2+wM8AZEs8VpBLVA==}
     dev: true
 
-  /@types/ms@0.7.31:
-    resolution: {integrity: sha512-iiUgKzV9AuaEkZqkOLDIvlQiL6ltuZd9tGcW3gwpnX8JbuiuhFlEGmmFXEXkN50Cvq7Os88IY2v0dkDqXYWVgA==}
+  /@types/ms@0.7.32:
+    resolution: {integrity: sha512-xPSg0jm4mqgEkNhowKgZFBNtwoEwF6gJ4Dhww+GFpm3IgtNseHQZ5IqdNwnquZEoANxyDAKDRAdVo4Z72VvD/g==}
     dev: true
 
   /@types/node@10.17.60:
@@ -1121,8 +1121,8 @@ packages:
       - debug
     dev: true
 
-  /axios@1.5.0:
-    resolution: {integrity: sha512-D4DdjDo5CY50Qms0qGQTTw6Q44jl7zRwY7bthds06pUGfChBCTcQs+N743eFWGEd6pRTMd6A+I87aWyFV5wiZQ==}
+  /axios@1.5.1:
+    resolution: {integrity: sha512-Q28iYCWzNHjAm+yEAot5QaAMxhMghWLFVf7rRdwhUI+c2jix2DUXjAHXVi+s1ibs3mjPO/cCgbA++3BjD0vP/A==}
     dependencies:
       follow-redirects: 1.15.3
       form-data: 4.0.0
@@ -1392,7 +1392,7 @@ packages:
     resolution: {integrity: sha512-fnULvOpxnC5/Vg3NCiWelDsLiUc9bRwAPs/+LfTLNvetFCtCTN+yQz15C/fs4AwX1R9K5GLtLfn8QW+dWisaAw==}
     engines: {node: '>=0.11'}
     dependencies:
-      '@babel/runtime': 7.22.15
+      '@babel/runtime': 7.23.1
     dev: true
 
   /dayjs@1.11.9:
@@ -2417,7 +2417,7 @@ packages:
     resolution: {integrity: sha512-EreP7qnozEUsQiS0ErpqsG55f3RIWv/PvcxDh4N2SxR+Uxgg+zGLB/+nVFVEx+4IIZZt/isK3YvxAI7Q8L7U0Q==}
     engines: {node: '>=16'}
     dependencies:
-      '@types/debug': 4.1.8
+      '@types/debug': 4.1.9
       awaitqueue: 3.0.1(supports-color@9.4.0)
       debug: 4.3.4(supports-color@9.4.0)
       events: 3.3.0
@@ -2530,8 +2530,8 @@ packages:
     resolution: {integrity: sha512-Bus7NBR01MUaPtZpoG87INRLZ/xjW/LFP2/XDURz5GedMi4bLYX/o/nb6idYUHZ0tf+Xi1i1WnuamBPbIb0s9Q==}
     engines: {node: '>=15'}
     dependencies:
-      '@types/debug': 4.1.8
-      '@types/events': 3.0.0
+      '@types/debug': 4.1.9
+      '@types/events': 3.0.1
       awaitqueue: 2.4.0
       bowser: 2.11.0
       debug: 4.3.4(supports-color@8.1.1)
@@ -2986,12 +2986,12 @@ packages:
     engines: {iojs: '>=1.0.0', node: '>=0.10.0'}
     dev: true
 
-  /revkit@1.1.10(ws@8.14.2):
-    resolution: {integrity: sha512-9GLWoBO1pA7U68ZF0g1Ezt3e5XMbcQzeLupqxhXpK/cPAB1AmvQnSSoNl7vkFRgO8eo9hF09oX15Pj8n7UHt+A==}
+  /revkit@1.1.11(ws@8.14.2):
+    resolution: {integrity: sha512-/dQwmg+CaPxfKEJylxGXUBdCxXo8hp7O2B42iQ6dx0KkAE0Odq1SRwwbnDMW0O8VwA2RiJZAimiv8EghWekXWQ==}
     dependencies:
       '@insertish/exponential-backoff': 3.1.0-patch.2
       '@insertish/isomorphic-ws': 4.0.1(ws@8.14.2)
-      axios: 1.5.0
+      axios: 1.5.1
       eventemitter3: 5.0.1
       form-data: 4.0.0
       long: 5.2.3

@@ -217,9 +217,8 @@
 	<div
 		bind:this={messagesListNode}
 		id="messages-list"
-		class="flex flex-col h-full overflow-x-hidden overflow-y-scroll"
+		class="flex flex-col justify-end h-full overflow-x-hidden overflow-y-scroll"
 	>
-		<p>so um hi this is the start, i should make this text box much further down i think</p>
 		{#each $messages as message}
 			<MessageComponent {message} />
 		{/each}

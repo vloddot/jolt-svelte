@@ -1,13 +1,21 @@
 import { goto } from '$app/navigation';
 import { base } from '$app/paths';
 
+type Cache = {
+	channels: Map<Channel['_id'], Channel>;
+	emojis: Map<Emoji['_id'], Emoji>;
+	members: Map<Member['_id'], Member>;
+	servers: Map<Server['_id'], Server>;
+	users: Map<User['_id'], User>;
+};
+
 export class APIClient {
-	cache = {
-		channels: new Map<string, Channel>(),
-		emojis: new Map<string, Emoji>(),
-		members: new Map<Extract<Member, '_id'>, Member>(),
-		servers: new Map<string, Server>(),
-		users: new Map<string, User>()
+	cache: Cache = {
+		channels: new Map(),
+		emojis: new Map(),
+		members: new Map(),
+		servers: new Map(),
+		users: new Map()
 	};
 
 	token: string | undefined;
@@ -51,8 +59,12 @@ export class APIClient {
 		await this.req('POST', '/auth/session/logout');
 	}
 
-	async deleteSession(id: string): Promise<void> {
+	async revokeSession(id: string): Promise<void> {
 		await this.req('DELETE', `/auth/session/${id}`);
+	}
+
+	async revokeAllSessions(revoke_self: boolean): Promise<void> {
+		await this.req('DELETE', `/auth/session/all?revoke_self=${revoke_self}`);
 	}
 
 	async createServer(body: DataCreateServer): Promise<CreateServerResponse> {

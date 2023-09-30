@@ -22,8 +22,20 @@ export class Client extends EventEmitter<Events<ServerMessage>> {
 		this.websocket.authenticate(token);
 
 		this.api.fetchUser('@me').then((user) => (this.user = user));
-
 		this.websocket.on('serverEvent', (event) => this.#handleEvent(event));
+	}
+
+	async destroy() {
+		await this.api.logout();
+		this.api.token = undefined;
+		this.websocket.disconnect();
+		this.api.cache = {
+			channels: new Map(),
+			emojis: new Map(),
+			members: new Map(),
+			servers: new Map(),
+			users: new Map()
+		};
 	}
 
 	#handleEvent(event: ServerMessage) {

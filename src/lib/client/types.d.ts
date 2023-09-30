@@ -1,4 +1,3 @@
-// automatically generated file by scripts/generateOpenAPITypes.js /shrug
 type RevoltConfig = components['schemas']['RevoltConfig'];
 type RevoltFeatures = components['schemas']['RevoltFeatures'];
 type CaptchaFeature = components['schemas']['CaptchaFeature'];

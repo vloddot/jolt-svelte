@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import type { RouteParams } from './$types';
-	import Chat from '@components/Chat/index.svelte';
+	import Chat from '@components/Chat/TextChat.svelte';
 	import UserDetail from '@components/UserDetail.svelte';
-	import { clientKey, sessionKey } from '@routes/context';
+	import { clientKey } from '@routes/context';
 	import { getContext } from '$lib/context';
 	import { redirect } from '@sveltejs/kit';
 	import { getDisplayName } from '$lib/util';

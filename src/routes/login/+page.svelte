@@ -26,7 +26,7 @@
 	];
 
 	// whether to remember the session or not
-	let rememberMe: boolean = true;
+	let rememberMe = true;
 
 	// error text to display
 	let error: string | undefined = undefined;
