@@ -1,1 +1,0 @@
-const o="Errore",t="Accesso",i={notice:"Facoltativamente, se il tuo account utilizza l'autenticazione a più fattori, utilizza uno di questi metodi, includendo anche l'e-mail e la password precedenti"},e="Ok",n={error:o,login:t,mfa:i,confirm:e};export{e as confirm,n as default,o as error,t as login,i as mfa};
