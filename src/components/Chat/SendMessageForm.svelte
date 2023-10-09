@@ -84,21 +84,11 @@
 	$: updateChannelName(channel);
 </script>
 
-<form
-	id="message-send-form"
-	on:submit={sendMessage}
->
+<form id="message-send-form" on:submit={sendMessage}>
 	<label for="file-upload" class="cursor-pointer">
 		<PlusIcon />
 	</label>
-	<input
-		id="file-upload"
-		type="file"
-		multiple
-		max={5}
-		bind:this={fileUploadNode}
-		bind:files
-	/>
+	<input id="file-upload" type="file" multiple max={5} bind:this={fileUploadNode} bind:files />
 	<textarea
 		on:blur={endTyping}
 		on:input={startTyping}
