@@ -98,6 +98,15 @@
 		text-decoration: none;
 	}
 
+	:global(hr) {
+		border-color: var(--secondary-header);
+		width: calc(100% - 36px);
+	}
+
+	:global(.flex-divider) {
+		flex: 1;
+	}
+
 	:global(input, textarea, button) {
 		background-color: var(--secondary-background);
 		color: var(--secondary-foreground);

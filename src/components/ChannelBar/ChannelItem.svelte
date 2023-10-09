@@ -23,6 +23,7 @@
 		display: flex;
 		align-items: center;
 		transition: background-color 150ms;
+		height: 48px;
 
 		&[data-selected='true'],
 		&:hover {

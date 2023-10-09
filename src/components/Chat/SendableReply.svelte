@@ -77,10 +77,6 @@
 		text-overflow: ellipsis;
 	}
 
-	.flex-divider {
-		flex: 1;
-	}
-
 	img {
 		width: 16px;
 		height: 16px;

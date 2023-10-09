@@ -15,6 +15,10 @@
 	import SystemMessageComponent from './SystemMessage.svelte';
 	import AttachmentComponent from './Attachment.svelte';
 	import EmbedComponent from './Embed.svelte';
+	import tippy from 'svelte-tippy';
+	import 'tippy.js/dist/tippy.css';
+	import 'tippy.js/animations/shift-away-subtle.css';
+	import MessageForm from './MessageForm.svelte';
 
 	/**
 	 * Message to show.
@@ -36,7 +40,7 @@
 
 	interface MessageControls {
 		src: ComponentType | string;
-		alt: string;
+		name: string;
 		showIf?: (message: Message) => boolean;
 		onclick: (message: Message) => unknown;
 	}
@@ -44,7 +48,7 @@
 	const controls: MessageControls[] = [
 		{
 			src: ArrowUturnLeftIcon,
-			alt: 'Reply',
+			name: 'Reply',
 			onclick() {
 				if ($replies?.some((reply) => reply.message._id == message._id)) {
 					return;
@@ -58,7 +62,7 @@
 		},
 		{
 			src: PencilSquareIcon,
-			alt: 'Edit',
+			name: 'Edit',
 			showIf: (message) => message.author == client.user?._id,
 			onclick: (message) =>
 				(messageContentToEdit =
@@ -66,7 +70,7 @@
 		},
 		{
 			src: TrashIcon,
-			alt: 'Delete',
+			name: 'Delete',
 			showIf: (message) => message.author == client.user?._id, // TODO: check permissions for message deleting
 			onclick: (message) => client.api.deleteMessage(message.channel, message._id)
 		}
@@ -137,11 +141,21 @@
 		<div class="flex-divider" />
 
 		<div class="message-controls">
-			{#each controls as { src, alt, onclick, showIf }}
+			{#each controls as { src, name, onclick, showIf }}
 				{#if showIf?.(message) ?? true}
-					<button class="ml-2" aria-label={alt} on:click={() => onclick(message)}>
+					<button
+						aria-label={name}
+						on:click={() => onclick(message)}
+						use:tippy={{
+							placement: 'top',
+							content: name,
+							theme: 'message-controls',
+							animation: 'shift-away-subtle',
+							duration: 100
+						}}
+					>
 						{#if typeof src == 'string'}
-							<img width="16px" height="16px" {src} {alt} />
+							<img width="16px" height="16px" {src} alt={name} />
 						{:else}
 							<svelte:component this={src} />
 						{/if}
@@ -152,30 +166,22 @@
 	</div>
 
 	{#if messageContentToEdit != undefined}
-		<form id="message-edit-form" class="bg-gray-500 rounded-xl px-2 pt-2" on:submit={editMessage}>
-			<textarea
-				on:keydown={(event) => {
-					if (event.defaultPrevented) {
-						return;
-					}
-
-					if (event.key == 'Escape') {
-						event.preventDefault();
-						messageContentToEdit = undefined;
-						return;
-					}
-
-					if (event.shiftKey || event.key != 'Enter') {
-						return;
-					}
-
-					event.preventDefault();
-					editMessage();
-					messageContentToEdit = undefined;
-				}}
-				class="outline-none resize-none bg-inherit w-full"
-				placeholder="Edit this message"
+		<form
+			style="padding-left: 8px"
+			id="message-edit-form"
+			class="message-form"
+			on:submit={editMessage}
+		>
+			<MessageForm
 				bind:value={messageContentToEdit}
+				on:keydown={(event) => {
+					console.log(event);
+					if (event.detail.key == 'Escape') {
+						messageContentToEdit = undefined;
+					}
+				}}
+				placeholder="Edit this message"
+				sendTypingEvents={false}
 			/>
 		</form>
 	{:else if message.content != undefined}
@@ -203,7 +209,7 @@
 	.container {
 		display: flex;
 		flex-direction: column;
-		padding: 24px;
+		padding: 8px 24px;
 
 		&:hover {
 			background-color: var(--hover);
@@ -216,24 +222,34 @@
 		.user-detail {
 			display: flex;
 			align-items: center;
+			gap: 8px;
 
 			.timestamp {
 				color: var(--tertiary-foreground);
 			}
 
 			.message-controls {
-				display: hidden;
+				display: none;
 			}
+		}
 
-			&:hover {
-				.message-controls {
-					display: flex;
+		&:hover {
+			.message-controls {
+				display: flex;
+
+				button {
+					border-radius: 0px;
 				}
 			}
 		}
 	}
 
-	.flex-divider {
-		flex: 1;
+	:global(.tippy-box[data-theme='message-controls']) {
+		background-color: black;
+		border-radius: var(--border-radius);
+	}
+
+	:global(.tippy-box[data-theme='message-controls'] > .tippy-arrow::before) {
+		border-top-color: black;
 	}
 </style>

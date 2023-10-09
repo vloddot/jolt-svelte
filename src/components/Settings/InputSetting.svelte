@@ -6,12 +6,11 @@
 	export let value = '';
 </script>
 
-<div>
+<div class="container">
 	{#if type == 'textarea'}
-		<textarea class="bg-gray-500" {placeholder} bind:value />
+		<textarea {placeholder} bind:value />
 	{:else}
 		<input
-			class="bg-gray-500"
 			{type}
 			{placeholder}
 			{value}
@@ -20,6 +19,13 @@
 	{/if}
 
 	{#if description != undefined}
-		<p class="ml-4">{description}</p>
+		<p class="description">{description}</p>
 	{/if}
 </div>
+
+<style lang="scss">
+	.description {
+		margin: 12px 0px 24px 24px;
+		color: var(--secondary-foreground);
+	}
+</style>

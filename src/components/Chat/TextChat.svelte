@@ -8,8 +8,9 @@
 	import MessageComponent from './Message.svelte';
 	import XCircleIcon from '@components/Icons/XCircleIcon.svelte';
 	import UserIcon from '@components/Icons/UserIcon.svelte';
-	import SendMessageForm from './SendMessageForm.svelte';
+	import SendMessageForm from './MessageForm.svelte';
 	import SendableReplyComponent from './SendableReply.svelte';
+	import PlusIcon from '@components/Icons/PlusIcon.svelte';
 
 	/**
 	 * Which channel to show messages from.
@@ -31,10 +32,12 @@
 	setContext(repliesKey, replies);
 	setContext(channelKey, channel);
 
+	let messageInput: string;
 	let messagesListNode: HTMLDivElement;
 	let currentlyTypingUsers: User[] = [];
-	let fileUploadNode: HTMLInputElement | null;
+	let fileInputNode: HTMLInputElement;
 	let files: FileList | null;
+	let channelName = 'Unknown Channel';
 
 	$: {
 		client.api
@@ -99,6 +102,29 @@
 
 	$: listenToTypingEvents($settings['jolt:receive-typing-indicators']);
 
+	async function sendMessage() {
+		let attachments: string[] = [];
+		if (fileInputNode?.files != null) {
+			attachments = await Promise.all(
+				Array.from(fileInputNode.files).map((file) => client.autumn.uploadFile(file))
+			);
+			fileInputNode.value = '';
+			files = null;
+		}
+
+		await client.api.sendMessage(channel._id, {
+			content: messageInput.trim(),
+			replies: $replies.map(({ message: { _id }, mention }) => ({
+				id: _id,
+				mention
+			})),
+			attachments
+		});
+
+		replies.set([]);
+		messageInput = '';
+	}
+
 	onMount(() => {
 		client.on('Message', (message) => {
 			if (message.channel != channel._id) {
@@ -144,6 +170,30 @@
 			});
 		});
 	});
+
+	async function updateChannelName(channel: Exclude<Channel, { channel_type: 'VoiceChannel' }>) {
+		if (channel.channel_type == 'TextChannel' || channel.channel_type == 'Group') {
+			channelName = `#${channel.name}`;
+			return;
+		}
+
+		if (channel.channel_type == 'SavedMessages') {
+			channelName = 'Saved Notes';
+			return;
+		}
+
+		try {
+			channelName = `@${getDisplayName(
+				await client.api.fetchUser(
+					channel.recipients[0] == client.user?._id ? channel.recipients[1] : channel.recipients[0]
+				)
+			)}`;
+		} catch (error) {
+			channelName = 'Unknown Channel';
+		}
+	}
+
+	$: updateChannelName(channel);
 </script>
 
 <main class="main-content-container">
@@ -153,7 +203,7 @@
 		{/each}
 	</div>
 	{#if files != null && files.length != 0}
-		<div class="flex">
+		<div class="file-uploads">
 			<p>
 				Uploading
 				{Array.from(files)
@@ -161,13 +211,12 @@
 					.join(', ')}
 			</p>
 
-			<div class="flex-1" />
+			<div class="flex-divider" />
 
 			<button
-				class="pr-2"
 				on:click={() => {
-					if (fileUploadNode != null) {
-						fileUploadNode.value = '';
+					if (fileInputNode != null) {
+						fileInputNode.value = '';
 						files = null;
 					}
 				}}
@@ -196,13 +245,42 @@
 	{#each $replies as reply}
 		<SendableReplyComponent {reply} />
 	{/each}
-	<SendMessageForm />
+	<form class="message-form" id="send-message-form" on:submit={sendMessage}>
+		<label for="file-upload">
+			<PlusIcon />
+		</label>
+		<input type="file" id="file-upload" max="5" bind:files bind:this={fileInputNode} />
+		<SendMessageForm
+			sendTypingEvents={$settings['jolt:send-typing-indicators']}
+			bind:value={messageInput}
+			placeholder="Send message in {channelName}"
+		/>
+	</form>
 </main>
 
 <style lang="scss">
 	main.main-content-container {
 		display: flex;
 		flex-direction: column;
+	}
+
+	input#file-upload {
+		visibility: hidden;
+		width: 0;
+	}
+
+	label[for='file-upload'] {
+		cursor: pointer;
+		margin-left: 16px;
+	}
+
+	:global(.message-form) {
+		display: flex;
+		background-color: var(--message-box);
+		border-radius: var(--border-radius);
+		align-items: center;
+		margin: 0px 16px 16px 16px;
+		border-bottom: 2px solid var(--accent);
 	}
 
 	.messages-list {
@@ -215,7 +293,15 @@
 		margin-bottom: 24px;
 	}
 
+	.file-uploads {
+		display: flex;
+	}
+
 	.typing-indicator {
 		margin: 0px 16px;
+		padding: 8px;
+		background-color: var(--secondary-background);
+		border-top-right-radius: var(--border-radius);
+		border-top-left-radius: var(--border-radius);
 	}
 </style>

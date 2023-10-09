@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import ChannelItem from '@components/ChannelBar/ChannelItem.svelte';
 
 	export let section: SettingsSection;
 
@@ -8,11 +9,17 @@
 </script>
 
 {#if section.type == 'link'}
-	<div class={$page.url.pathname == `${root}/${section.id}` ? 'bg-gray-400' : 'hover:bg-gray-600'}>
-		<a href="{root}/{section.id}">
-			<p>{section.title}</p>
-		</a>
-	</div>
+	<ChannelItem href={section.id} selected={$page.url.pathname == `${root}/${section.id}`}>
+		{section.title}
+	</ChannelItem>
 {:else if section.type == 'header'}
-	<h1 class="text-xl uppercase my-2">{section.title}</h1>
+	<h1>{section.title}</h1>
 {/if}
+
+<style lang="scss">
+	h1 {
+		text-transform: uppercase;
+		font-size: large;
+		margin: 8px 0;
+	}
+</style>

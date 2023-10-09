@@ -39,7 +39,7 @@
 	onMount(updateDMs);
 </script>
 
-<div role="list" class="channel-bar-container">
+<div class="channel-bar-container">
 	<ChannelItem href="{base}/friends" selected={$page.url.pathname == `${base}/friends`}>
 		<UserIcon />
 		Friends

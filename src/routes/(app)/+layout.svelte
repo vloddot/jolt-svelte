@@ -217,6 +217,7 @@
 		flex: 1;
 		height: 100vh;
 		overflow-x: hidden;
+		background-color: var(--primary-background);
 	}
 
 	:global(.members-list-container) {
@@ -232,10 +233,5 @@
 	:global(img.cover) {
 		border-radius: 100%;
 		object-fit: cover;
-	}
-
-	hr {
-		border-color: var(--secondary-header);
-		width: calc(100% - 36px);
 	}
 </style>
