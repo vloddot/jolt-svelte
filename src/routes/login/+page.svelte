@@ -2,12 +2,9 @@
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { getContext } from '$lib/context';
-	import '$lib/index.css';
 	import { clientKey, sessionKey } from '@routes/context';
 	import { appWindow } from '@tauri-apps/api/window';
 	import detect from 'browser-detect';
-
-	import './index.css';
 
 	const session = getContext(sessionKey)!;
 	const client = getContext(clientKey)!;
@@ -21,8 +18,7 @@
 	// MFA methods with their input fields' values
 	let mfaMethods: [MFAMethod, string][] = [
 		['Totp', ''],
-		['Recovery', ''],
-		['Password', '']
+		['Recovery', '']
 	];
 
 	// whether to remember the session or not
@@ -124,7 +120,7 @@
 			{
 				Totp: 'MFA TOTP',
 				Recovery: 'MFA Recovery Code',
-				Password: 'Password'
+				Password: 'MFA Password'
 			}[method] ?? 'Unknown MFA Method'
 		);
 	}
@@ -135,39 +131,50 @@
 	}
 </script>
 
-<div class="login-base">
-	<div class="login-wrapper">
-		<form id="login-form" class="flex flex-col" on:submit|preventDefault={login}>
-			<h1 class="text-3xl">Jolt</h1>
+<form id="login-form" class="login-base" on:submit|preventDefault={login}>
+	<h1>Jolt &#x26A1;</h1>
 
-			<input type="email" placeholder="Email" bind:value={email} />
-			<input type="password" placeholder="Password" bind:value={password} />
+	<input type="email" placeholder="Email" bind:value={email} />
+	<input type="password" placeholder="Password" bind:value={password} />
 
-			<p class="text-xs">
-				Optionally, if your account uses MFA, use one of these methods, including the previous email
-				and password as well
-			</p>
+	<p>
+		Optionally, if your account uses MFA, use one of these methods, including the previous email and
+		password as well
+	</p>
 
-			{#each mfaMethods as [method, value]}
-				<input type="text" placeholder={displayMfaMethod(method)} bind:value />
-			{/each}
+	{#each mfaMethods as [method, value]}
+		<input type="text" placeholder={displayMfaMethod(method)} bind:value />
+	{/each}
 
-			<span class="flex justify-center">
-				<label>
-					Remember me <input type="checkbox" name="remember-me" bind:checked={rememberMe} />
-				</label>
-			</span>
+	<label>
+		Remember me <input type="checkbox" bind:checked={rememberMe} />
+	</label>
 
-			<button type="submit">Login</button>
-		</form>
-
-		{#if error}
-			<p>{error}</p>
-		{/if}
-	</div>
-</div>
+	<button type="submit">Login</button>
+	{#if error}
+		<p>{error}</p>
+	{/if}
+</form>
 
 <svelte:head>
 	<title>{TITLE}</title>
 	<meta name="description" content="Jolt - Login" />
 </svelte:head>
+
+<style lang="scss">
+	input {
+		margin-bottom: 8px;
+	}
+
+	.login-base {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		width: 400px;
+		margin: 70px 70px;
+		border-left: solid var(--accent);
+		border-radius: var(--border-radius);
+		padding: 20px;
+		background-color: var(--primary-background);
+	}
+</style>

@@ -4,7 +4,6 @@
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
 	import ChannelCategory from '@components/ChannelBar/Category.svelte';
 	import ChannelComponent from '@components/ChannelBar/Channel.svelte';
-	import RoundedImage from '@components/RoundedImage.svelte';
 	import { selectedChannelIDKey } from '@routes/(app)/context';
 	import { clientKey, settingsKey } from '@routes/context';
 	import { redirect } from '@sveltejs/kit';
@@ -13,7 +12,8 @@
 	import type { RouteParams } from './$types';
 	import { channelKey } from './context';
 	import { serverKey } from '../../context';
-	import User from '$lib/icons/user.svg';
+	import UserIcon from '@components/Icons/UserIcon.svelte';
+	import { onDestroy } from 'svelte';
 
 	const client = getContext(clientKey)!;
 	const settings = getContext(settingsKey)!;
@@ -64,6 +64,10 @@
 			document.title = title;
 		}
 	}
+
+	onDestroy(() => {
+		selectedChannelID.set(undefined);
+	});
 </script>
 
 {#if $server != undefined}
@@ -106,10 +110,14 @@
 				{#await user then user}
 					{@const name = getDisplayName(user, member)}
 					<div>
-						<RoundedImage
-							src={$settings['jolt:low-data-mode'] ? User : getDisplayAvatar(user, member)}
-							{name}
-						/>
+						{#if $settings['jolt:low-data-mode']}
+							<UserIcon />
+						{:else}
+							{@const avatar = getDisplayAvatar(user, member)}
+							{#if typeof avatar == 'string'}
+								<img class="cover" src={avatar} alt={name} />
+							{/if}
+						{/if}
 
 						{name}
 					</div>
@@ -118,3 +126,10 @@
 		{/await}
 	</div>
 {/if}
+
+<style lang="scss">
+	img.cover {
+		width: 24px;
+		height: 24px;
+	}
+</style>

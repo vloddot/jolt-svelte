@@ -6,5 +6,4 @@ import type VoiceClientBrowser from '@revkit/voice/browser';
 export const settingsKey: ContextInjectionKey<Writable<Settings>> = Symbol();
 export const sessionKey: ContextInjectionKey<Writable<Session | null>> = Symbol();
 export const clientKey: ContextInjectionKey<Client> = Symbol();
-export const voiceClientKey: ContextInjectionKey<Writable<VoiceClientBrowser>> =
-	Symbol();
+export const voiceClientKey: ContextInjectionKey<Writable<VoiceClientBrowser>> = Symbol();

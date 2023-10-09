@@ -2,17 +2,16 @@
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { getContext, setContext } from '$lib/context';
-	import '$lib/index.css';
 	import { getAutumnURL, getDisplayAvatar } from '$lib/util';
-	import ServerSidebarIcon from '@components/ServerSidebarIcon/index.svelte';
+	import ServerSidebarIcon from '@components/ServerSidebarIcon.svelte';
 	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
 	import { clientKey, settingsKey } from '@routes/context';
 	import { onMount } from 'svelte';
 	import { writable } from 'svelte/store';
-	import './index.css';
-	import Home from '$lib/icons/home.svg';
-	import Plus from '$lib/icons/plus.svg';
-	import Cog6Tooth from '$lib/icons/cog-6-tooth.svg';
+	import HomeIcon from '@components/Icons/HomeIcon.svelte';
+	import PlusIcon from '@components/Icons/PlusIcon.svelte';
+	import Cog6ToothIcon from '@components/Icons/Cog6ToothIcon.svelte';
+	import { page } from '$app/stores';
 
 	const settings = getContext(settingsKey)!;
 	const client = getContext(clientKey)!;
@@ -109,18 +108,27 @@
 	});
 </script>
 
-<div class="grid-container">
+<div class="app-container">
 	<div class="server-sidebar-container">
 		{#if $settings['jolt:low-data-mode']}
-			<ServerSidebarIcon href="{base}/" tooltip="Home" icon={Home} />
+			<ServerSidebarIcon
+				selected={$page.route.id?.startsWith('/(app)/(home)') ?? false}
+				href="{base}/"
+				tooltip="Home"
+			>
+				<HomeIcon />
+			</ServerSidebarIcon>
 			<hr class="border-gray-600 mx-4" />
 		{:else}
 			{#await client.user ?? client.api.fetchUser('@me') then user}
 				<ServerSidebarIcon
 					href="{base}/"
+					selected={$page.route.id?.startsWith('/(app)/(home)') ?? false}
+					ariaLabel="Home"
 					tooltip="{user.username}#{user.discriminator}"
-					icon={getDisplayAvatar(client.user)}
-				/>
+				>
+					<img class="cover" src={getDisplayAvatar(user)} alt="Home" width="48px" height="48px" />
+				</ServerSidebarIcon>
 
 				<hr class="border-gray-600 mx-4" />
 			{/await}
@@ -128,28 +136,106 @@
 
 		{#if servers != undefined}
 			{#each servers as server}
-				{#if $settings['jolt:low-data-mode']}
-					<ServerSidebarIcon
-						href="{base}/servers/{server._id}/channels/{server.channels[0]}"
-						tooltip={server.name}
-					/>
-				{:else}
-					<ServerSidebarIcon
-						href="{base}/servers/{server._id}/channels/{server.channels[0]}"
-						tooltip={server.name}
-						icon={server.icon == undefined
-							? undefined
-							: `${getAutumnURL(server.icon, { max_side: '256' })}`}
-					/>
-				{/if}
+				<ServerSidebarIcon
+					href="{base}/servers/{server._id}/channels/{server.channels[0]}"
+					tooltip={server.name}
+					selected={$selectedServerID == server._id}
+				>
+					{#if server.icon == undefined || $settings['jolt:low-data-mode']}
+						{server.name
+							.split(' ')
+							.map((s) => s[0])
+							.join('')}
+					{:else}
+						<img
+							class="cover"
+							src={getAutumnURL(server.icon, { max_side: '256' })}
+							alt={server.name}
+							width="48px"
+							height="48px"
+						/>
+					{/if}
+				</ServerSidebarIcon>
 			{/each}
 		{/if}
-		<ServerSidebarIcon href="{base}/servers/create" icon={Plus} tooltip="Create Server" />
+		<ServerSidebarIcon
+			selected={$page.route.id == '/(app)/servers/create'}
+			href="{base}/servers/create"
+			tooltip="Create Server"
+		>
+			<PlusIcon />
+		</ServerSidebarIcon>
 
 		<div class="flex-1" />
 
-		<ServerSidebarIcon href="{base}/settings" icon={Cog6Tooth} tooltip="Settings" />
+		<ServerSidebarIcon
+			selected={$page.route.id?.startsWith('/(app)/settings') ?? false}
+			href="{base}/settings"
+			tooltip="Settings"
+		>
+			<Cog6ToothIcon />
+		</ServerSidebarIcon>
 	</div>
 
 	<slot />
 </div>
+
+<style lang="scss">
+	:global(body) {
+		overflow: hidden;
+	}
+
+	.app-container {
+		display: flex;
+		width: 100%;
+		height: 100vh;
+	}
+
+	.server-sidebar-container {
+		width: 72px;
+		height: 100vh;
+		display: flex;
+		align-items: center;
+		flex-direction: column;
+		position: relative;
+		border-right: 1px solid var(--secondary-header);
+		background-color: var(--background);
+		overflow-y: scroll;
+	}
+
+	:global(.channel-bar-container) {
+		width: 232px;
+		height: 100vh;
+		display: flex;
+		flex-direction: column;
+		border-right: 1px solid var(--secondary-header);
+		background-color: var(--secondary-background);
+		overflow-y: scroll;
+	}
+
+	:global(.main-content-container) {
+		flex: 1;
+		height: 100vh;
+		overflow-x: hidden;
+	}
+
+	:global(.members-list-container) {
+		height: 100vh;
+		width: 256px;
+		display: flex;
+		flex-direction: column;
+		background-color: var(--secondary-background);
+		border-left: 1px solid var(--secondary-header);
+		overflow-y: scroll;
+	}
+
+	:global(img.cover) {
+		border-radius: 100%;
+		object-fit: cover;
+	}
+
+	hr {
+		border-color: var(--secondary-header);
+		width: calc(100% - 36px);
+	}
+</style>

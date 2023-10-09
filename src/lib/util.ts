@@ -1,4 +1,3 @@
-import User from '$lib/icons/user.svg';
 export const PING_HEARTBEAT_INTERVAL = 30;
 export const PONG_TIMEOUT = 10;
 export const AUTUMN_URL = 'https://autumn.revolt.chat';
@@ -41,10 +40,10 @@ export function getDisplayName(
 }
 
 export function getDisplayAvatar(
-	user?: { _id: string; avatar?: { _id: string; tag: string } },
+	user: { _id: string; avatar?: { _id: string; tag: string } },
 	member?: Member,
 	message?: Message
-): string {
+): string | undefined {
 	if (message?.webhook?.avatar != undefined) {
 		return message.webhook.avatar;
 	}
@@ -58,7 +57,7 @@ export function getDisplayAvatar(
 	}
 
 	if (user == undefined || message?.system != undefined) {
-		return User;
+		return;
 	}
 
 	if (user.avatar == undefined) {

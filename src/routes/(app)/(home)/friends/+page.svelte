@@ -3,11 +3,11 @@
 	import { base } from '$app/paths';
 	import { getContext } from '$lib/context';
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
-	import RoundedImage from '@components/RoundedImage.svelte';
+	import CheckIcon from '@components/Icons/CheckIcon.svelte';
+	import EnvelopeIcon from '@components/Icons/EnvelopeIcon.svelte';
+	import UserIcon from '@components/Icons/UserIcon.svelte';
+	import XMarkIcon from '@components/Icons/XMarkIcon.svelte';
 	import { clientKey } from '@routes/context';
-	import Envelope from '$lib/icons/envelope.svg';
-	import Check from '$lib/icons/check.svg';
-	import XMark from '$lib/icons/x-mark.svg';
 
 	const client = getContext(clientKey)!;
 	let list = Array.from(client.api.cache.users.values()).filter(
@@ -47,9 +47,14 @@
 
 			{#each list as user}
 				{@const name = getDisplayName(user)}
+				{@const avatar = getDisplayAvatar(user)}
 				<div class="flex">
 					<div class="p-2">
-						<RoundedImage {name} src={getDisplayAvatar(user)} width={64} height={64} />
+						{#if avatar != undefined}
+							<img class="cover" alt={name} src={avatar} width="64px" height="64px" />
+						{:else}
+							<UserIcon />
+						{/if}
 
 						{name}
 					</div>
@@ -61,17 +66,17 @@
 								await goto(`${base}/channels/${_id}`);
 							}}
 						>
-							<img src={Envelope} alt="Send Direct Message" />
+							<EnvelopeIcon />
 						</button>
 					{/if}
 					{#if user.relationship == 'Incoming'}
 						<button on:click={() => client.api.acceptFriend(user._id)}>
-							<img src={Check} alt="Accept Friend" />
+							<CheckIcon />
 						</button>
 					{/if}
 					{#if user.relationship == 'Outgoing' || user.relationship == 'Friend' || user.relationship == 'Incoming'}
 						<button on:click={() => client.api.removeFriend(user._id)}>
-							<img src={XMark} alt="Remove Friend" />
+							<XMarkIcon />
 						</button>
 					{/if}
 				</div>

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { getContext } from '$lib/context';
-	import '$lib/index.css';
 	import ChannelComponent from '@components/ChannelBar/Channel.svelte';
 	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
 	import { clientKey } from '@routes/context';
@@ -10,7 +9,7 @@
 	import type { LayoutParams } from './$types';
 	import ChannelItem from '@components/ChannelBar/ChannelItem.svelte';
 	import { base } from '$app/paths';
-	import Users from '$lib/icons/users.svg';
+	import UserIcon from '@components/Icons/UserIcon.svelte';
 
 	$: pageParams = $page.params as LayoutParams;
 
@@ -41,14 +40,10 @@
 </script>
 
 <div role="list" class="channel-bar-container">
-	<ChannelItem
-		name="Friends"
-		src={Users}
-		width={24}
-		height={24}
-		href="{base}/friends"
-		selected={$page.url.pathname == `${base}/friends`}
-	/>
+	<ChannelItem href="{base}/friends" selected={$page.url.pathname == `${base}/friends`}>
+		<UserIcon />
+		Friends
+	</ChannelItem>
 
 	{#if dms != undefined}
 		{#if savedMessagesChannel != undefined}

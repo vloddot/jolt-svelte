@@ -9,10 +9,13 @@
 	import { getDisplayName } from '$lib/util';
 
 	import { appWindow } from '@tauri-apps/api/window';
+	import { onDestroy } from 'svelte';
+	import { selectedChannelIDKey } from '@routes/(app)/context';
 
 	$: pageParams = $page.params as RouteParams;
 
 	const client = getContext(clientKey)!;
+	const selectedChannelID = getContext(selectedChannelIDKey);
 
 	let channel: Exclude<Channel, { channel_type: 'TextChannel' | 'VoiceChannel' }> | undefined =
 		undefined;
@@ -37,8 +40,9 @@
 		);
 	}
 
-	$: updateChannel(pageParams.id);
-	$: channel != undefined && channel.channel_type != 'SavedMessages' && updateUser(channel);
+	$: selectedChannelID?.set(pageParams.id);
+	$: if ($selectedChannelID) updateChannel($selectedChannelID);
+	$: if (channel != undefined && channel.channel_type != 'SavedMessages') updateUser(channel);
 
 	$: {
 		let title = '';
@@ -58,6 +62,10 @@
 			document.title = title;
 		}
 	}
+
+	onDestroy(() => {
+		selectedChannelID?.set(undefined);
+	});
 </script>
 
 {#if channel != undefined}

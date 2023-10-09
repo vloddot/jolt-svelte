@@ -6,7 +6,7 @@ export class AutumnClient {
 
 		const { id } = await fetch(`https://autumn.revolt.chat/${tag}`, {
 			method: 'POST',
-			body: form,
+			body: form
 		}).then((response) => response.json());
 
 		return id;

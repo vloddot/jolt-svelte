@@ -2,10 +2,10 @@
 	import { base } from '$app/paths';
 	import { getContext } from '$lib/context';
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
-	import RoundedImage from '@components/RoundedImage.svelte';
 	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
 	import { clientKey, settingsKey } from '@routes/context';
 	import { getUser, messagesKey, usersKey } from '.';
+	import UserIcon from '@components/Icons/UserIcon.svelte';
 
 	const client = getContext(clientKey)!;
 	const settings = getContext(settingsKey)!;
@@ -28,9 +28,21 @@
 				{#await getUser(client.api, $users ?? client.api.cache.users, message.author)}
 					&lt;Unknown User&gt;
 				{:then author}
-					{@const displayName = getDisplayName(author)}
-					<RoundedImage src={getDisplayAvatar(author)} name={displayName} width={24} height={24} />
-					{displayName}
+					{#if author != undefined}
+						{@const displayName = getDisplayName(author)}
+						<img
+							class="cover"
+							src={getDisplayAvatar(author)}
+							alt={displayName}
+							width="24px"
+							height="24px"
+						/>
+						{displayName}
+					{:else}
+						<UserIcon />
+
+						Unknown User
+					{/if}
 				{/await}:
 			{/if}
 			{#if message.content != undefined}

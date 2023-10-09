@@ -1,7 +1,6 @@
 <script lang="ts">
 	import SettingsSection from '@components/Settings/Section.svelte';
 	import { getContext } from '$lib/context';
-	import '$lib/index.css';
 	import { clientKey, sessionKey } from '@routes/context';
 	import type { LayoutData } from './$types';
 

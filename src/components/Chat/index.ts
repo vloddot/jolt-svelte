@@ -29,7 +29,8 @@ export async function getUser(
 
 	return user;
 }
-export const channelKey: ContextInjectionKey<Exclude<Channel, { channel_type: 'VoiceChannel' }>> = Symbol();
+export const channelKey: ContextInjectionKey<Exclude<Channel, { channel_type: 'VoiceChannel' }>> =
+	Symbol();
 export const messagesKey: ContextInjectionKey<Writable<Message[]>> = Symbol();
 export const membersKey: ContextInjectionKey<Writable<Member[]>> = Symbol();
 export const usersKey: ContextInjectionKey<Writable<User[]>> = Symbol();

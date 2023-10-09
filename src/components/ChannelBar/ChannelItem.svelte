@@ -1,26 +1,4 @@
 <script lang="ts">
-	import RoundedImage from '@components/RoundedImage.svelte';
-
-	/**
-	 * Image source to show.
-	 */
-	export let src: string;
-
-	/**
-	 * Channel name.
-	 */
-	export let name: string;
-
-	/**
-	 * Width of the image.
-	 */
-	export let width: number;
-
-	/**
-	 * Height of the image.
-	 */
-	export let height: number;
-
 	/**
 	 * Channel ID.
 	 */
@@ -32,10 +10,42 @@
 	export let selected: boolean;
 </script>
 
-<div role="listitem" class={selected ? 'bg-gray-400' : 'hover:bg-gray-600'}>
-	<a {href} class="p-2 block">
-		<RoundedImage {src} {name} {width} {height} />
+<a {href} class="channel-item" data-selected={selected}>
+	<slot />
+</a>
 
-		{name}
-	</a>
-</div>
+<style lang="scss">
+	.channel-item {
+		margin: 4px 8px;
+		gap: 8px;
+		padding: 0px 8px;
+		border-radius: var(--border-radius);
+		display: flex;
+		align-items: center;
+		transition: background-color 150ms;
+
+		&[data-selected='true'],
+		&:hover {
+			background-color: var(--hover);
+		}
+
+		&::before {
+			content: ' ';
+			position: relative;
+			left: 0;
+			width: 4px;
+			height: 0px;
+			border-radius: var(--border-radius);
+			background-color: var(--accent);
+			transition: height 150ms;
+		}
+
+		&:hover::before {
+			height: 8px;
+		}
+
+		&[data-selected='true']::before {
+			height: 16px;
+		}
+	}
+</style>

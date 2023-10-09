@@ -22,5 +22,5 @@
 		{/each}
 	{/await}
 
-	<button on:click={() => client.api.revokeAllSessions()}>Revoke all other sessions</button>
+	<button on:click={() => client.api.revokeAllSessions(false)}>Revoke all other sessions</button>
 </div>

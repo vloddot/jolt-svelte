@@ -1,19 +1,30 @@
 <script lang="ts">
 	import { getContext } from '$lib/context';
 	import { clientKey } from '@routes/context';
-	import './Category.css';
 
 	const client = getContext(clientKey)!;
 	export let category: Category;
 </script>
 
 <details open>
-	<summary class="category-summary" role="group">{category.title}</summary>
-	<div class="ml-2">
-		{#each category.channels as id}
-			{#await client.api.fetchChannel(id) then channel}
-				<slot {channel} />
-			{/await}
-		{/each}
-	</div>
+	<summary>{category.title}</summary>
+	{#each category.channels as id}
+		{#await client.api.fetchChannel(id) then channel}
+			<slot {channel} />
+		{/await}
+	{/each}
 </details>
+
+<style lang="scss">
+	details {
+		margin-top: 8px;
+		> summary {
+			user-select: none;
+			margin-left: 8px;
+			text-transform: uppercase;
+			font-size: 10px;
+			font-weight: bold;
+			cursor: pointer;
+		}
+	}
+</style>

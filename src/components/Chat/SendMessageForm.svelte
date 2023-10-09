@@ -2,9 +2,8 @@
 	import { getContext } from '$lib/context';
 	import { getDisplayName } from '$lib/util';
 	import { clientKey, settingsKey } from '@routes/context';
-
 	import { channelKey, repliesKey } from '.';
-	import Plus from '$lib/icons/plus.svg';
+	import PlusIcon from '@components/Icons/PlusIcon.svelte';
 
 	const client = getContext(clientKey)!;
 	const settings = getContext(settingsKey)!;
@@ -12,7 +11,7 @@
 	const replies = getContext(repliesKey)!;
 
 	let channelName: string;
-	let messageInputNode: HTMLTextAreaElement;
+	let messageInput: string;
 	let fileUploadNode: HTMLInputElement | null;
 	let files: FileList | null;
 
@@ -50,7 +49,7 @@
 
 	function startTyping() {
 		if ($settings['jolt:send-typing-indicators']) {
-			if (messageInputNode.value == '') {
+			if (messageInput == '') {
 				client.websocket.send({ type: 'EndTyping', channel: channel._id });
 				return;
 			}
@@ -70,7 +69,7 @@
 		}
 
 		await client.api.sendMessage(channel._id, {
-			content: messageInputNode.value.trim(),
+			content: messageInput.trim(),
 			replies: $replies.map(({ message: { _id }, mention }) => ({
 				id: _id,
 				mention
@@ -79,7 +78,7 @@
 		});
 
 		replies.set([]);
-		messageInputNode.value = '';
+		messageInput = '';
 	}
 
 	$: updateChannelName(channel);
@@ -88,14 +87,12 @@
 <form
 	id="message-send-form"
 	on:submit={sendMessage}
-	class="flex bg-gray-500 rounded-xl px-2 pt-2 m-4"
 >
 	<label for="file-upload" class="cursor-pointer">
-		<img src={Plus} alt="Upload File" />
+		<PlusIcon />
 	</label>
 	<input
 		id="file-upload"
-		class="opacity-0 w-0 p-1"
 		type="file"
 		multiple
 		max={5}
@@ -113,9 +110,40 @@
 			event.preventDefault();
 			sendMessage();
 		}}
-		bind:this={messageInputNode}
+		bind:value={messageInput}
 		maxlength="2000"
-		class="outline-none resize-none bg-inherit w-full h-12"
 		placeholder="Send message in {channelName}"
 	/>
 </form>
+
+<style lang="scss">
+	form {
+		display: flex;
+		background-color: var(--message-box);
+		border-radius: var(--border-radius);
+		align-items: center;
+		margin: 0px 16px 16px 16px;
+		border-bottom: 2px solid var(--accent);
+
+		input#file-upload {
+			opacity: 0;
+			width: 0px;
+		}
+
+		label[for='file-upload'] {
+			cursor: pointer;
+			margin-left: 16px;
+		}
+
+		textarea {
+			resize: none;
+			background-color: transparent;
+			font-family: inherit;
+			width: 100%;
+			line-height: 20px;
+			height: auto;
+			height: 20px;
+			padding: 14px 14px 14px 0;
+		}
+	}
+</style>

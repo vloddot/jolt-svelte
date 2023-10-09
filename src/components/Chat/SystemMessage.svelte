@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { getContext } from '$lib/context';
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
-	import RoundedImage from '@components/RoundedImage.svelte';
 	import { clientKey } from '@routes/context';
 
 	const client = getContext(clientKey)!;
@@ -13,7 +12,7 @@
 {:else if system.type == 'channel_description_changed' || system.type == 'channel_icon_changed' || system.type == 'channel_renamed' || system.type == 'user_added' || system.type == 'user_remove'}
 	{#await client.api.fetchUser(system.by) then user}
 		{@const displayName = getDisplayName(user)}
-		<RoundedImage src={getDisplayAvatar(user)} width={24} height={24} name={displayName} />
+		<img class="cover" src={getDisplayAvatar(user)} width="24px" height="24px" alt={displayName} />
 		{displayName}
 		{#if system.type == 'channel_description_changed'}
 			changed this channel's description.
@@ -39,7 +38,7 @@
 {:else if system.type == 'user_banned' || system.type == 'user_joined' || system.type == 'user_kicked' || system.type == 'user_left'}
 	{#await client.api.fetchUser(system.id) then user}
 		{@const displayName = getDisplayName(user)}
-		<RoundedImage src={getDisplayAvatar(user)} width={24} height={24} name={displayName} />
+		<img class="cover" src={getDisplayAvatar(user)} width="24px" height="24px" alt={displayName} />
 		{displayName}
 		{#if system.type == 'user_banned'}
 			was banned.

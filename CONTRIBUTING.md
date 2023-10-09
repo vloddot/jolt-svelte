@@ -1,4 +1,5 @@
 <!-- omit in toc -->
+
 # Contributing to Jolt
 
 First off, thanks for taking the time to contribute! ❤️
@@ -6,14 +7,15 @@ First off, thanks for taking the time to contribute! ❤️
 All types of contributions are encouraged and valued. See the [Table of Contents](#table-of-contents) for different ways to help and details about how this project handles them. Please make sure to read the relevant section before making your contribution. It will make it a lot easier for us maintainers and smooth out the experience for all involved. The community looks forward to your contributions. 🎉
 
 <!-- omit in toc -->
+
 ## Table of Contents
 
 - [I Have a Question](#i-have-a-question)
-	- [Reporting Bugs](#reporting-bugs)
-	- [Suggesting Enhancements](#suggesting-enhancements)
-	- [Your First Code Contribution](#your-first-code-contribution)
+  - [Reporting Bugs](#reporting-bugs)
+  - [Suggesting Enhancements](#suggesting-enhancements)
+  - [Your First Code Contribution](#your-first-code-contribution)
 - [Styleguides](#styleguides)
-	- [Commit Messages](#commit-messages)
+  - [Commit Messages](#commit-messages)
 
 ## I Have a Question
 
@@ -34,6 +36,7 @@ You can also ask questions on the [Jolt Lounge](https://rvlt.gg/AaCgcvgg) Revolt
 You can report bugs also through the [Jolt Lounge](https://rvlt.gg/AaCgcvgg) Revolt server or through opening an issue.
 
 <!-- omit in toc -->
+
 #### Before Submitting a Bug Report
 
 A good bug report shouldn't leave others needing to chase you up for more information. Therefore, we ask you to investigate carefully, collect information and describe the issue in detail in your report. Please complete the following steps in advance to help us fix any potential bug as fast as possible.
@@ -49,6 +52,7 @@ A good bug report shouldn't leave others needing to chase you up for more inform
 - Can you reliably reproduce the issue? And can you also reproduce it with older versions?
 
 <!-- omit in toc -->
+
 #### How Do I Submit a Good Bug Report?
 
 > You must never report security related issues, vulnerabilities or bugs including sensitive information to the issue tracker, or elsewhere in public. Instead sensitive bugs must be sent by DMs to the project owner on Revolt: vloddot#2349.
@@ -57,7 +61,7 @@ We use GitHub issues to track bugs and errors. If you run into an issue with the
 
 - Open an [Issue](https://www.github.com/vloddot/jolt/issues/new). (Since we can't be sure at this point whether it is a bug or not, we ask you not to talk about a bug yet and not to label the issue.)
 - Explain the behavior you would expect and the actual behavior.
-- Please provide as much context as possible and describe the *reproduction steps* that someone else can follow to recreate the issue on their own. This usually includes your code. For good bug reports you should isolate the problem and create a reduced test case.
+- Please provide as much context as possible and describe the _reproduction steps_ that someone else can follow to recreate the issue on their own. This usually includes your code. For good bug reports you should isolate the problem and create a reduced test case.
 - Provide the information you collected in the previous section.
 
 Once it's filed:
@@ -71,6 +75,7 @@ Once it's filed:
 This section guides you through submitting an enhancement suggestion for Jolt, **including completely new features and minor improvements to existing functionality**. Following these guidelines will help maintainers and the community to understand your suggestion and find related suggestions.
 
 <!-- omit in toc -->
+
 #### Before Submitting an Enhancement
 
 - Make sure that you are using the latest version.
@@ -78,6 +83,7 @@ This section guides you through submitting an enhancement suggestion for Jolt, *
 - Find out whether your idea fits with the scope and aims of the project. It's up to you to make a strong case to convince the project's developers of the merits of this feature. Keep in mind that we want features that will be useful to the majority of our users and not just a small subset. If you're just targeting a minority of users, consider writing an add-on/plugin library.
 
 <!-- omit in toc -->
+
 #### How Do I Submit a Good Enhancement Suggestion?
 
 Enhancement suggestions are tracked as [GitHub issues](https://www.github.com/vloddot/jolt/issues) or the [Jolt Lounge](https://rvlt.gg/AaCgcvgg) Revolt server.

@@ -1,16 +1,15 @@
 <script lang="ts">
 	import { getContext } from '$lib/context';
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
-	import RoundedImage from '@components/RoundedImage.svelte';
 	import { clientKey, settingsKey } from '@routes/context';
 	import { beforeUpdate, onMount, setContext, tick } from 'svelte';
 	import { writable } from 'svelte/store';
-	import { membersKey, messagesKey, repliesKey, usersKey, type SendableReply } from '.';
-	import XCircle from '$lib/icons/x-circle.svg';
-	import User from '$lib/icons/user.svg';
-	import AtSymbol from '$lib/icons/at-symbol.svg';
-	import Plus from '$lib/icons/plus.svg';
+	import { membersKey, messagesKey, repliesKey, usersKey, type SendableReply, channelKey } from '.';
 	import MessageComponent from './Message.svelte';
+	import XCircleIcon from '@components/Icons/XCircleIcon.svelte';
+	import UserIcon from '@components/Icons/UserIcon.svelte';
+	import SendMessageForm from './SendMessageForm.svelte';
+	import SendableReplyComponent from './SendableReply.svelte';
 
 	/**
 	 * Which channel to show messages from.
@@ -20,9 +19,9 @@
 	const settings = getContext(settingsKey)!;
 	const client = getContext(clientKey)!;
 
-	let messages = writable<Message[]>([]);
-	let members = writable<Member[]>([]);
-	let users = writable<User[]>([]);
+	const messages = writable<Message[]>([]);
+	const members = writable<Member[]>([]);
+	const users = writable<User[]>([]);
 
 	const replies = writable<SendableReply[]>([]);
 
@@ -30,8 +29,8 @@
 	setContext(membersKey, members);
 	setContext(usersKey, users);
 	setContext(repliesKey, replies);
+	setContext(channelKey, channel);
 
-	let messageInputNode: HTMLTextAreaElement;
 	let messagesListNode: HTMLDivElement;
 	let currentlyTypingUsers: User[] = [];
 	let fileUploadNode: HTMLInputElement | null;
@@ -145,80 +144,10 @@
 			});
 		});
 	});
-
-	async function sendMessage() {
-		let attachments: string[] = [];
-		if (fileUploadNode?.files != null) {
-			attachments = await Promise.all(
-				Array.from(fileUploadNode.files).map((file) => client.autumn.uploadFile(file))
-			);
-			fileUploadNode.value = '';
-			files = null;
-		}
-
-		await client.api.sendMessage(channel._id, {
-			content: messageInputNode.value.trim(),
-			replies: $replies.map(({ message: { _id }, mention }) => ({
-				id: _id,
-				mention
-			})),
-			attachments
-		});
-
-		replies.set([]);
-		messageInputNode.value = '';
-	}
-
-	let channelName: string;
-
-	async function updateChannelName(channel: Channel) {
-		if (
-			channel.channel_type == 'TextChannel' ||
-			channel.channel_type == 'VoiceChannel' ||
-			channel.channel_type == 'Group'
-		) {
-			channelName = `#${channel.name}`;
-			return;
-		}
-
-		if (channel.channel_type == 'SavedMessages') {
-			channelName = 'Saved Notes';
-			return;
-		}
-
-		channelName = `@${getDisplayName(
-			await client.api.fetchUser(
-				channel.recipients[0] == client.user?._id ? channel.recipients[1] : channel.recipients[0]
-			)
-		)}`;
-	}
-
-	function endTyping() {
-		if ($settings['jolt:send-typing-indicators']) {
-			client.websocket.send({ type: 'EndTyping', channel: channel._id });
-		}
-	}
-
-	function startTyping() {
-		if ($settings['jolt:send-typing-indicators']) {
-			if (messageInputNode.value == '') {
-				client.websocket.send({ type: 'EndTyping', channel: channel._id });
-				return;
-			}
-
-			client.websocket.send({ type: 'BeginTyping', channel: channel._id });
-		}
-	}
-
-	$: updateChannelName(channel);
 </script>
 
-<main class="main-content-container flex flex-col">
-	<div
-		bind:this={messagesListNode}
-		id="messages-list"
-		class="flex flex-col justify-items-end h-full overflow-x-hidden overflow-y-scroll"
-	>
+<main class="main-content-container">
+	<div bind:this={messagesListNode} class="messages-list">
 		{#each $messages as message}
 			<MessageComponent {message} />
 		{/each}
@@ -243,100 +172,50 @@
 					}
 				}}
 			>
-				<img src={XCircle} alt="Cancel Upload" />
+				<XCircleIcon />
 			</button>
 		</div>
 	{/if}
 	{#each currentlyTypingUsers as user}
 		{@const displayName = getDisplayName(user)}
-		<div>
-			<RoundedImage
-				src={$settings['jolt:low-data-mode'] ? User : getDisplayAvatar(user)}
-				width={16}
-				height={16}
-				name={displayName}
-			/>
+		<div class="typing-indicator">
+			{#if $settings['jolt:low-data-mode']}
+				<UserIcon />
+			{:else}
+				<img
+					class="cover"
+					src={getDisplayAvatar(user)}
+					width="16px"
+					height="16px"
+					alt={displayName}
+				/>
+			{/if}
 			{displayName} is typing...
 		</div>
 	{/each}
 	{#each $replies as reply}
-		{@const user = client.api.fetchUser(reply.message.author)}
-
-		<div class="flex">
-			<p>
-				replying to
-
-				<strong>
-					{#await user then user}
-						{@const displayName = getDisplayName(user)}
-						<RoundedImage src={getDisplayAvatar(user)} name={displayName} />
-						{displayName}
-					{:catch}
-						{@const displayName = '<Unknown User>'}
-						<RoundedImage src={User} name={displayName} />
-						{displayName}
-					{/await}
-				</strong>
-			</p>
-
-			<p class="pl-1 text-gray-600 overflow-ellipsis">{reply.message.content}</p>
-
-			<div class="flex-1" />
-
-			<div class="pr-2">
-				<input id="mention" style="display: none;" type="checkbox" bind:checked={reply.mention} />
-				<label class="cursor-pointer" for="mention">
-					<img src={AtSymbol} class="inline" alt="mention" />
-					{reply.mention ? 'ON' : 'OFF'}
-				</label>
-			</div>
-
-			<div class="pr-2">
-				<button
-					on:click={() =>
-						replies.update((replies) => {
-							replies = replies.filter((r) => r.message._id != reply.message._id);
-							return replies;
-						})}
-				>
-					<img src={XCircle} alt="Cancel mention" />
-				</button>
-			</div>
-		</div>
+		<SendableReplyComponent {reply} />
 	{/each}
-	<form
-		id="message-send-form"
-		on:submit={sendMessage}
-		class="flex bg-gray-500 rounded-xl px-2 pt-2 m-4"
-	>
-		<label for="file-upload" class="cursor-pointer">
-			<img src={Plus} alt="Upload File" />
-		</label>
-		<input
-			id="file-upload"
-			class="opacity-0 w-0 p-1"
-			type="file"
-			multiple
-			max={5}
-			bind:this={fileUploadNode}
-			bind:files
-		/>
-		<textarea
-			on:blur={endTyping}
-			on:input={startTyping}
-			on:keydown={(event) => {
-				if (event.shiftKey || event.key != 'Enter') {
-					return;
-				}
-
-				event.preventDefault();
-
-				sendMessage();
-			}}
-			bind:this={messageInputNode}
-			maxlength="2000"
-			class="outline-none resize-none bg-inherit w-full h-12"
-			placeholder="Send message in {channelName}"
-		/>
-	</form>
+	<SendMessageForm />
 </main>
+
+<style lang="scss">
+	main.main-content-container {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.messages-list {
+		display: flex;
+		flex-direction: column;
+		justify-items: end;
+		height: 100%;
+		overflow-x: hidden;
+		overflow-y: scroll;
+		margin-bottom: 24px;
+	}
+
+	.typing-indicator {
+		margin: 0px 16px;
+	}
+</style>

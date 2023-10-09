@@ -9,4 +9,3 @@ node_modules
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite
-.vscode/settings.json

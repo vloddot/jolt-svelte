@@ -4,12 +4,13 @@
 	import { getAutumnURL, getDisplayAvatar, getDisplayName } from '$lib/util';
 	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
 	import { clientKey, settingsKey } from '@routes/context';
-	import PencilSquare from '$lib/icons/pencil-square.svg';
-	import UserGroup from '$lib/icons/user-group.svg';
-	import Hash from '$lib/icons/hash.svg';
-	import SpeakerWave from '$lib/icons/speaker-wave.svg';
-	import User from '$lib/icons/user.svg';
+	import PencilSquare from '@components/Icons/PencilSquareIcon.svelte';
+	import UserGroup from '@components/Icons/UserGroupIcon.svelte';
+	import Hash from '@components/Icons/HashIcon.svelte';
+	import SpeakerWave from '@components/Icons/SpeakerWaveIcon.svelte';
 	import ChannelItem from './ChannelItem.svelte';
+	import type { ComponentType } from 'svelte';
+	import UserIcon from '@components/Icons/UserIcon.svelte';
 
 	const settings = getContext(settingsKey)!;
 	const client = getContext(clientKey)!;
@@ -17,7 +18,9 @@
 	const selectedChannelID = getContext(selectedChannelIDKey);
 	const selectedServerID = getContext(selectedServerIDKey);
 
-	function getChannelIcon(channel: Exclude<Channel, { channel_type: 'DirectMessage' }>): string {
+	function getChannelIcon(
+		channel: Exclude<Channel, { channel_type: 'DirectMessage' }>
+	): ComponentType | string {
 		if (channel.channel_type == 'SavedMessages') {
 			return PencilSquare;
 		}
@@ -50,32 +53,45 @@
 {#if channel.channel_type == 'DirectMessage'}
 	{#if channel.active}
 		{#await client.api.fetchUser(channel.recipients[0] == client.user?._id ? channel.recipients[1] : channel.recipients[0]) then user}
-			<ChannelItem
-				src={$settings['jolt:low-data-mode'] ? User : getDisplayAvatar(user)}
-				name={getDisplayName(user)}
-				width={32}
-				height={32}
-				href={getChannelHref(channel._id)}
-				selected={$selectedChannelID == channel._id}
-			/>
+			<ChannelItem href={getChannelHref(channel._id)} selected={$selectedChannelID == channel._id}>
+				{@const name = getDisplayName(user)}
+
+				{#if $settings['jolt:low-data-mode']}
+					<UserIcon />
+				{:else}
+					<img class="cover" src={getDisplayAvatar(user)} alt={name} />
+				{/if}
+
+				{name}
+			</ChannelItem>
 		{:catch}
-			<ChannelItem
-				src={User}
-				name="Unknown User"
-				width={32}
-				height={32}
-				href={getChannelHref(channel._id)}
-				selected={$selectedChannelID == channel._id}
-			/>
+			<ChannelItem href={getChannelHref(channel._id)} selected={$selectedChannelID == channel._id}>
+				<UserIcon />
+
+				Unknown User
+			</ChannelItem>
 		{/await}
 	{/if}
 {:else if channel.channel_type == 'TextChannel' || channel.channel_type == 'VoiceChannel' || channel.channel_type == 'Group' || channel.channel_type == 'SavedMessages'}
-	<ChannelItem
-		src={getChannelIcon(channel)}
-		name={channel.channel_type == 'SavedMessages' ? 'Saved Notes' : channel.name}
-		width={24}
-		height={24}
-		href={getChannelHref(channel._id)}
-		selected={$selectedChannelID == channel._id}
-	/>
+	<ChannelItem href={getChannelHref(channel._id)} selected={$selectedChannelID == channel._id}>
+		{@const icon = getChannelIcon(channel)}
+		{@const name = channel.channel_type == 'SavedMessages' ? 'Saved Notes' : channel.name}
+
+		{#if typeof icon == 'string'}
+			<img class="cover" src={icon} alt={name} />
+		{:else}
+			<svelte:component this={icon} />
+		{/if}
+
+		{name}
+	</ChannelItem>
 {/if}
+
+<style>
+	:global(.channel-item) img,
+	:global(.channel-item svg) {
+		width: 24px;
+		height: 24px;
+		padding: 4px;
+	}
+</style>

@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { getContext, setContext } from "$lib/context";
-	import { selectedServerIDKey } from "@routes/(app)/context";
-	import { writable } from "svelte/store";
-	import type { RouteParams } from "./$types";
-	import { page } from "$app/stores";
-	import { serverKey } from "./context";
-	import { clientKey } from "@routes/context";
+	import { getContext, setContext } from '$lib/context';
+	import { selectedServerIDKey } from '@routes/(app)/context';
+	import { writable } from 'svelte/store';
+	import type { RouteParams } from './$types';
+	import { page } from '$app/stores';
+	import { serverKey } from './context';
+	import { clientKey } from '@routes/context';
+	import { onDestroy } from 'svelte';
 
 	const server = writable<Server | undefined>();
 
@@ -22,6 +23,10 @@
 	async function updateServer(sid: string) {
 		server.set(await client.api.fetchServer(sid));
 	}
+
+	onDestroy(() => {
+		selectedServerID.set(undefined);
+	});
 </script>
 
 <slot />

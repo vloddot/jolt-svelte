@@ -3,47 +3,44 @@
 	import { clientKey } from '@routes/context';
 	import { repliesKey, type SendableReply } from '.';
 
-	import RoundedImage from '@components/RoundedImage.svelte';
 	import { getDisplayName, getDisplayAvatar } from '$lib/util';
-	import User from '$lib/icons/user.svg';
-	import AtSymbol from '$lib/icons/at-symbol.svg';
-	import XCircle from '$lib/icons/x-circle.svg';
-
+	import UserIcon from '@components/Icons/UserIcon.svelte';
+	import AtSymbolIcon from '@components/Icons/AtSymbolIcon.svelte';
+	import XCircleIcon from '@components/Icons/XCircleIcon.svelte';
 	export let reply: SendableReply;
 
 	const client = getContext(clientKey)!;
 	const replies = getContext(repliesKey)!;
 </script>
 
-<div class="flex">
+<div class="container">
 	<p>
 		replying to
 		<strong>
 			{#await client.api.fetchUser(reply.message.author) then user}
 				{@const displayName = getDisplayName(user)}
-				<RoundedImage src={getDisplayAvatar(user)} name={displayName} />
+				<img class="cover" src={getDisplayAvatar(user)} alt={displayName} />
 				{displayName}
 			{:catch}
-				{@const displayName = '<Unknown User>'}
-				<RoundedImage src={User} name={displayName} />
-				{displayName}
+				<UserIcon />
+				&lt;UnknownUser&gt;
 			{/await}
 		</strong>
 	</p>
 
-	<p class="pl-1 text-gray-600 overflow-ellipsis">{reply.message.content}</p>
+	<p class="message-content">{reply.message.content}</p>
 
-	<div class="flex-1" />
+	<div class="flex-divider" />
 
-	<div class="pr-2">
+	<div>
 		<input id="mention" style="display: none;" type="checkbox" bind:checked={reply.mention} />
-		<label class="cursor-pointer" for="mention">
-			<img src={AtSymbol} class="inline" alt="mention" />
+		<label class="mention-button" for="mention">
+			<AtSymbolIcon />
 			{reply.mention ? 'ON' : 'OFF'}
 		</label>
 	</div>
 
-	<div class="pr-2">
+	<div>
 		<button
 			on:click={() =>
 				replies.update((replies) => {
@@ -51,7 +48,50 @@
 					return replies;
 				})}
 		>
-			<img src={XCircle} alt="Cancel mention" />
+			<XCircleIcon />
 		</button>
 	</div>
 </div>
+
+<style lang="scss">
+	img.cover {
+		width: 24px;
+		height: 24px;
+	}
+
+	.container {
+		display: flex;
+		align-items: center;
+		background-color: var(--secondary-background);
+		margin: 0px 16px;
+		height: 24px;
+		padding: 8px;
+		gap: 8px;
+		border-top-right-radius: var(--border-radius);
+		border-top-left-radius: var(--border-radius);
+	}
+
+	.message-content {
+		padding-left: 4px;
+		color: var(--tertiary-foreground);
+		text-overflow: ellipsis;
+	}
+
+	.flex-divider {
+		flex: 1;
+	}
+
+	img {
+		width: 16px;
+		height: 16px;
+	}
+
+	.mention-button {
+		cursor: pointer;
+		color: var(--tertiary-foreground);
+
+		&:hover {
+			color: var(--tertiary-foreground);
+		}
+	}
+</style>

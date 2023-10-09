@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { getContext } from '$lib/context';
 	import { getDisplayName } from '$lib/util';
-	import RoundedImage from '@components/RoundedImage.svelte';
+	import PhoneIcon from '@components/Icons/PhoneIcon.svelte';
 	import type { VoiceParticipant } from '@revkit/voice';
 	import { voiceClientKey } from '@routes/context';
-	import Phone from '$lib/icons/phone.svg';
 
 	export let channel: Extract<Channel, { channel_type: 'VoiceChannel' }>;
 
@@ -29,19 +28,19 @@
 
 <div class="main-content-container">
 	<button class="m-2" on:click={() => ($voice.connected ? $voice.disconnect() : connect())}>
-		<img src={Phone} alt={$voice.connected ? 'Leave Call' : 'Join Call'} width={24} height={24} />
+		<PhoneIcon />
 	</button>
 
 	<div class="flex justify-center">
 		{#each participants.values() as { user }}
 			{@const name = getDisplayName(user)}
 			<div class="flex flex-col m-2">
-				<RoundedImage
-					{name}
+				<img
+					class="cover"
+					alt={name}
 					src={user.generateAvatarURL({ max_side: 256 })}
-					width={100}
-					height={100}
-					inline={false}
+					width="100px"
+					height="100px"
 				/>
 				<span class="align-center text-sm">{name}</span>
 			</div>
