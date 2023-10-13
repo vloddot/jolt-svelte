@@ -23,7 +23,14 @@
 		display: flex;
 		align-items: center;
 		transition: background-color 150ms;
-		height: 48px;
+		min-height: 32px;
+
+		:global(img),
+		:global(svg) {
+			width: 24px;
+			height: 24px;
+			padding: 4px;
+		}
 
 		&[data-selected='true'],
 		&:hover {

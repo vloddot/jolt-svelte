@@ -86,12 +86,3 @@
 		{name}
 	</ChannelItem>
 {/if}
-
-<style>
-	:global(.channel-item) img,
-	:global(.channel-item svg) {
-		width: 24px;
-		height: 24px;
-		padding: 4px;
-	}
-</style>

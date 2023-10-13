@@ -42,10 +42,6 @@ export class APIClient {
 			await goto(`${base}/login`);
 		}
 
-		if (!response.ok) {
-			throw response.statusText;
-		}
-
 		return response;
 	}
 
@@ -133,6 +129,17 @@ export class APIClient {
 		return this.req('POST', '/sync/settings/fetch', JSON.stringify({ keys })).then((response) =>
 			response.json()
 		);
+	}
+
+	async setSettings(
+		settings: Record<string, string | boolean | number | object>,
+		timestamp = Date.now()
+	): Promise<void> {
+		for (const [key, value] of Object.entries(settings)) {
+			settings[key] = typeof value == 'string' ? value : JSON.stringify(value);
+		};
+
+		await this.req('POST', `/sync/settings/set?timestamp=${timestamp}`, JSON.stringify(settings));
 	}
 
 	async fetchMembers(server_id: string): Promise<AllMemberResponse> {

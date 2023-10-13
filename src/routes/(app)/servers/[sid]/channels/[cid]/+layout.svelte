@@ -10,7 +10,7 @@
 	import { writable } from 'svelte/store';
 	import type { RouteParams } from './$types';
 	import { channelKey } from './context';
-	import { serverKey } from '../../context';
+	import { serverKey } from '@routes/(app)/servers/[sid]/context';
 	import { onDestroy } from 'svelte';
 
 	const client = getContext(clientKey)!;

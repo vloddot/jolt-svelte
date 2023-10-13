@@ -15,7 +15,7 @@
 
 <div class="container">
 	<p>
-		replying to
+		Replying to
 		<strong>
 			{#await client.api.fetchUser(reply.message.author) then user}
 				{@const displayName = getDisplayName(user)}
@@ -28,17 +28,17 @@
 		</strong>
 	</p>
 
-	<p class="message-content">{reply.message.content}</p>
+	{#if reply.message.content}
+		<p class="message-content">{reply.message.content}</p>
+	{/if}
 
 	<div class="flex-divider" />
 
-	<div>
+	<label class="mention-button" aria-label="Mention author {reply.mention ? 'ON' : 'OFF'}">
 		<input id="mention" style="display: none;" type="checkbox" bind:checked={reply.mention} />
-		<label class="mention-button" for="mention">
-			<AtSymbolIcon />
-			{reply.mention ? 'ON' : 'OFF'}
-		</label>
-	</div>
+		<AtSymbolIcon />
+		{reply.mention ? 'ON' : 'OFF'}
+	</label>
 
 	<div>
 		<button
@@ -85,9 +85,10 @@
 	.mention-button {
 		cursor: pointer;
 		color: var(--tertiary-foreground);
+		transition: color 150ms;
 
 		&:hover {
-			color: var(--tertiary-foreground);
+			color: var(--foreground);
 		}
 	}
 </style>

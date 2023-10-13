@@ -7,7 +7,7 @@
 	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
 	import { clientKey, settingsKey } from '@routes/context';
 	import { onMount } from 'svelte';
-	import { writable } from 'svelte/store';
+	import { get, writable } from 'svelte/store';
 	import HomeIcon from '@components/Icons/HomeIcon.svelte';
 	import PlusIcon from '@components/Icons/PlusIcon.svelte';
 	import Cog6ToothIcon from '@components/Icons/Cog6ToothIcon.svelte';
@@ -54,21 +54,50 @@
 		}
 	});
 
-	client.on('Ready', async (event) => {
+	client.on('Ready', (event) => {
 		servers = event.servers;
+	});
 
-		const result = await client.api.fetchSettings(['ordering']);
+	onMount(async () => {
+		const settingsValue = get(settings);
 
-		if (result.ordering == undefined) {
-			return;
+		for (const key of Object.keys(settingsValue) as (keyof Settings)[]) {
+			const value = localStorage.getItem(key);
+			if (value != null) {
+				settingsValue[key] = JSON.parse(value);
+			}
 		}
 
-		const [revision, ordering] = result.ordering;
+		const serverSettings = await client.api.fetchSettings(Object.keys(settingsValue));
+		const serverSettingsUpdate: Partial<Settings> = {};
 
-		if (revision > Number(localStorage.getItem('revision:ordering')) ?? 0) {
-			localStorage.setItem('revision:ordering', revision.toString());
-			settings.update((settings) => (settings.ordering = JSON.parse(ordering).servers));
+		for (const [key, localValue] of Object.entries(settingsValue) as [
+			keyof Settings,
+			Settings[keyof Settings]
+		][]) {
+			const revisionKey = `revision:${key}`;
+
+			const serverSetting = serverSettings[key];
+			if (serverSetting == undefined) {
+				continue;
+			}
+
+			const [serverRevision, serverValue] = serverSetting;
+			const localRevision = Number(localStorage.getItem(revisionKey) ?? '0');
+
+			if (serverRevision >= localRevision) {
+				localStorage.setItem(revisionKey, serverRevision.toString());
+				localStorage.setItem(key, serverValue);
+				settingsValue[key] = JSON.parse(serverValue);
+			} else {
+				// @ts-expect-error typescript stupid
+				serverSettingsUpdate[key] = localValue;
+			}
 		}
+
+		client.api.setSettings(serverSettingsUpdate);
+		console.log(settingsValue);
+		settings.set(settingsValue);
 	});
 
 	client.on('UserSettingsUpdate', ({ id, update }) => {
@@ -82,8 +111,9 @@
 
 			if (revision > Number(localStorage.getItem(revisionID)) ?? 0) {
 				localStorage.setItem(revisionID, revision.toString());
+				localStorage.setItem(key, value);
 				// @ts-expect-error thinks you can't access with `key`
-				data[key] = value;
+				data[key] = JSON.parse(value);
 			}
 		}
 
@@ -93,17 +123,6 @@
 				settings[key] = value;
 			}
 			return settings;
-		});
-	});
-
-	onMount(() => {
-		const localSettings = localStorage.getItem('settings');
-		if (localSettings != null) {
-			settings.set(JSON.parse(localSettings));
-		}
-
-		settings.subscribe((settings) => {
-			localStorage.setItem('settings', JSON.stringify(settings));
 		});
 	});
 </script>

@@ -2,7 +2,7 @@
 	import { getContext } from '$lib/context';
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
 	import { clientKey, settingsKey } from '@routes/context';
-	import { beforeUpdate, onMount, setContext, tick } from 'svelte';
+	import { beforeUpdate, setContext, tick } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { membersKey, messagesKey, repliesKey, usersKey, type SendableReply, channelKey } from '.';
 	import MessageComponent from './Message.svelte';
@@ -17,14 +17,19 @@
 	 */
 	export let channel: Exclude<Channel, { channel_type: 'VoiceChannel' }>;
 
+	let initialReplies: SendableReply[] = [];
+	export { initialReplies as replies };
+
+	export let messageInput = '';
+	export let files: FileList | null = null;
+
 	const settings = getContext(settingsKey)!;
 	const client = getContext(clientKey)!;
 
 	const messages = writable<Message[]>([]);
 	const members = writable<Member[]>([]);
 	const users = writable<User[]>([]);
-
-	const replies = writable<SendableReply[]>([]);
+	const replies = writable<SendableReply[]>(initialReplies);
 
 	setContext(messagesKey, messages);
 	setContext(membersKey, members);
@@ -32,21 +37,22 @@
 	setContext(repliesKey, replies);
 	setContext(channelKey, channel);
 
-	let messageInput: string;
 	let messagesListNode: HTMLDivElement;
 	let currentlyTypingUsers: User[] = [];
 	let fileInputNode: HTMLInputElement;
-	let files: FileList | null;
 	let channelName = 'Unknown Channel';
+	let messageLoadPromise = Promise.resolve();
 
 	$: {
-		client.api
+		messageLoadPromise = client.api
 			.queryMessages(channel._id, { sort: 'Latest', include_users: true })
 			.then((response) => {
 				if (Array.isArray(response)) {
-					messages.set(response.reverse());
+					const value = response.reverse();
+					messages.set(value);
 				} else {
-					messages.set(response.messages.reverse());
+					const messagesValue = response.messages.reverse();
+					messages.set(messagesValue);
 					users.set(response.users);
 					members.set(response.members ?? []);
 				}
@@ -125,49 +131,47 @@
 		messageInput = '';
 	}
 
-	onMount(() => {
-		client.on('Message', (message) => {
-			if (message.channel != channel._id) {
-				return;
-			}
+	client.on('Message', (message) => {
+		if (message.channel != channel._id) {
+			return;
+		}
 
-			client.api.ackMessage(channel._id, message._id);
-			messages.update((messages) => {
-				messages.push(message);
-				return messages;
-			});
+		client.api.ackMessage(channel._id, message._id);
+		messages.update((messages) => {
+			messages.push(message);
+			return messages;
 		});
+	});
 
-		client.on('MessageDelete', ({ id, channel: channel_id }) => {
-			if (channel_id != channel._id) {
-				return;
+	client.on('MessageDelete', ({ id, channel: channel_id }) => {
+		if (channel_id != channel._id) {
+			return;
+		}
+
+		messages.update((messages) => messages.filter((message) => message._id != id));
+	});
+
+	client.on('MessageUpdate', ({ id, channel: channel_id, data }) => {
+		if (channel_id != channel._id) {
+			return;
+		}
+
+		messages.update((messages) => {
+			const index = messages.findIndex((message) => message._id == id);
+			const message = messages[index];
+
+			if (data.content != undefined) {
+				message.content = data.content;
 			}
 
-			messages.update((messages) => messages.filter((message) => message._id != id));
-		});
-
-		client.on('MessageUpdate', ({ id, channel: channel_id, data }) => {
-			if (channel_id != channel._id) {
-				return;
+			if (data.embeds != undefined) {
+				message.embeds = data.embeds;
 			}
 
-			messages.update((messages) => {
-				const index = messages.findIndex((message) => message._id == id);
-				const message = messages[index];
+			message.edited = data.edited;
 
-				if (data.content != undefined) {
-					message.content = data.content;
-				}
-
-				if (data.embeds != undefined) {
-					message.embeds = data.embeds;
-				}
-
-				message.edited = data.edited;
-
-				messages[index] = message;
-				return messages;
-			});
+			messages[index] = message;
+			return messages;
 		});
 	});
 
@@ -198,9 +202,14 @@
 
 <main class="main-content-container">
 	<div bind:this={messagesListNode} class="messages-list">
-		{#each $messages as message}
-			<MessageComponent {message} />
-		{/each}
+		{#await messageLoadPromise}
+			<!-- TODO: make it look better lol -->
+			Loading...
+		{:then}
+			{#each $messages as message}
+				<MessageComponent {message} />
+			{/each}
+		{/await}
 	</div>
 	{#if files != null && files.length != 0}
 		<div class="file-uploads">

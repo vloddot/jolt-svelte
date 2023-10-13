@@ -10,7 +10,7 @@
 	import VoiceClientBrowser, { DEFAULT_CONSUMER } from '@revkit/voice/browser';
 	import '$lib/i18n';
 
-	const settings = writable<Settings>(DEFAULT_SETTINGS);
+	const settings = writable(DEFAULT_SETTINGS);
 	setContext(settingsKey, settings);
 
 	const session = writable<Session | null>(JSON.parse(localStorage.getItem('session') || 'null'));
