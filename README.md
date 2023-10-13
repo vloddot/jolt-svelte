@@ -71,7 +71,7 @@ pnpm run dev # you can also adapt your favorite package manager
 ## Links
 
 - [Reywen-Revolt](https://github.com/Toastxc/Reywen-Revolt)
-- [Jolt Development Server on Revolt](https://rvlt.gg/AaCgcvgg)
+- [Jolt Support Server on Revolt](https://rvlt.gg/a55AyxeD)
 - [Tauri](https://tauri.app)
 - [Svelte](https://svelte.dev)
 - [SvelteKit](https://kit.svelte.dev)
