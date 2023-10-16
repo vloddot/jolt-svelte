@@ -96,7 +96,6 @@
 		}
 
 		client.api.setSettings(serverSettingsUpdate);
-		console.log(settingsValue);
 		settings.set(settingsValue);
 	});
 

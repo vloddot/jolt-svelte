@@ -20,8 +20,7 @@
 	$: selectedServerID.set(undefined);
 	$: selectedChannelID.set(pageParams.id);
 
-	let dms: Exclude<Channel, { channel_type: 'TextChannel' | 'VoiceChannel' }>[] | undefined =
-		undefined;
+	let dms: Exclude<Channel, { channel_type: 'TextChannel' | 'VoiceChannel' }>[] = [];
 
 	$: savedMessagesChannel = dms?.find((channel) => channel.channel_type == 'SavedMessages');
 
@@ -30,7 +29,7 @@
 			['DirectMessage', 'Group', 'SavedMessages'].includes(channel.channel_type)
 		) as typeof dms;
 
-		if ((dms?.length ?? 0) == 0 && client.ready) {
+		if ((dms.length ?? 0) == 0 && client.ready) {
 			client.api.fetchDirectMessages().then((result) => (dms = result));
 		}
 	}

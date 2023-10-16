@@ -3,7 +3,6 @@
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
 	import MessageReply from '@components/Chat/MessageReply.svelte';
 	import { selectedServerIDKey } from '@routes/(app)/context';
-	import { date, time } from 'svelte-i18n';
 	import { decodeTime } from 'ulid';
 	import { getUser, membersKey, messagesKey, repliesKey, usersKey } from '.';
 	import UserIcon from '@components/Icons/UserIcon.svelte';
@@ -19,24 +18,31 @@
 	import 'tippy.js/dist/tippy.css';
 	import 'tippy.js/animations/shift-away-subtle.css';
 	import MessageForm from './MessageForm.svelte';
+	import { get } from 'svelte/store';
+	import dayjs from 'dayjs';
+	import calendar from 'dayjs/plugin/calendar';
+
+	dayjs.extend(calendar);
 
 	/**
 	 * Message to show.
 	 */
 	export let message: Message;
 
+	export let messageIndex: number;
+
 	let messageContentToEdit: string | undefined = undefined;
 	let author: User | undefined = undefined;
 	let member: Member | undefined = undefined;
 
-	let settings = getContext(settingsKey)!;
-	let client = getContext(clientKey)!;
-	let selectedServerID = getContext(selectedServerIDKey);
+	const settings = getContext(settingsKey)!;
+	const client = getContext(clientKey)!;
+	const selectedServerID = getContext(selectedServerIDKey);
 
-	let messages = getContext(messagesKey);
-	let users = getContext(usersKey);
-	let members = getContext(membersKey);
-	let replies = getContext(repliesKey);
+	const messages = getContext(messagesKey);
+	const users = getContext(usersKey);
+	const members = getContext(membersKey);
+	const replies = getContext(repliesKey);
 
 	interface MessageControls {
 		src: ComponentType | string;
@@ -91,6 +97,24 @@
 			messages[messages.findIndex((v) => v._id == message._id)] = editedMessage;
 			return messages;
 		});
+
+		messageContentToEdit = undefined;
+	}
+
+	function isHead(message: Message): boolean {
+		if (messages == undefined) {
+			return true;
+		}
+
+		const messagesValue = get(messages);
+
+		const lastMessage = messagesValue[messageIndex - 1];
+
+		if (lastMessage == undefined) {
+			return true;
+		}
+
+		return message.author != lastMessage.author;
 	}
 
 	$: getUser(client.api, $users ?? client.api.cache.users, message.author).then(
@@ -111,32 +135,42 @@
 	{/if}
 
 	<div class="user-detail">
-		{#if !$settings['jolt:compact-mode']}
-			{#if $settings['jolt:low-data-mode'] || author == undefined}
-				<UserIcon />
-			{:else}
-				{@const displayAvatar = getDisplayAvatar(author, member, message)}
-				{#if displayAvatar == undefined}
+		{#if isHead(message)}
+			{#if !$settings['jolt:compact-mode']}
+				{#if $settings['jolt:low-data-mode'] || author == undefined}
 					<UserIcon />
 				{:else}
-					<img class="cover" alt={displayName} src={displayAvatar} width="40px" height="40px" />
+					{@const displayAvatar = getDisplayAvatar(author, member, message)}
+					{#if displayAvatar == undefined}
+						<UserIcon />
+					{:else}
+						<img class="cover" alt={displayName} src={displayAvatar} width="40px" height="40px" />
+					{/if}
 				{/if}
 			{/if}
+
+			{displayName}
+
+			<p class="timestamp">
+				{dayjs().calendar(timestamp)}
+
+				{#if message.edited != undefined}
+					{@const timestamp = new Date(message.edited)}
+					<span
+						class="timestamp"
+						use:tippy={{
+							placement: 'top',
+							content: dayjs().calendar(timestamp),
+							theme: 'message-controls',
+							animation: 'shift-away-subtle',
+							duration: 100
+						}}
+					>
+						(edited)
+					</span>
+				{/if}
+			</p>
 		{/if}
-
-		{displayName}
-
-		<p class="timestamp">
-			[{$date(timestamp)}
-			{$time(timestamp)}]
-
-			{#if message.edited != undefined}
-				{@const timestamp = new Date(message.edited)}
-				[edited
-				{$date(timestamp)}
-				{$time(timestamp)}]
-			{/if}
-		</p>
 
 		<div class="flex-divider" />
 
@@ -175,7 +209,6 @@
 			<MessageForm
 				bind:value={messageContentToEdit}
 				on:keydown={(event) => {
-					console.log(event);
 					if (event.detail.key == 'Escape') {
 						messageContentToEdit = undefined;
 					}
@@ -226,6 +259,7 @@
 
 			.timestamp {
 				color: var(--tertiary-foreground);
+				font-size: 12px;
 			}
 
 			.message-controls {

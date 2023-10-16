@@ -206,8 +206,8 @@
 			<!-- TODO: make it look better lol -->
 			Loading...
 		{:then}
-			{#each $messages as message}
-				<MessageComponent {message} />
+			{#each $messages as message, messageIndex}
+				<MessageComponent {message} {messageIndex} />
 			{/each}
 		{/await}
 	</div>

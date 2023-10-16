@@ -52,7 +52,16 @@
 
 {#if channel.channel_type == 'DirectMessage'}
 	{#if channel.active}
-		{#await client.api.fetchUser(channel.recipients[0] == client.user?._id ? channel.recipients[1] : channel.recipients[0]) then user}
+		{@const user = client.api.cache.users.get(
+			channel.recipients[0] == client.user?._id ? channel.recipients[1] : channel.recipients[0]
+		)}
+		{#if user == undefined}
+			<ChannelItem href={getChannelHref(channel._id)} selected={$selectedChannelID == channel._id}>
+				<UserIcon />
+
+				Unknown User
+			</ChannelItem>
+		{:else}
 			<ChannelItem href={getChannelHref(channel._id)} selected={$selectedChannelID == channel._id}>
 				{@const name = getDisplayName(user)}
 
@@ -64,13 +73,7 @@
 
 				{name}
 			</ChannelItem>
-		{:catch}
-			<ChannelItem href={getChannelHref(channel._id)} selected={$selectedChannelID == channel._id}>
-				<UserIcon />
-
-				Unknown User
-			</ChannelItem>
-		{/await}
+		{/if}
 	{/if}
 {:else if channel.channel_type == 'TextChannel' || channel.channel_type == 'VoiceChannel' || channel.channel_type == 'Group' || channel.channel_type == 'SavedMessages'}
 	<ChannelItem href={getChannelHref(channel._id)} selected={$selectedChannelID == channel._id}>

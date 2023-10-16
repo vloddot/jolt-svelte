@@ -217,6 +217,8 @@ export class APIClient {
 			const result: User = await this.req('GET', `/users/${id}`).then((response) =>
 				response.json()
 			);
+
+
 			this.cache.users.set(result._id, result);
 			return result;
 		}
