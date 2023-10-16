@@ -24,10 +24,10 @@
 
 	let servers = Array.from(client.api.cache.servers.values());
 
-	settings.subscribe((settings) => {
-		servers = servers.sort((a, b) => {
-			const aIndex = settings.ordering.servers?.indexOf(a._id) ?? -1;
-			const bIndex = settings.ordering.servers?.indexOf(b._id) ?? -1;
+	function sortServers(servers: Server[], ordering: string[]) {
+		return servers.sort((a, b) => {
+			const aIndex = ordering.indexOf(a._id) ?? -1;
+			const bIndex = ordering.indexOf(b._id) ?? -1;
 
 			// sort unordered servers to put them at the bottom
 			if (bIndex == -1) {
@@ -40,6 +40,10 @@
 
 			return aIndex - bIndex;
 		});
+	}
+
+	settings.subscribe((settings) => {
+		servers = sortServers(servers, settings.ordering.servers ?? []);
 	});
 
 	client.on('ServerCreate', () => {
@@ -55,7 +59,7 @@
 	});
 
 	client.on('Ready', (event) => {
-		servers = event.servers;
+		servers = sortServers(event.servers, $settings.ordering.servers ?? []);
 	});
 
 	onMount(async () => {
@@ -152,30 +156,28 @@
 			{/await}
 		{/if}
 
-		{#if servers != undefined}
-			{#each servers as server}
-				<ServerSidebarIcon
-					href="{base}/servers/{server._id}/channels/{server.channels[0]}"
-					tooltip={server.name}
-					selected={$selectedServerID == server._id}
-				>
-					{#if server.icon == undefined || $settings['jolt:low-data-mode']}
-						{server.name
-							.split(' ')
-							.map((s) => s[0])
-							.join('')}
-					{:else}
-						<img
-							class="cover"
-							src={getAutumnURL(server.icon, { max_side: '256' })}
-							alt={server.name}
-							width="48px"
-							height="48px"
-						/>
-					{/if}
-				</ServerSidebarIcon>
-			{/each}
-		{/if}
+		{#each servers as server}
+			<ServerSidebarIcon
+				href="{base}/servers/{server._id}/channels/{server.channels[0]}"
+				tooltip={server.name}
+				selected={$selectedServerID == server._id}
+			>
+				{#if server.icon == undefined || $settings['jolt:low-data-mode']}
+					{server.name
+						.split(' ')
+						.map((s) => s[0])
+						.join('')}
+				{:else}
+					<img
+						class="cover"
+						src={getAutumnURL(server.icon, { max_side: '256' })}
+						alt={server.name}
+						width="48px"
+						height="48px"
+					/>
+				{/if}
+			</ServerSidebarIcon>
+		{/each}
 		<ServerSidebarIcon
 			selected={$page.route.id == '/(app)/servers/create'}
 			href="{base}/servers/create"
