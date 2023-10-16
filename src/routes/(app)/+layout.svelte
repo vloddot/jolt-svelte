@@ -47,11 +47,14 @@
 	});
 
 	client.on('ServerCreate', () => {
-		servers = Array.from(client.api.cache.servers.values());
+		servers = sortServers(
+			Array.from(client.api.cache.servers.values()),
+			$settings.ordering.servers ?? []
+		);
 	});
 
 	client.on('ServerDelete', async ({ id }) => {
-		servers = Array.from(client.api.cache.servers.values());
+		servers = sortServers(Array.from(client.api.cache.servers.values()), $settings.ordering.servers ?? []);
 
 		if ($selectedServerID == id) {
 			await goto(`${base}/`);
