@@ -108,20 +108,21 @@
 
 		const messagesValue = get(messages);
 
-		const lastMessage = messagesValue[messageIndex - 1];
+		const lastMessage = messagesValue.at(messageIndex - 1);
 
-		if (lastMessage == undefined) {
-			return true;
-		}
-
-		return message.author != lastMessage.author;
+		return (
+			message.author != lastMessage?.author ||
+			message.masquerade != lastMessage?.masquerade ||
+			decodeTime(message._id) - decodeTime(lastMessage?._id ?? '0'.repeat(26)) >= 7 * 60 * 1000 ||
+			(message.replies?.length ?? 0) != 0
+		);
 	}
 
 	$: getUser(client.api, $users ?? client.api.cache.users, message.author).then(
 		(user) => (author = user)
 	);
 	$: $selectedServerID == undefined ? undefined : updateMember($selectedServerID, message.author);
-	$: displayName = getDisplayName(author, member, message);
+	$: displayName = author == undefined ? 'Unknown User' : getDisplayName(author, member, message);
 	$: timestamp = decodeTime(message._id);
 </script>
 
@@ -134,8 +135,8 @@
 		</div>
 	{/if}
 
-	<div class="user-detail">
-		{#if isHead(message)}
+	{#if isHead(message)}
+		<div class="user-detail">
 			{#if !$settings['jolt:compact-mode']}
 				{#if $settings['jolt:low-data-mode'] || author == undefined}
 					<UserIcon />
@@ -152,7 +153,7 @@
 			{displayName}
 
 			<p class="timestamp">
-				{dayjs().calendar(timestamp)}
+				{dayjs(timestamp).calendar()}
 
 				{#if message.edited != undefined}
 					{@const timestamp = new Date(message.edited)}
@@ -160,8 +161,8 @@
 						class="timestamp"
 						use:tippy={{
 							placement: 'top',
-							content: dayjs().calendar(timestamp),
-							theme: 'message-controls',
+							content: dayjs(timestamp).calendar(),
+							theme: 'top-tooltip',
 							animation: 'shift-away-subtle',
 							duration: 100
 						}}
@@ -170,34 +171,8 @@
 					</span>
 				{/if}
 			</p>
-		{/if}
-
-		<div class="flex-divider" />
-
-		<div class="message-controls">
-			{#each controls as { src, name, onclick, showIf }}
-				{#if showIf?.(message) ?? true}
-					<button
-						aria-label={name}
-						on:click={() => onclick(message)}
-						use:tippy={{
-							placement: 'top',
-							content: name,
-							theme: 'message-controls',
-							animation: 'shift-away-subtle',
-							duration: 100
-						}}
-					>
-						{#if typeof src == 'string'}
-							<img width="16px" height="16px" {src} alt={name} />
-						{:else}
-							<svelte:component this={src} />
-						{/if}
-					</button>
-				{/if}
-			{/each}
 		</div>
-	</div>
+	{/if}
 
 	{#if messageContentToEdit != undefined}
 		<form
@@ -261,29 +236,6 @@
 				color: var(--tertiary-foreground);
 				font-size: 12px;
 			}
-
-			.message-controls {
-				display: none;
-			}
 		}
-
-		&:hover {
-			.message-controls {
-				display: flex;
-
-				button {
-					border-radius: 0px;
-				}
-			}
-		}
-	}
-
-	:global(.tippy-box[data-theme='message-controls']) {
-		background-color: black;
-		border-radius: var(--border-radius);
-	}
-
-	:global(.tippy-box[data-theme='message-controls'] > .tippy-arrow::before) {
-		border-top-color: black;
 	}
 </style>

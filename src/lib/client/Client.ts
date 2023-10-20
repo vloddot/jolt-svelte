@@ -8,9 +8,10 @@ export type Events<T extends { type: string | number | symbol }> = {
 };
 
 export class Client extends EventEmitter<Events<ServerMessage>> {
-	api: APIClient = new APIClient();
-	websocket: WebSocketClient = new WebSocketClient();
-	autumn: AutumnClient = new AutumnClient();
+	api = new APIClient();
+	websocket = new WebSocketClient();
+	autumn = new AutumnClient();
+	unreads = new Map<ChannelUnread['_id']['channel'], ChannelUnread>();
 	user: User | undefined = undefined;
 
 	get ready(): boolean {
@@ -22,6 +23,12 @@ export class Client extends EventEmitter<Events<ServerMessage>> {
 		this.websocket.authenticate(token);
 
 		this.api.fetchUser('@me').then((user) => (this.user = user));
+		this.api
+			.fetchUnreads()
+			.then(
+				(unreads) => (this.unreads = new Map(unreads.map((unread) => [unread._id.channel, unread])))
+			);
+
 		this.websocket.on('serverEvent', (event) => this.#handleEvent(event));
 	}
 

@@ -10,12 +10,7 @@
 	{#if type == 'textarea'}
 		<textarea {placeholder} bind:value />
 	{:else}
-		<input
-			{type}
-			{placeholder}
-			{value}
-			on:input={(event) => (value = event.currentTarget.value)}
-		/>
+		<input {type} {placeholder} {value} on:input={(event) => (value = event.currentTarget.value)} />
 	{/if}
 
 	{#if description != undefined}

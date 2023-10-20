@@ -54,7 +54,10 @@
 	});
 
 	client.on('ServerDelete', async ({ id }) => {
-		servers = sortServers(Array.from(client.api.cache.servers.values()), $settings.ordering.servers ?? []);
+		servers = sortServers(
+			Array.from(client.api.cache.servers.values()),
+			$settings.ordering.servers ?? []
+		);
 
 		if ($selectedServerID == id) {
 			await goto(`${base}/`);
@@ -143,7 +146,7 @@
 			>
 				<HomeIcon />
 			</ServerSidebarIcon>
-			<hr class="border-gray-600 mx-4" />
+			<hr />
 		{:else}
 			{#await client.user ?? client.api.fetchUser('@me') then user}
 				<ServerSidebarIcon
@@ -152,10 +155,10 @@
 					ariaLabel="Home"
 					tooltip="{user.username}#{user.discriminator}"
 				>
-					<img class="cover" src={getDisplayAvatar(user)} alt="Home" width="48px" height="48px" />
+					<img class="cover" src={getDisplayAvatar(user)} alt="Home" width="42px" height="42px" />
 				</ServerSidebarIcon>
 
-				<hr class="border-gray-600 mx-4" />
+				<hr />
 			{/await}
 		{/if}
 
@@ -175,8 +178,8 @@
 						class="cover"
 						src={getAutumnURL(server.icon, { max_side: '256' })}
 						alt={server.name}
-						width="48px"
-						height="48px"
+						width="42px"
+						height="42px"
 					/>
 				{/if}
 			</ServerSidebarIcon>
@@ -215,7 +218,7 @@
 	}
 
 	.server-sidebar-container {
-		width: 72px;
+		width: 64px;
 		height: 100vh;
 		display: flex;
 		align-items: center;

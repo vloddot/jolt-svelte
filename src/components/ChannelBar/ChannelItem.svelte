@@ -8,9 +8,14 @@
 	 * Whether this channel is selected or not.
 	 */
 	export let selected: boolean;
+
+	/**
+	 * Whether this channel is unread or not.
+	 */
+	export let unread = false;
 </script>
 
-<a {href} class="channel-item" data-selected={selected}>
+<a {href} class="channel-item" data-selected={selected} data-unread={unread}>
 	<slot />
 </a>
 
@@ -20,6 +25,7 @@
 		gap: 8px;
 		padding: 0px 8px;
 		border-radius: var(--border-radius);
+		color: var(--tertiary-foreground);
 		display: flex;
 		align-items: center;
 		transition: background-color 150ms;
@@ -35,6 +41,7 @@
 		&[data-selected='true'],
 		&:hover {
 			background-color: var(--hover);
+			color: var(--foreground);
 		}
 
 		&::before {
@@ -48,8 +55,12 @@
 			transition: height 150ms;
 		}
 
+		&[data-unread='true']::before {
+			height: 4px;
+		}
+
 		&:hover::before {
-			height: 8px;
+			height: 10px;
 		}
 
 		&[data-selected='true']::before {

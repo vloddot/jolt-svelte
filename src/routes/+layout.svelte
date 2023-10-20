@@ -60,6 +60,7 @@
 		--hover: rgba(255, 255, 255, 0.075);
 		--scrollbar-track: transparent;
 		--scrollbar-thumb: #2469b2;
+		--error: #d2373d;
 		--scrollbar-thickness: 5px;
 		--border-radius: 6px;
 	}
@@ -67,7 +68,8 @@
 	:global(body) {
 		background-color: var(--background);
 		caret-color: var(--accent);
-		font-family: 'Open Sans', sans-serif;
+		font-family: sans-serif;
+		font-size: 14px;
 		overflow-x: scroll;
 		margin: 0;
 	}
@@ -107,6 +109,10 @@
 		flex: 1;
 	}
 
+	:global(.danger) {
+		color: var(--error);
+	}
+
 	:global(input, textarea, button) {
 		background-color: var(--secondary-background);
 		color: var(--secondary-foreground);
@@ -134,5 +140,18 @@
 
 	:global(*) {
 		color: var(--foreground);
+	}
+
+	:global(.tippy-box) {
+		background-color: black !important;
+		border-radius: var(--border-radius) !important;
+	}
+
+	:global(.tippy-box[data-theme='top-tooltip'] > .tippy-arrow::before) {
+		border-top-color: black !important;
+	}
+
+	:global(.tippy-box[data-theme='right-tooltip'] > .tippy-arrow::before) {
+		border-right-color: black !important;
 	}
 </style>

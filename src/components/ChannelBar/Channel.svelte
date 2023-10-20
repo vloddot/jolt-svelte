@@ -40,6 +40,13 @@
 	}
 
 	export let channel: Channel;
+	let unread = client.unreads.get(channel._id) != undefined;
+
+	client.on('ChannelAck', (event) => {
+		event.id;
+	});
+
+	$: console.log(client.unreads.get('01H8VPT9A6KAB9YXV97DDWS419'));
 
 	function getChannelHref(id: string): string {
 		return `${base}/${
@@ -56,13 +63,21 @@
 			channel.recipients[0] == client.user?._id ? channel.recipients[1] : channel.recipients[0]
 		)}
 		{#if user == undefined}
-			<ChannelItem href={getChannelHref(channel._id)} selected={$selectedChannelID == channel._id}>
+			<ChannelItem
+				href={getChannelHref(channel._id)}
+				selected={$selectedChannelID == channel._id}
+				{unread}
+			>
 				<UserIcon />
 
 				Unknown User
 			</ChannelItem>
 		{:else}
-			<ChannelItem href={getChannelHref(channel._id)} selected={$selectedChannelID == channel._id}>
+			<ChannelItem
+				href={getChannelHref(channel._id)}
+				selected={$selectedChannelID == channel._id}
+				{unread}
+			>
 				{@const name = getDisplayName(user)}
 
 				{#if $settings['jolt:low-data-mode']}
@@ -76,7 +91,11 @@
 		{/if}
 	{/if}
 {:else if channel.channel_type == 'TextChannel' || channel.channel_type == 'VoiceChannel' || channel.channel_type == 'Group' || channel.channel_type == 'SavedMessages'}
-	<ChannelItem href={getChannelHref(channel._id)} selected={$selectedChannelID == channel._id}>
+	<ChannelItem
+		href={getChannelHref(channel._id)}
+		selected={$selectedChannelID == channel._id}
+		{unread}
+	>
 		{@const icon = getChannelIcon(channel)}
 		{@const name = channel.channel_type == 'SavedMessages' ? 'Saved Notes' : channel.name}
 

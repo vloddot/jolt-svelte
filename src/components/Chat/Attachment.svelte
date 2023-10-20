@@ -45,3 +45,10 @@
 		{/if}
 	{/if}
 </div>
+
+<style lang="scss">
+	img, video {
+		max-width: 400px;
+		max-height: 300px;
+	}
+</style>

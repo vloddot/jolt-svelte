@@ -131,30 +131,32 @@
 	}
 </script>
 
-<form id="login-form" class="login-base" on:submit|preventDefault={login}>
-	<h1>Jolt &#x26A1;</h1>
+<div class="login-position">
+	<form id="login-form" class="login-base" on:submit|preventDefault={login}>
+		<h1>Jolt &#x26A1;</h1>
 
-	<input type="email" placeholder="Email" bind:value={email} />
-	<input type="password" placeholder="Password" bind:value={password} />
+		<input type="email" placeholder="Email" bind:value={email} />
+		<input type="password" placeholder="Password" bind:value={password} />
 
-	<p>
-		Optionally, if your account uses MFA, use one of these methods, including the previous email and
-		password as well
-	</p>
+		<p>
+			Optionally, if your account uses MFA, use one of these methods, including the previous email
+			and password as well
+		</p>
 
-	{#each mfaMethods as [method, value]}
-		<input type="text" placeholder={displayMfaMethod(method)} bind:value />
-	{/each}
+		{#each mfaMethods as [method, value]}
+			<input type="text" placeholder={displayMfaMethod(method)} bind:value />
+		{/each}
 
-	<label>
-		Remember me <input type="checkbox" bind:checked={rememberMe} />
-	</label>
+		<label>
+			Remember me <input type="checkbox" bind:checked={rememberMe} />
+		</label>
 
-	<button type="submit">Login</button>
-	{#if error}
-		<p>{error}</p>
-	{/if}
-</form>
+		<button type="submit">Login</button>
+		{#if error}
+			<p>{error}</p>
+		{/if}
+	</form>
+</div>
 
 <svelte:head>
 	<title>{TITLE}</title>
@@ -166,12 +168,18 @@
 		margin-bottom: 8px;
 	}
 
+	.login-position {
+		display: flex;
+		height: 100vh;
+		align-items: center;
+	}
+
 	.login-base {
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		width: 400px;
-		margin: 70px 70px;
+		margin-left: 5%;
 		border-left: solid var(--accent);
 		border-radius: var(--border-radius);
 		padding: 20px;

@@ -14,9 +14,16 @@
 	export let ariaLabel: string | undefined = undefined;
 
 	export let selected: boolean;
+
+	export let unread = false;
 </script>
 
-<div class="server-sidebar-icon-base" data-selected={selected} aria-selected={selected}>
+<div
+	class="server-sidebar-icon-base"
+	data-selected={selected}
+	data-unread={unread}
+	aria-selected={selected}
+>
 	<a
 		{href}
 		tabindex="0"
@@ -25,7 +32,7 @@
 		use:tippy={{
 			placement: 'right',
 			content: tooltip,
-			theme: 'server-sidebar-icon',
+			theme: 'right-tooltip',
 			animation: 'scale-subtle',
 			duration: 100,
 			onShow() {
@@ -38,19 +45,9 @@
 </div>
 
 <style lang="scss">
-	:global(.tippy-box[data-theme='server-sidebar-icon']) {
-		background-color: black;
-		padding: 5px;
-		border-radius: var(--border-radius);
-	}
-
-	:global(.tippy-box[data-theme='server-sidebar-icon'] > .tippy-arrow::before) {
-		border-right-color: black;
-	}
-
 	.server-sidebar-icon-base {
 		position: relative;
-		margin: 8px 0;
+		margin: 4px 0;
 		justify-content: center;
 		align-items: center;
 		display: flex;
@@ -68,22 +65,26 @@
 			transition: height 150ms;
 		}
 
+		&[data-unread='true']::before {
+			height: 8px;
+		}
+
 		&:has(.server-sidebar-icon:hover, .server-sidebar-icon:focus)[data-selected='false']::before {
 			height: 16px;
 		}
 
 		&[data-selected='true']::before {
-			height: 48px;
+			height: 42px;
 		}
 
 		.server-sidebar-icon {
 			background-color: var(--secondary-background);
 			border-radius: 100%;
-			width: 48px;
+			width: 42px;
 			justify-content: center;
 			align-items: center;
 			display: flex;
-			min-height: 48px;
+			min-height: 42px;
 		}
 
 		.server-sidebar-icon,

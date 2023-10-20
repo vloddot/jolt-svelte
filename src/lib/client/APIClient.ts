@@ -131,13 +131,17 @@ export class APIClient {
 		);
 	}
 
+	async fetchUnreads(): Promise<ChannelUnread[]> {
+		return this.req('GET', '/sync/unreads').then((response) => response.json());
+	}
+
 	async setSettings(
 		settings: Record<string, string | boolean | number | object>,
 		timestamp = Date.now()
 	): Promise<void> {
 		for (const [key, value] of Object.entries(settings)) {
 			settings[key] = typeof value == 'string' ? value : JSON.stringify(value);
-		};
+		}
 
 		await this.req('POST', `/sync/settings/set?timestamp=${timestamp}`, JSON.stringify(settings));
 	}
@@ -217,7 +221,6 @@ export class APIClient {
 			const result: User = await this.req('GET', `/users/${id}`).then((response) =>
 				response.json()
 			);
-
 
 			this.cache.users.set(result._id, result);
 			return result;

@@ -24,18 +24,12 @@ export function getDefaultUserAvatar(user_id: string): string {
 }
 
 export function getDisplayName(
-	user?: Partial<{ display_name: string; username: string }>,
+	user: { display_name?: string; username: string },
 	member?: Member,
 	message?: Message
 ): string {
 	if (message?.system == undefined) {
-		return (
-			message?.masquerade?.name ??
-			member?.nickname ??
-			user?.display_name ??
-			user?.username ??
-			'Unknown User'
-		);
+		return message?.masquerade?.name ?? member?.nickname ?? user?.display_name ?? user.username;
 	}
 
 	return 'System Message';

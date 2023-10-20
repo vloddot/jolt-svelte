@@ -2,7 +2,7 @@
 	import { getContext } from '$lib/context';
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
 	import { clientKey, settingsKey } from '@routes/context';
-	import { beforeUpdate, setContext, tick } from 'svelte';
+	import { setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { membersKey, messagesKey, repliesKey, usersKey, type SendableReply, channelKey } from '.';
 	import MessageComponent from './Message.svelte';
@@ -61,22 +61,6 @@
 		replies.set([]);
 		currentlyTypingUsers = [];
 	}
-
-	beforeUpdate(() => {
-		if (!messagesListNode) {
-			return;
-		}
-
-		// autoscroll when new messages are added
-		if (
-			messagesListNode.offsetHeight + messagesListNode.scrollTop >
-			messagesListNode.scrollHeight - 20
-		) {
-			tick().then(() => {
-				messagesListNode.scrollTo(0, messagesListNode.scrollHeight);
-			});
-		}
-	});
 
 	async function listenToTypingEvents(receive: boolean) {
 		if (!receive) {

@@ -11,6 +11,6 @@
 	{#if $channel.channel_type == 'VoiceChannel'}
 		<VoiceChat channel={$channel} />
 	{:else}
-		<TextChat channel={$channel}  />
+		<TextChat channel={$channel} />
 	{/if}
 {/if}

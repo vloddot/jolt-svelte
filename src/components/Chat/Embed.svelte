@@ -18,12 +18,7 @@
 {:else if embed.type == 'Text'}
 	<div class="text-embed" style="border-left: solid {embed.colour}">
 		{#if embed.icon_url && !$settings['jolt:low-data-mode']}
-			<img
-				src={embed.icon_url}
-				alt={embed.title}
-				width="24"
-				height="24"
-			/>
+			<img src={embed.icon_url} alt={embed.title} width="24" height="24" />
 		{/if}
 
 		{#if embed.title}

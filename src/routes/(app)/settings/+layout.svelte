@@ -15,21 +15,26 @@
 		<SettingsSection {section} />
 	{/each}
 
-	<hr class="my-2 mr-2 border-gray-500" />
+	<hr />
 
-	<div class="hover:bg-gray-600">
-		<button
-			class="w-full text-start"
-			on:click={async () => {
-				await client.destroy();
-				session.set(null);
-			}}
-		>
-			Logout
-		</button>
-	</div>
+	<button
+		class="button danger"
+		on:click={async () => {
+			await client.destroy();
+			session.set(null);
+		}}
+	>
+		Logout
+	</button>
 </div>
 
 <main class="main-content-container">
 	<slot />
 </main>
+
+<style lang="scss">
+	.button {
+		text-align: start;
+		margin: 0px 8px;
+	}
+</style>
