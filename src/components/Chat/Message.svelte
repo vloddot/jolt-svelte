@@ -4,13 +4,13 @@
 	import MessageReply from '@components/Chat/MessageReply.svelte';
 	import { selectedServerIDKey } from '@routes/(app)/context';
 	import { decodeTime } from 'ulid';
-	import { getUser, membersKey, messagesKey, repliesKey, usersKey } from '.';
+	import { getUser, membersKey, messagesKey, /* repliesKey, */ usersKey } from '.';
 	import UserIcon from '@components/Icons/UserIcon.svelte';
 	import { clientKey, settingsKey } from '@routes/context';
-	import TrashIcon from '@components/Icons/TrashIcon.svelte';
-	import PencilSquareIcon from '@components/Icons/PencilSquareIcon.svelte';
-	import ArrowUturnLeftIcon from '@components/Icons/ArrowUturnLeftIcon.svelte';
-	import type { ComponentType } from 'svelte';
+	// import TrashIcon from '@components/Icons/TrashIcon.svelte';
+	// import PencilSquareIcon from '@components/Icons/PencilSquareIcon.svelte';
+	// import ArrowUturnLeftIcon from '@components/Icons/ArrowUturnLeftIcon.svelte';
+	// import type { ComponentType } from 'svelte';
 	import SystemMessageComponent from './SystemMessage.svelte';
 	import AttachmentComponent from './Attachment.svelte';
 	import EmbedComponent from './Embed.svelte';
@@ -42,45 +42,45 @@
 	const messages = getContext(messagesKey);
 	const users = getContext(usersKey);
 	const members = getContext(membersKey);
-	const replies = getContext(repliesKey);
+	// const replies = getContext(repliesKey);
 
-	interface MessageControls {
-		src: ComponentType | string;
-		name: string;
-		showIf?: (message: Message) => boolean;
-		onclick: (message: Message) => unknown;
-	}
+	// interface MessageControls {
+	// 	src: ComponentType | string;
+	// 	name: string;
+	// 	showIf?: (message: Message) => boolean;
+	// 	onclick: (message: Message) => unknown;
+	// }
 
-	const controls: MessageControls[] = [
-		{
-			src: ArrowUturnLeftIcon,
-			name: 'Reply',
-			onclick() {
-				if ($replies?.some((reply) => reply.message._id == message._id)) {
-					return;
-				}
+	// const controls: MessageControls[] = [
+	// 	{
+	// 		src: ArrowUturnLeftIcon,
+	// 		name: 'Reply',
+	// 		onclick() {
+	// 			if ($replies?.some((reply) => reply.message._id == message._id)) {
+	// 				return;
+	// 			}
 
-				replies?.update((replies) => {
-					replies.push({ message, mention: true });
-					return replies;
-				});
-			}
-		},
-		{
-			src: PencilSquareIcon,
-			name: 'Edit',
-			showIf: (message) => message.author == client.user?._id,
-			onclick: (message) =>
-				(messageContentToEdit =
-					messageContentToEdit == undefined ? message.content ?? '' : undefined)
-		},
-		{
-			src: TrashIcon,
-			name: 'Delete',
-			showIf: (message) => message.author == client.user?._id, // TODO: check permissions for message deleting
-			onclick: (message) => client.api.deleteMessage(message.channel, message._id)
-		}
-	];
+	// 			replies?.update((replies) => {
+	// 				replies.push({ message, mention: true });
+	// 				return replies;
+	// 			});
+	// 		}
+	// 	},
+	// 	{
+	// 		src: PencilSquareIcon,
+	// 		name: 'Edit',
+	// 		showIf: (message) => message.author == client.user?._id,
+	// 		onclick: (message) =>
+	// 			(messageContentToEdit =
+	// 				messageContentToEdit == undefined ? message.content ?? '' : undefined)
+	// 	},
+	// 	{
+	// 		src: TrashIcon,
+	// 		name: 'Delete',
+	// 		showIf: (message) => message.author == client.user?._id, // TODO: check permissions for message deleting
+	// 		onclick: (message) => client.api.deleteMessage(message.channel, message._id)
+	// 	}
+	// ];
 
 	async function updateMember(server_id: string, user_id: string) {
 		member = $members?.find(
