@@ -39,7 +39,8 @@
 		}
 
 		&[data-selected='true'],
-		&:hover {
+		&:hover,
+		&:focus {
 			background-color: var(--hover);
 			color: var(--foreground);
 		}
@@ -59,7 +60,8 @@
 			height: 4px;
 		}
 
-		&:hover::before {
+		&:hover::before,
+		&:focus::before {
 			height: 10px;
 		}
 
