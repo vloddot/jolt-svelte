@@ -48,25 +48,6 @@
 />
 
 <style lang="scss">
-	// form {
-	// 	display: flex;
-	// 	background-color: var(--message-box);
-	// 	border-radius: var(--border-radius);
-	// 	align-items: center;
-	// 	margin: 0px 16px 16px 16px;
-	// 	border-bottom: 2px solid var(--accent);
-
-	// 	input#file-upload {
-	// 		opacity: 0;
-	// 		width: 0px;
-	// 	}
-
-	// 	label[for='file-upload'] {
-	// 		cursor: pointer;
-	// 		margin-left: 16px;
-	// 	}
-
-	// }
 	textarea {
 		resize: none;
 		background-color: transparent;
@@ -76,5 +57,6 @@
 		height: auto;
 		height: 20px;
 		padding: 14px 14px 14px 0;
+		color: var(--foreground);
 	}
 </style>

@@ -23,11 +23,6 @@ const sections: SettingsSection[] = [
 		type: 'link',
 		title: 'Text & Images',
 		id: 'text'
-	},
-	{
-		type: 'link',
-		title: 'Appearence',
-		id: 'appearence'
 	}
 ];
 

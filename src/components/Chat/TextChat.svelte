@@ -2,7 +2,7 @@
 	import { getContext } from '$lib/context';
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
 	import { clientKey, settingsKey } from '@routes/context';
-	import { setContext } from 'svelte';
+	import { onDestroy, onMount, setContext, tick } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { membersKey, messagesKey, repliesKey, usersKey, type SendableReply, channelKey } from '.';
 	import MessageComponent from './Message.svelte';
@@ -11,6 +11,7 @@
 	import SendMessageForm from './MessageForm.svelte';
 	import SendableReplyComponent from './SendableReply.svelte';
 	import PlusIcon from '@components/Icons/PlusIcon.svelte';
+	import type { ServerMessage } from '$lib/client/WebSocketClient';
 
 	/**
 	 * Which channel to show messages from.
@@ -60,6 +61,10 @@
 
 		replies.set([]);
 		currentlyTypingUsers = [];
+
+		messageLoadPromise.then(() => {
+			tick().then(() => messagesListNode.scrollTo(0, messagesListNode.scrollHeight));
+		});
 	}
 
 	async function listenToTypingEvents(receive: boolean) {
@@ -115,27 +120,51 @@
 		messageInput = '';
 	}
 
-	client.on('Message', (message) => {
+	function onMessage(message: Message) {
 		if (message.channel != channel._id) {
 			return;
 		}
 
-		client.api.ackMessage(channel._id, message._id);
+		const scrolledToBottom =
+			messagesListNode.offsetHeight + messagesListNode.scrollTop >
+			messagesListNode.scrollHeight - 20;
+
+		if (document.hasFocus() && scrolledToBottom) {
+			client.api.ackMessage(channel._id, message._id);
+		}
+
 		messages.update((messages) => {
 			messages.push(message);
 			return messages;
 		});
-	});
 
-	client.on('MessageDelete', ({ id, channel: channel_id }) => {
+		if (scrolledToBottom) {
+			tick().then(() => {
+				if (messagesListNode.lastElementChild?.scrollIntoView == undefined) {
+					messagesListNode.scrollTo(0, messagesListNode.scrollHeight);
+				} else {
+					messagesListNode.lastElementChild?.scrollIntoView({ behavior: 'smooth' });
+				}
+			});
+		}
+	}
+
+	function onMessageDelete({
+		id,
+		channel: channel_id
+	}: Extract<ServerMessage, { type: 'MessageDelete' }>) {
 		if (channel_id != channel._id) {
 			return;
 		}
 
 		messages.update((messages) => messages.filter((message) => message._id != id));
-	});
+	}
 
-	client.on('MessageUpdate', ({ id, channel: channel_id, data }) => {
+	function onMessageUpdate({
+		id,
+		channel: channel_id,
+		data
+	}: Extract<ServerMessage, { type: 'MessageUpdate' }>) {
 		if (channel_id != channel._id) {
 			return;
 		}
@@ -157,6 +186,18 @@
 			messages[index] = message;
 			return messages;
 		});
+	}
+
+	onMount(() => {
+		client.on('Message', onMessage);
+		client.on('MessageDelete', onMessageDelete);
+		client.on('MessageUpdate', onMessageUpdate);
+	});
+
+	onDestroy(() => {
+		client.removeListener('Message', onMessage);
+		client.removeListener('MessageDelete', onMessageDelete);
+		client.removeListener('MessageUpdate', onMessageUpdate);
 	});
 
 	async function updateChannelName(channel: Exclude<Channel, { channel_type: 'VoiceChannel' }>) {

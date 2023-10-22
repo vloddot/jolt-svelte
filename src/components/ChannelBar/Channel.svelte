@@ -40,13 +40,6 @@
 	}
 
 	export let channel: Channel;
-	let unread = client.unreads.get(channel._id) != undefined;
-
-	client.on('ChannelAck', (event) => {
-		event.id;
-	});
-
-	$: console.log(client.unreads.get('01H8VPT9A6KAB9YXV97DDWS419'));
 
 	function getChannelHref(id: string): string {
 		return `${base}/${
@@ -66,7 +59,6 @@
 			<ChannelItem
 				href={getChannelHref(channel._id)}
 				selected={$selectedChannelID == channel._id}
-				{unread}
 			>
 				<UserIcon />
 
@@ -76,7 +68,6 @@
 			<ChannelItem
 				href={getChannelHref(channel._id)}
 				selected={$selectedChannelID == channel._id}
-				{unread}
 			>
 				{@const name = getDisplayName(user)}
 
@@ -94,7 +85,6 @@
 	<ChannelItem
 		href={getChannelHref(channel._id)}
 		selected={$selectedChannelID == channel._id}
-		{unread}
 	>
 		{@const icon = getChannelIcon(channel)}
 		{@const name = channel.channel_type == 'SavedMessages' ? 'Saved Notes' : channel.name}

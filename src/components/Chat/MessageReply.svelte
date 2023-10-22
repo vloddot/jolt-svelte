@@ -43,11 +43,17 @@
 
 						Unknown User
 					{/if}
-				{/await}:
+				{/await}
 			{/if}
 			{#if message.content != undefined}
-				<span class="text-gray-600">{message.content}</span>
+				<span class="message-content">{message.content}</span>
 			{/if}
 		{/await}
 	{/if}
 </a>
+
+<style lang="scss">
+	.message-content {
+		color: var(--secondary-foreground);
+	}
+</style>

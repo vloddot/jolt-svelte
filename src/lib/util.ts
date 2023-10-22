@@ -7,7 +7,6 @@ export const DEFAULT_SETTINGS: Settings = {
 		servers: []
 	},
 	'jolt:low-data-mode': false,
-	'jolt:compact-mode': false,
 	'jolt:receive-typing-indicators': true,
 	'jolt:send-typing-indicators': true
 };

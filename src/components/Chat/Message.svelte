@@ -137,16 +137,14 @@
 
 	{#if isHead(message)}
 		<div class="user-detail">
-			{#if !$settings['jolt:compact-mode']}
-				{#if $settings['jolt:low-data-mode'] || author == undefined}
+			{#if $settings['jolt:low-data-mode'] || author == undefined}
+				<UserIcon />
+			{:else}
+				{@const displayAvatar = getDisplayAvatar(author, member, message)}
+				{#if displayAvatar == undefined}
 					<UserIcon />
 				{:else}
-					{@const displayAvatar = getDisplayAvatar(author, member, message)}
-					{#if displayAvatar == undefined}
-						<UserIcon />
-					{:else}
-						<img class="cover" alt={displayName} src={displayAvatar} width="40px" height="40px" />
-					{/if}
+					<img class="cover" alt={displayName} src={displayAvatar} width="40px" height="40px" />
 				{/if}
 			{/if}
 
@@ -175,12 +173,7 @@
 	{/if}
 
 	{#if messageContentToEdit != undefined}
-		<form
-			style="padding-left: 8px"
-			id="message-edit-form"
-			class="message-form"
-			on:submit={editMessage}
-		>
+		<form id="message-edit-form" class="message-form" on:submit={editMessage}>
 			<MessageForm
 				bind:value={messageContentToEdit}
 				on:keydown={(event) => {
@@ -217,7 +210,7 @@
 	.container {
 		display: flex;
 		flex-direction: column;
-		padding: 8px 24px;
+		padding: 4px 24px;
 
 		&:hover {
 			background-color: var(--hover);
@@ -231,6 +224,7 @@
 			display: flex;
 			align-items: center;
 			gap: 8px;
+			margin-bottom: 2px;
 
 			.timestamp {
 				color: var(--tertiary-foreground);

@@ -4,7 +4,7 @@ import { AutumnClient } from './AutumnClient';
 import { WebSocketClient, type ServerMessage } from './WebSocketClient';
 
 export type Events<T extends { type: string | number | symbol }> = {
-	[K in Exclude<T['type'], 'Bulk'>]: (event: Omit<Extract<T, { type: K }>, 'type'>) => void;
+	[K in Exclude<T['type'], 'Bulk'>]: (event: Extract<T, { type: K }>) => void;
 };
 
 export class Client extends EventEmitter<Events<ServerMessage>> {
@@ -197,7 +197,7 @@ export class Client extends EventEmitter<Events<ServerMessage>> {
 
 				group.recipients = group.recipients.filter((user) => user != event.user);
 				this.api.cache.channels.set(event.id, group);
-				this.emit('ChannelGroupJoin', event);
+				this.emit('ChannelGroupLeave', event);
 				break;
 			}
 			case 'ServerMemberUpdate': {
