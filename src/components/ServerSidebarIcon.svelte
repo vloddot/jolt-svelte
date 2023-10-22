@@ -16,16 +16,23 @@
 	export let selected: boolean;
 
 	export let unread = false;
+
+	let focused = false;
 </script>
 
 <div
 	class="server-sidebar-icon-base"
+	data-focused={focused}
 	data-selected={selected}
 	data-unread={unread}
 	aria-selected={selected}
 >
 	<a
 		{href}
+		on:mouseenter={() => (focused = true)}
+		on:mouseleave={() => (focused = false)}
+		on:focus={() => (focused = true)}
+		on:blur={() => (focused = false)}
 		tabindex="0"
 		aria-label={typeof tooltip == 'string' && ariaLabel != undefined ? tooltip : ariaLabel}
 		class="server-sidebar-icon"
@@ -69,7 +76,7 @@
 			height: 8px;
 		}
 
-		&:has(.server-sidebar-icon:hover, .server-sidebar-icon:focus)[data-selected='false']::before {
+		&[data-focused='true'][data-selected='false']::before {
 			height: 16px;
 		}
 
