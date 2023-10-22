@@ -5,13 +5,26 @@
 	export let description: string | undefined = undefined;
 </script>
 
-<div class="flex">
+<div class="container">
 	<div>
 		<h2><label for={id}>{title}</label></h2>
-		{#if description}
-			<p class="ml-4 whitespace-pre-wrap">{description}</p>
+		{#if description != undefined}
+			<p class="description">{description}</p>
 		{/if}
 	</div>
-	<div class="flex-1" />
-	<input {id} bind:checked type="checkbox" />
+	<div class="flex-divider" />
+	<input {id} bind:checked type="checkbox" style="outline: none;" />
 </div>
+
+<style lang="scss">
+	.container {
+		display: flex;
+		padding: 0px 20px;
+	}
+
+	.description {
+		margin-left: 6px;
+		color: var(--secondary-foreground);
+		white-space: pre-wrap;
+	}
+</style>

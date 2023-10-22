@@ -237,7 +237,7 @@
 		{/await}
 	</div>
 	{#if files != null && files.length != 0}
-		<div class="file-uploads">
+		<div class="flex-container">
 			<p>
 				Uploading
 				{Array.from(files)
@@ -325,10 +325,6 @@
 		overflow-x: hidden;
 		overflow-y: scroll;
 		margin-bottom: 24px;
-	}
-
-	.file-uploads {
-		display: flex;
 	}
 
 	.typing-indicator {

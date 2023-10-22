@@ -6,10 +6,16 @@
 
 <details>
 	<summary><label for={id}>{title}</label></summary>
-	<div class="ml-4">
+	<div class="indented">
 		<slot />
 	</div>
 	{#if description != undefined}
-		<p class="ml-4">{description}</p>
+		<p class="indented">{description}</p>
 	{/if}
 </details>
+
+<style lang="scss">
+	.indented {
+		margin-left: 24px;
+	}
+</style>

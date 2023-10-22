@@ -128,7 +128,7 @@
 
 <div id={message._id} class="container">
 	{#if message.replies != undefined && message.replies.length != 0}
-		<div class="reply-base">
+		<div class="flex-container">
 			{#each message.replies as id}
 				<MessageReply {id} />
 			{/each}
@@ -214,10 +214,6 @@
 
 		&:hover {
 			background-color: var(--hover);
-		}
-
-		.reply-base {
-			display: flex;
 		}
 
 		.user-detail {

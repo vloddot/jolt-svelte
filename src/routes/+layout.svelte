@@ -105,6 +105,10 @@
 		width: calc(100% - 36px);
 	}
 
+	:global(.flex-container) {
+		display: flex;
+	}
+
 	:global(.flex-divider) {
 		flex: 1;
 	}
@@ -124,6 +128,7 @@
 
 	:global(button) {
 		cursor: pointer;
+		border: 1px solid var(--primary-header);
 	}
 
 	:global(input:hover, textarea:hover, button:hover) {

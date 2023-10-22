@@ -6,17 +6,15 @@
 	export let value = '';
 </script>
 
-<div class="container">
-	{#if type == 'textarea'}
-		<textarea {placeholder} bind:value />
-	{:else}
-		<input {type} {placeholder} {value} on:input={(event) => (value = event.currentTarget.value)} />
-	{/if}
+{#if type == 'textarea'}
+	<textarea {placeholder} bind:value />
+{:else}
+	<input {type} {placeholder} {value} on:input={(event) => (value = event.currentTarget.value)} />
+{/if}
 
-	{#if description != undefined}
-		<p class="description">{description}</p>
-	{/if}
-</div>
+{#if description != undefined}
+	<p class="description">{description}</p>
+{/if}
 
 <style lang="scss">
 	.description {

@@ -1,8 +1,11 @@
 <script lang="ts">
 	import { getContext } from '$lib/context';
 	import { clientKey, sessionKey } from '@routes/context';
-	import { time } from 'svelte-i18n';
 	import { decodeTime } from 'ulid';
+	import dayjs from 'dayjs';
+	import calendar from 'dayjs/plugin/calendar';
+
+	dayjs.extend(calendar);
 
 	let sessionToView: SessionInfo;
 	export { sessionToView as session };
@@ -13,16 +16,20 @@
 	$: isThisDevice = sessionToView._id == $session?._id;
 </script>
 
-<div class="w-full mx-auto" class:bg-blue-500={isThisDevice}>
+<div class="container" data-this-device={isThisDevice}>
 	{#if isThisDevice}
-		<h1 class="text-2xl uppercase">This Device</h1>
+		<p>This Device</p>
 	{/if}
 
-	<div class="flex">
-		<h2 class="text-xl">{sessionToView.name.toUpperCase()}</h2>
-		<p class="pl-2">Created <time>{$time(decodeTime(sessionToView._id))}</time>.</p>
+	<div class="flex-container">
+		<div class="session-info">
+			<h3 class="header">{sessionToView.name}</h3>
+			<p class="indented">
+				Created <time>{dayjs(decodeTime(sessionToView._id)).calendar()}</time>.
+			</p>
+		</div>
 
-		<div class="flex-1" />
+		<div class="flex-divider" />
 
 		<button
 			on:click={() => {
@@ -39,3 +46,34 @@
 		</button>
 	</div>
 </div>
+
+<style lang="scss">
+	.container {
+		margin: 20px;
+		padding-left: 20px;
+		padding-right: 10px;
+		padding-bottom: 6px;
+		padding-top: 6px;
+
+		&[data-this-device='true'] {
+			background-color: var(--accent);
+		}
+	}
+
+	.indented {
+		padding-left: 8px;
+	}
+
+	.session-info {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		white-space: nowrap;
+
+		.header {
+			margin: 0;
+		}
+	}
+</style>
