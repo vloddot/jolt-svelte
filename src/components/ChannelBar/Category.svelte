@@ -23,7 +23,7 @@
 			margin-left: 8px;
 			text-transform: uppercase;
 			font-size: 10px;
-			font-weight: bold;
+			font-weight: 600;
 			cursor: pointer;
 		}
 	}

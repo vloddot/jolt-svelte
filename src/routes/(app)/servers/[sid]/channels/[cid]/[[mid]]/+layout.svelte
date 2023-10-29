@@ -12,6 +12,7 @@
 	import { channelKey } from './context';
 	import { serverKey } from '@routes/(app)/servers/[sid]/context';
 	import { onDestroy } from 'svelte';
+	import { nearbyMessageKey } from '@components/Chat';
 
 	const client = getContext(clientKey)!;
 	const server = getContext(serverKey);
@@ -41,7 +42,7 @@
 	$: if ($selectedChannelID) updateChannel($selectedChannelID);
 
 	$: {
-		let title = '';
+		let title = 'Jolt - ';
 
 		if ($server == undefined) {
 			title += 'Server';
@@ -53,12 +54,32 @@
 			title += ` | #${$channel.name}`;
 		}
 
-		title += ' - Jolt';
-
 		if ('__TAURI__' in window) {
 			appWindow.setTitle(title);
 		} else {
 			document.title = title;
+		}
+	}
+
+	$: {
+		const element = document.getElementById(`MESSAGE-${pageParams.mid}`);
+
+		if (element == null) {
+			setContext(nearbyMessageKey, pageParams.mid);
+		} else {
+			element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			element.animate(
+				[
+					{ backgroundColor: 'var(--mention)' },
+					{ backgroundColor: 'var(--mention)', offset: 0.6 },
+					{ backgroundColor: 'transparent' }
+				],
+				{
+					duration: 3000,
+					iterations: 1,
+					easing: 'ease'
+				}
+			);
 		}
 	}
 

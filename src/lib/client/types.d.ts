@@ -67,6 +67,9 @@ type Member = components['schemas']['Member'];
 type MemberCompositeKey = components['schemas']['MemberCompositeKey'];
 type MessageSort = components['schemas']['MessageSort'];
 type OptionsMessageSearch = components['schemas']['OptionsMessageSearch'];
+type OptionsQueryMessages = Omit<components['schemas']['OptionsMessageSearch'], 'query'> & {
+	nearby?: string;
+};
 type OptionsQueryStale = components['schemas']['OptionsQueryStale'];
 type DataEditMessage = components['schemas']['DataEditMessage'];
 type OptionsBulkDelete = components['schemas']['OptionsBulkDelete'];

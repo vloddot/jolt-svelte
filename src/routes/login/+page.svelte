@@ -30,9 +30,16 @@
 	function getFriendlyName(): string {
 		const { mobile, os, name } = detect();
 
-		return `Jolt ${mobile ? 'mobile' : 'desktop'} on ${
-			('__TAURI__' in window ? os ?? name : name ?? os) ?? 'Unknown Platform'
-		}`;
+		let platform: string;
+		if ('__TAURI__' in window && os != undefined) {
+			platform = os.charAt(0).toUpperCase() + os.slice(1);
+		} else if (name != undefined) {
+			platform = name.charAt(0).toUpperCase() + name.slice(1);
+		} else {
+			platform = 'Unknown Platform';
+		}
+
+		return `Jolt ${mobile ? 'Mobile' : 'Desktop'} on ${platform}`;
 	}
 
 	async function handleLoginResponse(response: Exclude<ResponseLogin, { result: 'MFA' }>) {
@@ -131,8 +138,8 @@
 	}
 </script>
 
-<div class="login-position">
-	<form id="login-form" class="login-base" on:submit|preventDefault={login}>
+<div class="modal">
+	<form id="login-form" class="modal-base" on:submit|preventDefault={login}>
 		<h1>Jolt &#x26A1;</h1>
 
 		<input type="email" placeholder="Email" bind:value={email} />
@@ -166,23 +173,5 @@
 <style lang="scss">
 	input {
 		margin-bottom: 8px;
-	}
-
-	.login-position {
-		display: flex;
-		height: 100vh;
-		align-items: center;
-	}
-
-	.login-base {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		width: 400px;
-		margin-left: 5%;
-		border-left: solid var(--accent);
-		border-radius: var(--border-radius);
-		padding: 20px;
-		background-color: var(--primary-background);
 	}
 </style>

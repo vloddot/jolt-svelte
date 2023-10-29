@@ -41,7 +41,9 @@
 <div class="channel-bar-container">
 	<ChannelItem href="{base}/friends" selected={$page.url.pathname == `${base}/friends`}>
 		<UserIcon />
-		Friends
+
+		<!-- janky hack, mate -->
+		<span>Friends</span>
 	</ChannelItem>
 
 	{#if dms != undefined}

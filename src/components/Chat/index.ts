@@ -35,3 +35,4 @@ export const messagesKey: ContextInjectionKey<Writable<Message[]>> = Symbol();
 export const membersKey: ContextInjectionKey<Writable<Member[]>> = Symbol();
 export const usersKey: ContextInjectionKey<Writable<User[]>> = Symbol();
 export const repliesKey: ContextInjectionKey<Writable<SendableReply[]>> = Symbol();
+export const nearbyMessageKey: ContextInjectionKey<string> = Symbol();

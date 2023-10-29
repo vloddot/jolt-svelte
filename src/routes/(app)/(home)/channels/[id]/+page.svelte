@@ -45,7 +45,7 @@
 	$: if (channel != undefined && channel.channel_type != 'SavedMessages') updateUser(channel);
 
 	$: {
-		let title = '';
+		let title = 'Jolt - ';
 		if (channel?.channel_type == 'SavedMessages') {
 			title += 'Saved Messages';
 		} else if (user == undefined) {
@@ -53,8 +53,6 @@
 		} else {
 			title += `DM with ${getDisplayName(user)}`;
 		}
-
-		title += ' - Jolt';
 
 		if ('__TAURI__' in window) {
 			appWindow.setTitle(title);

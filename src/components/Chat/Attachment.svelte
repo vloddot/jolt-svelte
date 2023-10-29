@@ -47,7 +47,8 @@
 </div>
 
 <style lang="scss">
-	img, video {
+	img,
+	video {
 		max-width: 400px;
 		max-height: 300px;
 	}

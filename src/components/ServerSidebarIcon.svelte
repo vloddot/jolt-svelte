@@ -86,6 +86,7 @@
 
 		.server-sidebar-icon {
 			background-color: var(--secondary-background);
+			color: inherit;
 			border-radius: 100%;
 			width: 42px;
 			justify-content: center;

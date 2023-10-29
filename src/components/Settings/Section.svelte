@@ -10,7 +10,7 @@
 
 {#if section.type == 'link'}
 	<ChannelItem href={section.id} selected={$page.url.pathname == `${root}/${section.id}`}>
-		{section.title}
+		<span>{section.title}</span>
 	</ChannelItem>
 {:else if section.type == 'header'}
 	<h1>{section.title}</h1>

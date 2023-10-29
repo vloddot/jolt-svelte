@@ -55,6 +55,7 @@
 		--secondary-foreground: #aaaaaa;
 		--secondary-header: #262626;
 		--message-box: #2d2d2d;
+		--mention: #3399ff30;
 		--tertiary-background: #3d3d3d;
 		--tertiary-foreground: #666666;
 		--hover: rgba(255, 255, 255, 0.075);
@@ -98,6 +99,7 @@
 
 	:global(a) {
 		text-decoration: none;
+		color: var(--accent);
 	}
 
 	:global(hr) {
@@ -120,6 +122,8 @@
 	:global(input, textarea, button) {
 		background-color: var(--secondary-background);
 		color: var(--secondary-foreground);
+		font-size: inherit;
+		font-family: inherit;
 		border: none;
 		padding: 8px;
 		border-radius: var(--border-radius);
@@ -158,5 +162,24 @@
 
 	:global(.tippy-box[data-theme='right-tooltip'] > .tippy-arrow::before) {
 		border-right-color: black !important;
+	}
+
+	:global(.modal) {
+		display: flex;
+		height: 100vh;
+		align-items: center;
+	}
+
+	:global(.modal-base) {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		width: 400px;
+		gap: 2px;
+		margin-left: 5%;
+		border-left: solid var(--accent);
+		border-radius: var(--border-radius);
+		padding: 20px;
+		background-color: var(--primary-background);
 	}
 </style>

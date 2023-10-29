@@ -25,7 +25,6 @@
 		gap: 8px;
 		padding: 0px 8px;
 		border-radius: var(--border-radius);
-		color: var(--tertiary-foreground);
 		display: flex;
 		align-items: center;
 		transition: background-color 150ms;
@@ -42,7 +41,18 @@
 		&:hover,
 		&:focus {
 			background-color: var(--hover);
-			color: var(--foreground);
+		}
+
+		:global(*) {
+			color: var(--tertiary-foreground);
+		}
+
+		&[data-selected='true'],
+		&:hover,
+		&:focus {
+			:global(*) {
+				color: var(--foreground);
+			}
 		}
 
 		&::before {

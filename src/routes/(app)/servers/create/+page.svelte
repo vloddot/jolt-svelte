@@ -28,7 +28,7 @@
 		await goto(`${base}/servers/${server._id}/channels/${channels[0]._id}`);
 	}
 
-	const TITLE = 'Create Server - Jolt';
+	const TITLE = 'Jolt - Create Server';
 	$: {
 		if ('__TAURI__' in window) {
 			appWindow.setTitle(TITLE);
@@ -36,47 +36,50 @@
 	}
 </script>
 
-<!-- TODO: should be populated with things, currently a placeholder to make the main content on the center -->
-<div class="channel-bar-container" />
-
 <main class="main-content-container">
-	<div class="w-full h-full flex items-center flex-col justify-center relative">
-		<div
-			class="rounded-xl relative items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm px-6 py-12 w-[90%] mb-auto"
-		>
-			<form id="create-server-form" class="flex flex-col" on:submit|preventDefault={createServer}>
-				<h1 class="text-3xl">Create Server</h1>
+	<div class="modal">
+		<form id="create-server-form" class="modal-base" on:submit|preventDefault={createServer}>
+			<h1>Create Server</h1>
 
-				<input
-					class="bg-gray-500 mb-3 rounded-md"
-					type="text"
-					placeholder="What do you want to name your server?"
-					bind:value={name}
-				/>
+			<input type="text" placeholder="What do you want to name your server?" bind:value={name} />
 
-				<div class="bg-gray-500 rounded-xl pt-2 px-2">
-					<textarea
-						class="outline-none bg-inherit w-full"
-						placeholder="Describe your server (Optional)"
-						bind:value={description}
-					/>
-				</div>
+			<textarea placeholder="Describe your server (Optional)" bind:value={description} />
 
-				<span class="flex justify-center">
-					<label class="pr-2" for="nsfw">Is your server NSFW?</label>
-					<input type="checkbox" name="nsfw" bind:checked={nsfw} />
-				</span>
+			<p>
+				Markdown in the server description is supported.
+				<a href="https://developers.revolt.chat/markdown" target="_blank" rel="nonreferrer"
+					>Learn more here</a
+				>.
+			</p>
 
-				<button type="submit">Create Server</button>
-			</form>
+			<span class="flex justify-center">
+				<label class="pr-2" for="nsfw">Is your server NSFW?</label>
+				<input type="checkbox" name="nsfw" bind:checked={nsfw} />
+			</span>
 
-			{#if error}
-				<p>{error}</p>
-			{/if}
-		</div>
+			<button type="submit">Create Server</button>
+		</form>
+
+		{#if error}
+			<p>{error}</p>
+		{/if}
 	</div>
 </main>
 
 <svelte:head>
 	<title>{TITLE}</title>
 </svelte:head>
+
+<style lang="scss">
+	.main-content-container {
+		background-color: var(--secondary-background);
+	}
+
+	textarea {
+		resize: vertical;
+	}
+
+	a {
+		color: var(--accent);
+	}
+</style>

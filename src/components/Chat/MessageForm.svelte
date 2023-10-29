@@ -57,6 +57,5 @@
 		height: auto;
 		height: 20px;
 		padding: 14px 14px 14px 0;
-		color: var(--foreground);
 	}
 </style>

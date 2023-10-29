@@ -53,14 +53,14 @@
 		);
 	});
 
-	client.on('ServerDelete', async ({ id }) => {
+	client.on('ServerDelete', ({ id }) => {
 		servers = sortServers(
 			Array.from(client.api.cache.servers.values()),
 			$settings.ordering.servers ?? []
 		);
 
 		if ($selectedServerID == id) {
-			await goto(`${base}/`);
+			goto(`${base}/`);
 		}
 	});
 
@@ -95,7 +95,11 @@
 			const [serverRevision, serverValue] = serverSetting;
 			const localRevision = Number(localStorage.getItem(revisionKey) ?? '0');
 
-			if (serverRevision >= localRevision) {
+			if (serverRevision == localRevision) {
+				continue;
+			}
+
+			if (serverRevision > localRevision) {
 				localStorage.setItem(revisionKey, serverRevision.toString());
 				localStorage.setItem(key, serverValue);
 				settingsValue[key] = JSON.parse(serverValue);
@@ -105,8 +109,17 @@
 			}
 		}
 
-		client.api.setSettings(serverSettingsUpdate);
+		if (Object.keys(serverSettingsUpdate).length != 0) {
+			client.api.setSettings(serverSettingsUpdate);
+		}
+
 		settings.set(settingsValue);
+
+		settings.subscribe((settings) => {
+			for (const [key, value] of Object.entries(settings)) {
+				localStorage.setItem(key, JSON.stringify(value));
+			}
+		});
 	});
 
 	client.on('UserSettingsUpdate', ({ id, update }) => {
@@ -169,10 +182,15 @@
 				selected={$selectedServerID == server._id}
 			>
 				{#if server.icon == undefined || $settings['jolt:low-data-mode']}
-					{server.name
-						.split(' ')
-						.map((s) => s[0])
-						.join('')}
+					{@const words = server.name.split(' ')}
+					{#if words.length > 3}
+						{words
+							.slice(0, 3)
+							.map((s) => s[0])
+							.join('')}...
+					{:else}
+						{words.map((s) => s[0]).join('')}
+					{/if}
 				{:else}
 					<img
 						class="cover"

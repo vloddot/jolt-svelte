@@ -19,8 +19,8 @@
 
 <a
 	href="{base}/{$selectedServerID == undefined
-		? `channels/${$selectedChannelID}#${id}`
-		: `servers/${$selectedServerID}/channels/${$selectedChannelID}#${id}`}"
+		? `channels/${$selectedChannelID}/${id}`
+		: `servers/${$selectedServerID}/channels/${$selectedChannelID}/${id}`}"
 >
 	{#if $selectedChannelID != undefined}
 		{#await $messages?.find(({ _id }) => id == _id) ?? client.api.fetchMessage($selectedChannelID, id) then message}
@@ -53,7 +53,10 @@
 </a>
 
 <style lang="scss">
-	.message-content {
-		color: var(--secondary-foreground);
+	a {
+		color: inherit;
+		.message-content {
+			color: var(--secondary-foreground);
+		}
 	}
 </style>

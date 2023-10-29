@@ -4,7 +4,15 @@
 	import { clientKey, settingsKey } from '@routes/context';
 	import { onDestroy, onMount, setContext, tick } from 'svelte';
 	import { writable } from 'svelte/store';
-	import { membersKey, messagesKey, repliesKey, usersKey, type SendableReply, channelKey } from '.';
+	import {
+		membersKey,
+		messagesKey,
+		repliesKey,
+		usersKey,
+		type SendableReply,
+		channelKey,
+		nearbyMessageKey
+	} from '.';
 	import MessageComponent from './Message.svelte';
 	import XCircleIcon from '@components/Icons/XCircleIcon.svelte';
 	import UserIcon from '@components/Icons/UserIcon.svelte';
@@ -12,6 +20,7 @@
 	import SendableReplyComponent from './SendableReply.svelte';
 	import PlusIcon from '@components/Icons/PlusIcon.svelte';
 	import type { ServerMessage } from '$lib/client/WebSocketClient';
+	import { page } from '$app/stores';
 
 	/**
 	 * Which channel to show messages from.
@@ -45,14 +54,30 @@
 	let messageLoadPromise = Promise.resolve();
 
 	$: {
+		const nearby = getContext(nearbyMessageKey);
 		messageLoadPromise = client.api
-			.queryMessages(channel._id, { sort: 'Latest', include_users: true })
+			.queryMessages(channel._id, {
+				sort: 'Latest',
+				include_users: true,
+				limit: 100,
+				nearby
+			})
 			.then((response) => {
 				if (Array.isArray(response)) {
-					const value = response.reverse();
-					messages.set(value);
+					let messagesValue: Message[];
+					if (nearby == undefined) {
+						messagesValue = response.reverse();
+					} else {
+						messagesValue = response.sort((a, b) => a._id.localeCompare(b._id));
+					}
+					messages.set(messagesValue);
 				} else {
-					const messagesValue = response.messages.reverse();
+					let messagesValue: Message[];
+					if (nearby == undefined) {
+						messagesValue = response.messages.reverse();
+					} else {
+						messagesValue = response.messages.sort((a, b) => a._id.localeCompare(b._id));
+					}
 					messages.set(messagesValue);
 					users.set(response.users);
 					members.set(response.members ?? []);
@@ -139,13 +164,7 @@
 		});
 
 		if (scrolledToBottom) {
-			tick().then(() => {
-				if (messagesListNode.lastElementChild?.scrollIntoView == undefined) {
-					messagesListNode.scrollTo(0, messagesListNode.scrollHeight);
-				} else {
-					messagesListNode.lastElementChild?.scrollIntoView({ behavior: 'smooth' });
-				}
-			});
+			tick().then(() => messagesListNode.scrollTo(0, messagesListNode.scrollHeight));
 		}
 	}
 
@@ -223,6 +242,48 @@
 	}
 
 	$: updateChannelName(channel);
+
+	function getTypingUsersDisplay(currentlyTypingUsers: User[]): string {
+		if (currentlyTypingUsers.length == 0) {
+			throw new Error('function called with an array of length 0');
+		}
+
+		const users = currentlyTypingUsers.map((user) => getDisplayName(user));
+		if (users.length == 1) {
+			return `${users[0]} is typing...`;
+		}
+
+		if (users.length >= 5) {
+			return 'Several users are typing...';
+		}
+
+		return `${users.slice(0, users.length - 1).join(', ')} and ${
+			users[users.length - 1]
+		} are typing...`;
+	}
+
+	$: {
+		const messageElement = document.getElementById(`MESSAGE-${$page.url.hash.slice(1)}`);
+
+		messageElement?.animate(
+			[
+				{
+					backgroundColor: 'var(--mention)'
+				},
+				{
+					backgroundColor: 'var(--mention)',
+					offset: 0.6
+				},
+				{
+					backgroundColor: 'transparent'
+				}
+			],
+			{
+				duration: 3000,
+				iterations: 1
+			}
+		);
+	}
 </script>
 
 <main class="main-content-container">
@@ -259,9 +320,11 @@
 			</button>
 		</div>
 	{/if}
-	{#each currentlyTypingUsers as user}
-		{@const displayName = getDisplayName(user)}
-		<div class="typing-indicator">
+	{#each $replies as reply}
+		<SendableReplyComponent {reply} />
+	{/each}
+	<div class="typing-indicator">
+		{#each currentlyTypingUsers as user}
 			{#if $settings['jolt:low-data-mode']}
 				<UserIcon />
 			{:else}
@@ -270,15 +333,15 @@
 					src={getDisplayAvatar(user)}
 					width="16px"
 					height="16px"
-					alt={displayName}
+					alt={getDisplayName(user)}
 				/>
 			{/if}
-			{displayName} is typing...
-		</div>
-	{/each}
-	{#each $replies as reply}
-		<SendableReplyComponent {reply} />
-	{/each}
+		{/each}
+
+		{#if currentlyTypingUsers.length != 0}
+			{getTypingUsersDisplay(currentlyTypingUsers)}
+		{/if}
+	</div>
 	<form class="message-form" id="send-message-form" on:submit={sendMessage}>
 		<label for="file-upload">
 			<PlusIcon />
@@ -324,12 +387,15 @@
 		height: 100%;
 		overflow-x: hidden;
 		overflow-y: scroll;
-		margin-bottom: 24px;
 	}
 
 	.typing-indicator {
+		display: flex;
+		gap: 4px;
+		padding-left: 8px;
+		align-items: center;
 		margin: 0px 16px;
-		padding: 8px;
+		height: 36px;
 		background-color: var(--secondary-background);
 		border-top-right-radius: var(--border-radius);
 		border-top-left-radius: var(--border-radius);

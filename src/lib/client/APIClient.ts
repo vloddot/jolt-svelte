@@ -160,12 +160,14 @@ export class APIClient {
 
 	async queryMessages(
 		channel_id: string,
-		data_query_messages: Omit<OptionsMessageSearch, 'query'>
+		data_query_messages: OptionsQueryMessages
 	): Promise<BulkMessageResponse> {
 		const params =
 			'?' +
 			new URLSearchParams(
-				Object.entries(data_query_messages).map(([key, value]) => [key, value.toString()])
+				Object.entries(data_query_messages).flatMap(([key, value]) =>
+					value == undefined ? [] : [[key, value.toString()]]
+				)
 			);
 		return this.req('GET', `/channels/${channel_id}/messages${params}`).then((response) =>
 			response.json()

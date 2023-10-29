@@ -108,12 +108,16 @@
 
 		const messagesValue = get(messages);
 
-		const lastMessage = messagesValue.at(messageIndex - 1);
+		const lastMessage = messagesValue[messageIndex - 1];
+
+		if (lastMessage == undefined) {
+			return true;
+		}
 
 		return (
-			message.author != lastMessage?.author ||
-			message.masquerade != lastMessage?.masquerade ||
-			decodeTime(message._id) - decodeTime(lastMessage?._id ?? '0'.repeat(26)) >= 7 * 60 * 1000 ||
+			message.author != lastMessage.author ||
+			message.masquerade != lastMessage.masquerade ||
+			decodeTime(message._id) - decodeTime(lastMessage._id) >= 7 * 60 * 1000 ||
 			(message.replies?.length ?? 0) != 0
 		);
 	}
@@ -126,16 +130,16 @@
 	$: timestamp = decodeTime(message._id);
 </script>
 
-<div id={message._id} class="container">
+<div id="MESSAGE-{message._id}" class="message-container">
 	{#if message.replies != undefined && message.replies.length != 0}
-		<div class="flex-container">
+		<div class="replies">
 			{#each message.replies as id}
 				<MessageReply {id} />
 			{/each}
 		</div>
 	{/if}
 
-	{#if isHead(message)}
+	{#if isHead(message) && message.system == undefined}
 		<div class="user-detail">
 			{#if $settings['jolt:low-data-mode'] || author == undefined}
 				<UserIcon />
@@ -186,7 +190,7 @@
 			/>
 		</form>
 	{:else if message.content != undefined}
-		<span style="overflow-wrap: break-word;" class="whitespace-pre-wrap">{message.content}</span>
+		<span class="message-content">{message.content}</span>
 	{/if}
 
 	{#if message.system != undefined}
@@ -207,13 +211,18 @@
 </div>
 
 <style lang="scss">
-	.container {
+	.message-container {
 		display: flex;
 		flex-direction: column;
 		padding: 4px 24px;
 
 		&:hover {
 			background-color: var(--hover);
+		}
+
+		.replies {
+			display: flex;
+			flex-direction: column;
 		}
 
 		.user-detail {
@@ -226,6 +235,11 @@
 				color: var(--tertiary-foreground);
 				font-size: 12px;
 			}
+		}
+
+		.message-content {
+			white-space: pre-wrap;
+			overflow-wrap: break-word;
 		}
 	}
 </style>
