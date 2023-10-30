@@ -13,19 +13,49 @@
 </script>
 
 <div
+	class="user-detail"
 	style={profile?.background != undefined
 		? `background-image: url(${getAutumnURL(profile.background)})`
 		: undefined}
 >
 	<img class="cover" width="64px" height="64px" src={getDisplayAvatar(user)} alt={name} />
 
-	{name}
+	<h1 class="secondary-fg">{name}</h1>
 
-	<p class="text-sm text-gray-600">{user.username}#{user.discriminator}</p>
+	<h2 class="secondary-fg">{user.username}#{user.discriminator}</h2>
+</div>
 
+<div class="profile">
 	{#await client.api.fetchUserProfile(user._id) then profile}
 		{#if profile?.content != undefined}
-			<p style="overflow-wrap: break-word;" class="whitespace-pre-wrap">{profile.content}</p>
+			<p class="profile-content">{profile.content}</p>
 		{/if}
 	{/await}
 </div>
+
+<style lang="scss">
+	.user-detail {
+		max-height: 240px;
+	}
+
+	.secondary-fg {
+		color: var(--secondary-foreground);
+	}
+
+	h1 {
+		font-size: 1.2rem;
+	}
+
+	h2 {
+		font-size: 1.1rem;
+	}
+
+	.profile-content {
+		overflow-wrap: break-word;
+		white-space: pre-wrap;
+	}
+
+	.profile {
+		background-color: var(--primary-background);
+	}
+</style>

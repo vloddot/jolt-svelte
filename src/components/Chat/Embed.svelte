@@ -34,6 +34,11 @@
 {/if}
 
 <style lang="scss">
+	img, video {
+		max-width: 400px;
+		max-height: 300px;
+	}
+
 	.text-embed {
 		background-color: var(--primary-header);
 		border-radius: var(--border-radius);
@@ -41,6 +46,7 @@
 
 		img {
 			display: inline;
+
 		}
 	}
 </style>

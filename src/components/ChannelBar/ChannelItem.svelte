@@ -21,10 +21,11 @@
 
 <style lang="scss">
 	.channel-item {
-		margin: 4px 8px;
-		gap: 8px;
-		padding: 0px 8px;
-		border-radius: var(--border-radius);
+		margin-top: 4px;
+		margin-right: 16px;
+		gap: 2px;
+		border-top-right-radius: var(--border-radius);
+		border-bottom-right-radius: var(--border-radius);
 		display: flex;
 		align-items: center;
 		transition: background-color 150ms;
@@ -61,7 +62,8 @@
 			left: 0;
 			width: 4px;
 			height: 0px;
-			border-radius: var(--border-radius);
+			border-top-right-radius: var(--border-radius);
+			border-bottom-right-radius: var(--border-radius);
 			background-color: var(--accent);
 			transition: height 150ms;
 		}
