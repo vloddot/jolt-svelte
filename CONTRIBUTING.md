@@ -19,7 +19,7 @@ All types of contributions are encouraged and valued. See the [Table of Contents
 
 ## I Have a Question
 
-Before you ask a question, it is best to search for existing [Issues](https://www.github.com/vloddot/jolt/issues) that might help you. In case you have found a suitable issue and still need clarification, you can write your question in this issue. It is also advisable to search the internet for answers first.
+Before you ask a question, it is best to search for existing [Issues](https://www.github.com/vloddot/jolt/issues) that might help you. In case you have found a suitable issue and still need clarification, you can write your question in this issue.
 
 If you then still feel the need to ask a question and need clarification, we recommend the following:
 
@@ -33,7 +33,7 @@ You can also ask questions on the [Jolt Lounge](https://rvlt.gg/a55AyxeD) Revolt
 
 ### Reporting Bugs
 
-You can report bugs also through the [Jolt Lounge](https://rvlt.gg/a55AyxeD) Revolt server or through opening an issue.
+You can report bugs through the [Jolt Lounge](https://rvlt.gg/a55AyxeD) Revolt server or through [opening an issue](https://www.github.com/vloddot/jolt/issues/new).
 
 <!-- omit in toc -->
 
@@ -43,8 +43,7 @@ A good bug report shouldn't leave others needing to chase you up for more inform
 
 - Make sure that you are using the latest version.
 - Determine if your bug is really a bug and not an error on your side e.g. using incompatible environment components/versions (If you are looking for support, you might want to check [this section](#i-have-a-question)).
-- To see if other users have experienced (and potentially already solved) the same issue you are having, check if there is not already a bug report existing for your bug or error in the [bug tracker](https://www.github.com/vloddot/joltissues?q=label%3Abug).
-- Also make sure to search the internet (including Stack Overflow) to see if users outside of the GitHub community have discussed the issue.
+- To see if other users have experienced (and potentially already solved) the same issue you are having, check if there is not already a bug report existing for your bug or error in the [bug tracker](https://www.github.com/vloddot/jolt/issues?q=label%3Abug).
 - Collect information about the bug:
 - Stack trace (Traceback)
 - OS, Platform and Version (Windows, Linux, macOS, x86, ARM)
@@ -79,6 +78,7 @@ This section guides you through submitting an enhancement suggestion for Jolt, *
 #### Before Submitting an Enhancement
 
 - Make sure that you are using the latest version.
+- Check the [project board](https://github.com/users/vloddot/projects/3) to see if the enhancement has already been suggested. If it has, add a comment to the existing issue instead of opening a new one.
 - Perform a [search](https://www.github.com/vloddot/jolt/issues) to see if the enhancement has already been suggested. If it has, add a comment to the existing issue instead of opening a new one.
 - Find out whether your idea fits with the scope and aims of the project. It's up to you to make a strong case to convince the project's developers of the merits of this feature. Keep in mind that we want features that will be useful to the majority of our users and not just a small subset. If you're just targeting a minority of users, consider writing an add-on/plugin library.
 
