@@ -5,7 +5,7 @@
 	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
 	import { clientKey, settingsKey } from '@routes/context';
 	import { getUser, messagesKey, usersKey } from '.';
-	import UserIcon from '@components/Icons/UserIcon.svelte';
+	import GenericUserIcon from '@components/Icons/GenericUserIcon.svelte';
 
 	const client = getContext(clientKey)!;
 	const settings = getContext(settingsKey)!;
@@ -39,7 +39,7 @@
 						/>
 						{displayName}
 					{:else}
-						<UserIcon />
+						<GenericUserIcon />
 
 						Unknown User
 					{/if}

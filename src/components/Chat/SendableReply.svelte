@@ -4,7 +4,7 @@
 	import { repliesKey, type SendableReply } from '.';
 
 	import { getDisplayName, getDisplayAvatar } from '$lib/util';
-	import UserIcon from '@components/Icons/UserIcon.svelte';
+	import GenericUserIcon from '@components/Icons/GenericUserIcon.svelte';
 	import AtSymbolIcon from '@components/Icons/AtSymbolIcon.svelte';
 	import XCircleIcon from '@components/Icons/XCircleIcon.svelte';
 	export let reply: SendableReply;
@@ -22,7 +22,7 @@
 				<img class="cover" src={getDisplayAvatar(user)} alt={displayName} />
 				{displayName}
 			{:catch}
-				<UserIcon />
+				<GenericUserIcon />
 				&lt;UnknownUser&gt;
 			{/await}
 		</strong>

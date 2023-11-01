@@ -2,6 +2,7 @@ import EventEmitter from 'eventemitter3';
 import { APIClient } from './APIClient';
 import { AutumnClient } from './AutumnClient';
 import { WebSocketClient, type ServerMessage } from './WebSocketClient';
+import { mapById } from './util';
 
 export type Events<T extends { type: string | number | symbol }> = {
 	[K in Exclude<T['type'], 'Bulk'>]: (event: Extract<T, { type: K }>) => void;
@@ -26,7 +27,11 @@ export class Client extends EventEmitter<Events<ServerMessage>> {
 		this.api
 			.fetchUnreads()
 			.then(
-				(unreads) => (this.unreads = new Map(unreads.map((unread) => [unread._id.channel, unread])))
+				(unreads) =>
+					(this.unreads = mapById<ChannelUnread['_id'], ChannelUnread['_id']['channel'], ChannelUnread>(
+						unreads,
+						(id) => id.channel
+					))
 			);
 
 		this.websocket.on('serverEvent', (event) => this.#handleEvent(event));
@@ -34,8 +39,10 @@ export class Client extends EventEmitter<Events<ServerMessage>> {
 
 	async destroy() {
 		await this.api.logout();
-		this.api.token = undefined;
 		this.websocket.disconnect();
+		this.api.token = undefined;
+		this.user = undefined;
+		this.unreads = new Map();
 		this.api.cache = {
 			channels: new Map(),
 			emojis: new Map(),
@@ -54,11 +61,11 @@ export class Client extends EventEmitter<Events<ServerMessage>> {
 				break;
 			}
 			case 'Ready': {
-				this.api.cache.users = new Map(event.users.map((user) => [user._id, user]));
-				this.api.cache.channels = new Map(event.channels.map((channel) => [channel._id, channel]));
-				this.api.cache.servers = new Map(event.servers.map((server) => [server._id, server]));
-				this.api.cache.members = new Map(event.members.map((member) => [member._id, member]));
-				this.api.cache.emojis = new Map(event.emojis.map((emoji) => [emoji._id, emoji]));
+				this.api.cache.users = mapById(event.users);
+				this.api.cache.channels = mapById(event.channels);
+				this.api.cache.servers = mapById(event.servers);
+				this.api.cache.members = mapById(event.members);
+				this.api.cache.emojis = mapById(event.emojis);
 
 				this.emit('Ready', event);
 				break;

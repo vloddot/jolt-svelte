@@ -146,8 +146,8 @@ export class APIClient {
 		await this.req('POST', `/sync/settings/set?timestamp=${timestamp}`, JSON.stringify(settings));
 	}
 
-	async fetchMembers(server_id: string): Promise<AllMemberResponse> {
-		return await this.req('GET', `/servers/${server_id}/members`).then((response) =>
+	async fetchMembers(server_id: string, exclude_offline = false): Promise<AllMemberResponse> {
+		return await this.req('GET', `/servers/${server_id}/members?exclude_offline=${exclude_offline}`).then((response) =>
 			response.json()
 		);
 	}

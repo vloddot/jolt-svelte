@@ -266,12 +266,13 @@
 
 	:global(.members-list-container) {
 		height: 100vh;
-		width: 256px;
+		width: 232px;
 		display: flex;
 		flex-direction: column;
 		background-color: var(--secondary-background);
 		border-left: 1px solid var(--secondary-header);
 		overflow-y: scroll;
+		overflow-x: hidden;
 	}
 
 	:global(img.cover) {

@@ -15,7 +15,7 @@
 	} from '.';
 	import MessageComponent from './Message.svelte';
 	import XCircleIcon from '@components/Icons/XCircleIcon.svelte';
-	import UserIcon from '@components/Icons/UserIcon.svelte';
+	import GenericUserIcon from '@components/Icons/GenericUserIcon.svelte';
 	import SendMessageForm from './MessageForm.svelte';
 	import SendableReplyComponent from './SendableReply.svelte';
 	import PlusIcon from '@components/Icons/PlusIcon.svelte';
@@ -31,7 +31,7 @@
 	export { initialReplies as replies };
 
 	export let messageInput = '';
-	export let files: FileList | null = null;
+	export let files: File[] = [];
 
 	const settings = getContext(settingsKey)!;
 	const client = getContext(clientKey)!;
@@ -49,7 +49,6 @@
 
 	let messagesListNode: HTMLDivElement;
 	let currentlyTypingUsers: User[] = [];
-	let fileInputNode: HTMLInputElement;
 	let channelName = 'Unknown Channel';
 	let messageLoadPromise = Promise.resolve();
 
@@ -123,14 +122,9 @@
 	$: listenToTypingEvents($settings['jolt:receive-typing-indicators']);
 
 	async function sendMessage() {
-		let attachments: string[] = [];
-		if (fileInputNode?.files != null) {
-			attachments = await Promise.all(
-				Array.from(fileInputNode.files).map((file) => client.autumn.uploadFile(file))
-			);
-			fileInputNode.value = '';
-			files = null;
-		}
+		const attachments = await Promise.all(files.map((file) => client.autumn.uploadFile(file)));
+
+		files = [];
 
 		await client.api.sendMessage(channel._id, {
 			content: messageInput.trim(),
@@ -207,16 +201,45 @@
 		});
 	}
 
+	function handlePaste(event: ClipboardEvent) {
+		if (event.clipboardData?.files != null && event.clipboardData.files.length != 0) {
+			event.preventDefault();
+			if (files == null) {
+				files = Array.from(event.clipboardData.files);
+			} else {
+				files = files.concat(Array.from(event.clipboardData.files));
+			}
+		}
+	}
+
+	function pushFile() {
+		const input = document.createElement('input');
+		input.type = 'file';
+		input.onchange = (e) => {
+			const event = e as InputEvent & { target: { files?: FileList } };
+
+			if (event.target.files == undefined) {
+				return;
+			}
+
+			files = files.concat(Array.from(event.target.files));
+		};
+
+		input.click();
+	}
+
 	onMount(() => {
 		client.on('Message', onMessage);
 		client.on('MessageDelete', onMessageDelete);
 		client.on('MessageUpdate', onMessageUpdate);
+		document.addEventListener('paste', handlePaste);
 	});
 
 	onDestroy(() => {
 		client.removeListener('Message', onMessage);
 		client.removeListener('MessageDelete', onMessageDelete);
 		client.removeListener('MessageUpdate', onMessageUpdate);
+		document.removeEventListener('paste', handlePaste);
 	});
 
 	async function updateChannelName(channel: Exclude<Channel, { channel_type: 'VoiceChannel' }>) {
@@ -308,14 +331,7 @@
 
 			<div class="flex-divider" />
 
-			<button
-				on:click={() => {
-					if (fileInputNode != null) {
-						fileInputNode.value = '';
-						files = null;
-					}
-				}}
-			>
+			<button on:click={() => (files = [])}>
 				<XCircleIcon />
 			</button>
 		</div>
@@ -326,7 +342,7 @@
 	<div class="typing-indicator">
 		{#each currentlyTypingUsers as user}
 			{#if $settings['jolt:low-data-mode']}
-				<UserIcon />
+				<GenericUserIcon />
 			{:else}
 				<img
 					class="cover"
@@ -343,10 +359,9 @@
 		{/if}
 	</div>
 	<form class="message-form" id="send-message-form" on:submit={sendMessage}>
-		<label for="file-upload">
+		<button on:click={pushFile} class="file-upload">
 			<PlusIcon />
-		</label>
-		<input type="file" id="file-upload" max="5" bind:files bind:this={fileInputNode} />
+		</button>
 		<SendMessageForm
 			sendTypingEvents={$settings['jolt:send-typing-indicators']}
 			bind:value={messageInput}
@@ -361,14 +376,14 @@
 		flex-direction: column;
 	}
 
-	input#file-upload {
-		visibility: hidden;
-		width: 0;
-	}
-
-	label[for='file-upload'] {
+	.file-upload {
 		cursor: pointer;
 		margin-left: 16px;
+		margin-right: 16px;
+		background-color: transparent;
+		border: none;
+		padding: 0;
+		outline: none;
 	}
 
 	:global(.message-form) {

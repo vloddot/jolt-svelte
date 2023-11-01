@@ -5,7 +5,7 @@
 	import { selectedServerIDKey } from '@routes/(app)/context';
 	import { decodeTime } from 'ulid';
 	import { getUser, membersKey, messagesKey, /* repliesKey, */ usersKey } from '.';
-	import UserIcon from '@components/Icons/UserIcon.svelte';
+	import GenericUserIcon from '@components/Icons/GenericUserIcon.svelte';
 	import { clientKey, settingsKey } from '@routes/context';
 	// import TrashIcon from '@components/Icons/TrashIcon.svelte';
 	// import PencilSquareIcon from '@components/Icons/PencilSquareIcon.svelte';
@@ -142,11 +142,11 @@
 	{#if isHead(message) && message.system == undefined}
 		<div class="user-detail">
 			{#if $settings['jolt:low-data-mode'] || author == undefined}
-				<UserIcon />
+				<GenericUserIcon />
 			{:else}
 				{@const displayAvatar = getDisplayAvatar(author, member, message)}
 				{#if displayAvatar == undefined}
-					<UserIcon />
+					<GenericUserIcon />
 				{:else}
 					<img class="cover" alt={displayName} src={displayAvatar} width="40px" height="40px" />
 				{/if}

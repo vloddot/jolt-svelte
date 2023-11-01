@@ -58,6 +58,10 @@
 		--mention: #3399ff30;
 		--tertiary-background: #3d3d3d;
 		--tertiary-foreground: #666666;
+		--status-online: #12ca74;
+		--status-idle: #f1b040;
+		--status-busy: #f53d42;
+		--status-invisible: #80848e;
 		--hover: rgba(255, 255, 255, 0.075);
 		--scrollbar-track: transparent;
 		--scrollbar-thumb: #2469b2;
@@ -109,6 +113,10 @@
 
 	:global(.flex-container) {
 		display: flex;
+	}
+
+	:global(.flex-col) {
+		flex-direction: column;
 	}
 
 	:global(.flex-divider) {

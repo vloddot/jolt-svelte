@@ -13,6 +13,7 @@
 	import { serverKey } from '@routes/(app)/servers/[sid]/context';
 	import { onDestroy } from 'svelte';
 	import { nearbyMessageKey } from '@components/Chat';
+	import MembersList from '@components/MembersList.svelte';
 
 	const client = getContext(clientKey)!;
 	const server = getContext(serverKey);
@@ -116,3 +117,7 @@
 {/if}
 
 <slot />
+
+{#if $server != undefined}
+	<MembersList server={$server} />
+{/if}
