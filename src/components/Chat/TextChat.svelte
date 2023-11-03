@@ -11,16 +11,22 @@
 		usersKey,
 		type SendableReply,
 		channelKey,
-		nearbyMessageKey
+		nearbyMessageKey,
+		showEmojiMenuKey,
+
+		messageInputKey
+
 	} from '.';
 	import MessageComponent from './Message.svelte';
 	import XCircleIcon from '@components/Icons/XCircleIcon.svelte';
+	import FaceSmileIcon from '@components/Icons/FaceSmileIcon.svelte';
 	import GenericUserCircleIcon from '@components/Icons/GenericUserCircleIcon.svelte';
 	import SendMessageForm from './MessageForm.svelte';
 	import SendableReplyComponent from './SendableReply.svelte';
 	import PlusIcon from '@components/Icons/PlusIcon.svelte';
 	import type { ServerMessage } from '$lib/client/WebSocketClient';
 	import { page } from '$app/stores';
+	import EmojiMenu from './EmojiMenu.svelte';
 
 	/**
 	 * Which channel to show messages from.
@@ -30,21 +36,28 @@
 	let initialReplies: SendableReply[] = [];
 	export { initialReplies as replies };
 
-	export let messageInput = '';
+	let initialMessageInput = '';
+	export { initialMessageInput as messageInput };
+
+	const messageInput = writable(initialMessageInput);
+	setContext(messageInputKey, messageInput);
+
 	export let files: File[] = [];
 
 	const settings = getContext(settingsKey)!;
 	const client = getContext(clientKey)!;
 
-	const messages = writable<Message[]>([]);
-	const members = writable<Member[]>([]);
-	const users = writable<User[]>([]);
-	const replies = writable<SendableReply[]>(initialReplies);
+	const messages = writable(new Array<Message>());
+	const members = writable(new Array<Member>());
+	const users = writable(new Array<User>());
+	const showEmojiMenu = writable(false);
+	const replies = writable(initialReplies);
 
 	setContext(messagesKey, messages);
 	setContext(membersKey, members);
 	setContext(usersKey, users);
 	setContext(repliesKey, replies);
+	setContext(showEmojiMenuKey, showEmojiMenu);
 	setContext(channelKey, channel);
 
 	let messagesListNode: HTMLDivElement;
@@ -127,7 +140,7 @@
 		files = [];
 
 		await client.api.sendMessage(channel._id, {
-			content: messageInput.trim(),
+			content: $messageInput.trim(),
 			replies: $replies.map(({ message: { _id }, mention }) => ({
 				id: _id,
 				mention
@@ -136,7 +149,7 @@
 		});
 
 		replies.set([]);
-		messageInput = '';
+		messageInput.set('');
 	}
 
 	function onMessage(message: Message) {
@@ -317,6 +330,7 @@
 			{/each}
 		{/await}
 	</div>
+
 	{#if files != null && files.length != 0}
 		<div class="flex-container">
 			<p>
@@ -355,15 +369,26 @@
 			{getTypingUsersDisplay(currentlyTypingUsers)}
 		{/if}
 	</div>
+
+	{#if $showEmojiMenu}
+		<div class="emoji-menu">
+			<EmojiMenu />
+		</div>
+	{/if}
+
 	<form class="message-form" id="send-message-form" on:submit={sendMessage}>
-		<button on:click={pushFile} class="file-upload">
+		<button on:click={pushFile} class="default-button">
 			<PlusIcon />
 		</button>
 		<SendMessageForm
 			sendTypingEvents={$settings['jolt:send-typing-indicators']}
-			bind:value={messageInput}
+			bind:value={$messageInput}
 			placeholder="Send message in {channelName}"
 		/>
+		<div class="flex-divider" />
+		<button type="button" on:click={() => showEmojiMenu.update(v => !v)} class="default-button">
+			<FaceSmileIcon />
+		</button>
 	</form>
 </main>
 
@@ -371,16 +396,6 @@
 	main.main-content-container {
 		display: flex;
 		flex-direction: column;
-	}
-
-	.file-upload {
-		cursor: pointer;
-		margin-left: 16px;
-		margin-right: 16px;
-		background-color: transparent;
-		border: none;
-		padding: 0;
-		outline: none;
 	}
 
 	:global(.message-form) {
@@ -399,6 +414,10 @@
 		height: 100%;
 		overflow-x: hidden;
 		overflow-y: scroll;
+	}
+
+	.emoji-menu {
+		position: relative;
 	}
 
 	.typing-indicator {

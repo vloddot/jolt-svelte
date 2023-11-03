@@ -4,7 +4,7 @@
 	import { getContext, setContext } from '$lib/context';
 	import { getAutumnURL, getDisplayAvatar } from '$lib/util';
 	import ServerSidebarIcon from '@components/ServerSidebarIcon.svelte';
-	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
+	import { selectedServerIDKey } from '@routes/(app)/context';
 	import { clientKey, settingsKey } from '@routes/context';
 	import { onMount } from 'svelte';
 	import { get, writable } from 'svelte/store';
@@ -17,9 +17,6 @@
 	const client = getContext(clientKey)!;
 
 	const selectedServerID = writable<string | undefined>();
-	const selectedChannelID = writable<string | undefined>();
-
-	setContext(selectedChannelIDKey, selectedChannelID);
 	setContext(selectedServerIDKey, selectedServerID);
 
 	let servers = Array.from(client.api.cache.servers.values());

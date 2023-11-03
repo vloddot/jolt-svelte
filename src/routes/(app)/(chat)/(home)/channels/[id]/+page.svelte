@@ -10,7 +10,7 @@
 
 	import { appWindow } from '@tauri-apps/api/window';
 	import { onDestroy } from 'svelte';
-	import { selectedChannelIDKey } from '@routes/(app)/context';
+	import { selectedChannelIDKey } from '@routes/(app)/(chat)/context';
 
 	$: pageParams = $page.params as RouteParams;
 

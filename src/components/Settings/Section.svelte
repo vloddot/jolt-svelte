@@ -10,14 +10,14 @@
 
 {#if section.type == 'link'}
 	<ChannelItem href={section.id} selected={$page.url.pathname == `${root}/${section.id}`}>
-			{#if section.icon != undefined}
-				{#if typeof section.icon == 'string'}
-					<img src={section.icon} alt={section.title} />
-				{:else}
-					<svelte:component this={section.icon} />
-				{/if}
+		{#if section.icon != undefined}
+			{#if typeof section.icon == 'string'}
+				<img src={section.icon} alt={section.title} />
+			{:else}
+				<svelte:component this={section.icon} />
 			{/if}
-			<div>{section.title}</div>
+		{/if}
+		<div>{section.title}</div>
 	</ChannelItem>
 {:else if section.type == 'header'}
 	<h1>{section.title}</h1>

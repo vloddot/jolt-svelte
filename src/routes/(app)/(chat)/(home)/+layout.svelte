@@ -2,23 +2,18 @@
 	import { page } from '$app/stores';
 	import { getContext } from '$lib/context';
 	import ChannelComponent from '@components/ChannelBar/Channel.svelte';
-	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
+	import { selectedServerIDKey } from '@routes/(app)/context';
 	import { clientKey } from '@routes/context';
 	import { onMount } from 'svelte';
 	import { writable } from 'svelte/store';
-	import type { LayoutParams } from './$types';
 	import ChannelItem from '@components/ChannelBar/ChannelItem.svelte';
 	import { base } from '$app/paths';
 	import GenericUserCircleIcon from '@components/Icons/GenericUserCircleIcon.svelte';
 
-	$: pageParams = $page.params as LayoutParams;
-
 	const client = getContext(clientKey)!;
-	const selectedChannelID = getContext(selectedChannelIDKey) ?? writable();
 	const selectedServerID = getContext(selectedServerIDKey) ?? writable();
 
 	$: selectedServerID.set(undefined);
-	$: selectedChannelID.set(pageParams.id);
 
 	let dms: Exclude<Channel, { channel_type: 'TextChannel' | 'VoiceChannel' }>[] = [];
 

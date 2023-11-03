@@ -143,6 +143,20 @@
 		border: 1px solid var(--primary-header);
 	}
 
+	:global(.default-button) {
+		cursor: pointer;
+		margin: 0 16px;
+		background-color: transparent;
+		border: none;
+		padding: 0;
+		outline: none;
+
+		&:focus, &:hover {
+			outline: none;
+			background-color: transparent;
+		}
+	}
+
 	:global(input:hover, textarea:hover, button:hover) {
 		background-color: var(--hover);
 	}

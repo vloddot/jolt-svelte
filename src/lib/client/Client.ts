@@ -28,10 +28,11 @@ export class Client extends EventEmitter<Events<ServerMessage>> {
 			.fetchUnreads()
 			.then(
 				(unreads) =>
-					(this.unreads = mapById<ChannelUnread['_id'], ChannelUnread['_id']['channel'], ChannelUnread>(
-						unreads,
-						(id) => id.channel
-					))
+					(this.unreads = mapById<
+						ChannelUnread['_id'],
+						ChannelUnread['_id']['channel'],
+						ChannelUnread
+					>(unreads, (id) => id.channel))
 			);
 
 		this.websocket.on('serverEvent', (event) => this.#handleEvent(event));

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getContext } from '$lib/context';
 	import InputSetting from '@components/Settings/InputSetting.svelte';
-	import { serverKey } from '@routes/(app)/servers/[sid]/context';
+	import { serverKey } from '@routes/(app)/(chat)/servers/[sid]/context';
 	import { clientKey } from '@routes/context';
 
 	const server = getContext(serverKey)!;

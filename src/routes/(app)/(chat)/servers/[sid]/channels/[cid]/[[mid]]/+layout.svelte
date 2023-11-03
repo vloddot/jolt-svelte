@@ -3,14 +3,14 @@
 	import { getContext, setContext } from '$lib/context';
 	import ChannelCategory from '@components/ChannelBar/Category.svelte';
 	import ChannelComponent from '@components/ChannelBar/Channel.svelte';
-	import { selectedChannelIDKey } from '@routes/(app)/context';
+	import { selectedChannelIDKey } from '@routes/(app)/(chat)/context';
 	import { clientKey } from '@routes/context';
 	import { redirect } from '@sveltejs/kit';
 	import { appWindow } from '@tauri-apps/api/window';
 	import { writable } from 'svelte/store';
 	import type { RouteParams } from './$types';
 	import { channelKey } from './context';
-	import { serverKey } from '@routes/(app)/servers/[sid]/context';
+	import { serverKey } from '@routes/(app)/(chat)/servers/[sid]/context';
 	import { onDestroy } from 'svelte';
 	import { nearbyMessageKey } from '@components/Chat';
 	import MembersList from '@components/MembersList.svelte';

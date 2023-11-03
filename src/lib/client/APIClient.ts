@@ -147,9 +147,10 @@ export class APIClient {
 	}
 
 	async fetchMembers(server_id: string, exclude_offline = false): Promise<AllMemberResponse> {
-		return await this.req('GET', `/servers/${server_id}/members?exclude_offline=${exclude_offline}`).then((response) =>
-			response.json()
-		);
+		return await this.req(
+			'GET',
+			`/servers/${server_id}/members?exclude_offline=${exclude_offline}`
+		).then((response) => response.json());
 	}
 
 	async fetchMessage(channel_id: string, message_id: string): Promise<Message> {

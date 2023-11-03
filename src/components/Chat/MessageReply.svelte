@@ -2,7 +2,8 @@
 	import { base } from '$app/paths';
 	import { getContext } from '$lib/context';
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
-	import { selectedChannelIDKey, selectedServerIDKey } from '@routes/(app)/context';
+	import { selectedServerIDKey } from '@routes/(app)/context';
+	import { selectedChannelIDKey } from '@routes/(app)/(chat)/context';
 	import { clientKey, settingsKey } from '@routes/context';
 	import { getUser, messagesKey, usersKey } from '.';
 	import GenericUserCircleIcon from '@components/Icons/GenericUserCircleIcon.svelte';

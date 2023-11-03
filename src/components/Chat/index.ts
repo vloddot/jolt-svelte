@@ -36,3 +36,5 @@ export const membersKey: ContextInjectionKey<Writable<Member[]>> = Symbol();
 export const usersKey: ContextInjectionKey<Writable<User[]>> = Symbol();
 export const repliesKey: ContextInjectionKey<Writable<SendableReply[]>> = Symbol();
 export const nearbyMessageKey: ContextInjectionKey<string> = Symbol();
+export const showEmojiMenuKey: ContextInjectionKey<Writable<boolean>> = Symbol();
+export const messageInputKey: ContextInjectionKey<Writable<string>> = Symbol();

@@ -51,7 +51,7 @@
 			flex-direction: column;
 			white-space: nowrap;
 			overflow: hidden;
-			
+
 			.user-presence {
 				color: var(--tertiary-foreground);
 				font-size: 0.6875rem;
