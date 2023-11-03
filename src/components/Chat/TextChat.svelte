@@ -204,11 +204,8 @@
 	function handlePaste(event: ClipboardEvent) {
 		if (event.clipboardData?.files != null && event.clipboardData.files.length != 0) {
 			event.preventDefault();
-			if (files == null) {
-				files = Array.from(event.clipboardData.files);
-			} else {
-				files = files.concat(Array.from(event.clipboardData.files));
-			}
+			const clipboardFiles = Array.from(event.clipboardData.files);
+			files = files?.concat(clipboardFiles) ?? clipboardFiles;
 		}
 	}
 
@@ -339,7 +336,7 @@
 	{#each $replies as reply}
 		<SendableReplyComponent {reply} />
 	{/each}
-	<div class="typing-indicator">
+	<div class="typing-indicator" class:transparent-color={currentlyTypingUsers.length == 0}>
 		{#each currentlyTypingUsers as user}
 			{#if $settings['jolt:low-data-mode']}
 				<GenericUserCircleIcon />
@@ -414,5 +411,9 @@
 		background-color: var(--secondary-background);
 		border-top-right-radius: var(--border-radius);
 		border-top-left-radius: var(--border-radius);
+	}
+
+	.transparent-color {
+		background-color: transparent;
 	}
 </style>

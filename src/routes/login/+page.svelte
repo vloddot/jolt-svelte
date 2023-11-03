@@ -142,6 +142,11 @@
 	<form id="login-form" class="modal-base" on:submit|preventDefault={login}>
 		<h1>Jolt &#x26A1;</h1>
 
+		<p>
+			The Revolt client inspired by the revolt.chat client re-taped from the one that's held
+			together by duct tape and bad code
+		</p>
+
 		<input type="email" placeholder="Email" bind:value={email} />
 		<input type="password" placeholder="Password" bind:value={password} />
 
@@ -173,5 +178,10 @@
 <style lang="scss">
 	input {
 		margin-bottom: 8px;
+	}
+
+	p {
+		margin-top: 0;
+		max-width: 80%;
 	}
 </style>
