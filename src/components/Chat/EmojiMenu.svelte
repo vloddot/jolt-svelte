@@ -44,17 +44,22 @@
 		return numberOfMatches / name.length;
 	}
 
-	$: {
-		if (searchInput.length == 0) {
-			emojis = Array.from(client.api.cache.emojis.values());
-		} else {
-			emojis = emojis
-				.map((emoji) => [calculateScore(emoji.name), emoji])
-				.filter(([score]) => score != 0)
-				.sort(([scoreA], [scoreB]) => (scoreA as number) - (scoreB as number))
-				.map(([, emoji]) => emoji as Emoji)
-				.toReversed();
-		}
+	$: if (searchInput.length == 0) {
+		emojis = Array.from(client.api.cache.emojis.values());
+	} else {
+		emojis = emojis
+			.flatMap((emoji) => {
+				const score = calculateScore(emoji.name);
+
+				if (score == 0) {
+					return [];
+				}
+
+				return [[score, emoji]];
+			})
+			.sort(([scoreA], [scoreB]) => (scoreA as number) - (scoreB as number))
+			.map(([, emoji]) => emoji as Emoji)
+			.reverse();
 	}
 </script>
 
