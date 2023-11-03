@@ -4,8 +4,8 @@
 	import MessageReply from '@components/Chat/MessageReply.svelte';
 	import { selectedServerIDKey } from '@routes/(app)/context';
 	import { decodeTime } from 'ulid';
-	import { getUser, membersKey, messagesKey, /* repliesKey, */ usersKey } from '.';
-	import GenericUserIcon from '@components/Icons/GenericUserIcon.svelte';
+	import { getUser, membersKey, messagesKey, usersKey } from '.';
+	import GenericUserCircleIcon from '@components/Icons/GenericUserCircleIcon.svelte';
 	import { clientKey, settingsKey } from '@routes/context';
 	// import TrashIcon from '@components/Icons/TrashIcon.svelte';
 	// import PencilSquareIcon from '@components/Icons/PencilSquareIcon.svelte';
@@ -142,11 +142,11 @@
 	{#if isHead(message) && message.system == undefined}
 		<div class="user-detail">
 			{#if $settings['jolt:low-data-mode'] || author == undefined}
-				<GenericUserIcon />
+				<GenericUserCircleIcon />
 			{:else}
 				{@const displayAvatar = getDisplayAvatar(author, member, message)}
 				{#if displayAvatar == undefined}
-					<GenericUserIcon />
+					<GenericUserCircleIcon />
 				{:else}
 					<img class="cover" alt={displayName} src={displayAvatar} width="40px" height="40px" />
 				{/if}

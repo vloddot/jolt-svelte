@@ -5,7 +5,7 @@
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
 	import CheckIcon from '@components/Icons/CheckIcon.svelte';
 	import EnvelopeIcon from '@components/Icons/EnvelopeIcon.svelte';
-	import GenericUserIcon from '@components/Icons/GenericUserIcon.svelte';
+	import GenericUserCircleIcon from '@components/Icons/GenericUserCircleIcon.svelte';
 	import XMarkIcon from '@components/Icons/XMarkIcon.svelte';
 	import { clientKey } from '@routes/context';
 
@@ -53,7 +53,7 @@
 						{#if avatar != undefined}
 							<img class="cover" alt={name} src={avatar} width="64px" height="64px" />
 						{:else}
-							<GenericUserIcon />
+							<GenericUserCircleIcon />
 						{/if}
 
 						{name}

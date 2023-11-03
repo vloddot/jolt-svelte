@@ -15,7 +15,7 @@
 	} from '.';
 	import MessageComponent from './Message.svelte';
 	import XCircleIcon from '@components/Icons/XCircleIcon.svelte';
-	import GenericUserIcon from '@components/Icons/GenericUserIcon.svelte';
+	import GenericUserCircleIcon from '@components/Icons/GenericUserCircleIcon.svelte';
 	import SendMessageForm from './MessageForm.svelte';
 	import SendableReplyComponent from './SendableReply.svelte';
 	import PlusIcon from '@components/Icons/PlusIcon.svelte';
@@ -342,7 +342,7 @@
 	<div class="typing-indicator">
 		{#each currentlyTypingUsers as user}
 			{#if $settings['jolt:low-data-mode']}
-				<GenericUserIcon />
+				<GenericUserCircleIcon />
 			{:else}
 				<img
 					class="cover"

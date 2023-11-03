@@ -10,7 +10,7 @@
 	import SpeakerWave from '@components/Icons/SpeakerWaveIcon.svelte';
 	import ChannelItem from './ChannelItem.svelte';
 	import type { ComponentType } from 'svelte';
-	import GenericUserIcon from '@components/Icons/GenericUserIcon.svelte';
+	import GenericUserCircleIcon from '@components/Icons/GenericUserCircleIcon.svelte';
 
 	const settings = getContext(settingsKey)!;
 	const client = getContext(clientKey)!;
@@ -57,7 +57,7 @@
 		)}
 		{#if user == undefined}
 			<ChannelItem href={getChannelHref(channel._id)} selected={$selectedChannelID == channel._id}>
-				<GenericUserIcon />
+				<GenericUserCircleIcon />
 
 				<span class="channel-name">Unknown User</span>
 			</ChannelItem>
@@ -66,7 +66,7 @@
 				{@const name = getDisplayName(user)}
 
 				{#if $settings['jolt:low-data-mode']}
-					<GenericUserIcon />
+					<GenericUserCircleIcon />
 				{:else}
 					<img class="cover" src={getDisplayAvatar(user)} alt={name} />
 				{/if}

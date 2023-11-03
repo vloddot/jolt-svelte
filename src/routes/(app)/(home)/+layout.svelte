@@ -9,7 +9,7 @@
 	import type { LayoutParams } from './$types';
 	import ChannelItem from '@components/ChannelBar/ChannelItem.svelte';
 	import { base } from '$app/paths';
-	import GenericUserIcon from '@components/Icons/GenericUserIcon.svelte';
+	import GenericUserCircleIcon from '@components/Icons/GenericUserCircleIcon.svelte';
 
 	$: pageParams = $page.params as LayoutParams;
 
@@ -40,7 +40,7 @@
 
 <div class="channel-bar-container">
 	<ChannelItem href="{base}/friends" selected={$page.url.pathname == `${base}/friends`}>
-		<GenericUserIcon />
+		<GenericUserCircleIcon />
 
 		<!-- janky hack, mate -->
 		<span>Friends</span>

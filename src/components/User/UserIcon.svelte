@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getContext } from '$lib/context';
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
-	import GenericUserIcon from '@components/Icons/GenericUserIcon.svelte';
+	import GenericUserCircleIcon from '@components/Icons/GenericUserCircleIcon.svelte';
 	import { settingsKey } from '@routes/context';
 
 	const settings = getContext(settingsKey)!;
@@ -18,7 +18,7 @@
 </script>
 
 {#if $settings['jolt:low-data-mode']}
-	<GenericUserIcon />
+	<GenericUserCircleIcon />
 {:else}
 	{@const src = getDisplayAvatar(user, member, message)}
 	{@const alt = getDisplayName(user, member, message)}

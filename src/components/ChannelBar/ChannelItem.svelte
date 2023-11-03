@@ -30,6 +30,7 @@
 		align-items: center;
 		transition: background-color 150ms;
 		min-height: 32px;
+		color: inherit;
 
 		:global(img),
 		:global(svg) {

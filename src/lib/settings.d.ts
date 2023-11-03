@@ -10,6 +10,7 @@ type SettingsSection =
 			readonly type: 'link';
 			readonly title: string;
 			readonly id: string;
+			readonly icon?: import('svelte').ComponentType | string;
 	  }
 	| {
 			readonly type: 'header';

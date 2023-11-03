@@ -10,7 +10,14 @@
 
 {#if section.type == 'link'}
 	<ChannelItem href={section.id} selected={$page.url.pathname == `${root}/${section.id}`}>
-		<span>{section.title}</span>
+			{#if section.icon != undefined}
+				{#if typeof section.icon == 'string'}
+					<img src={section.icon} alt={section.title} />
+				{:else}
+					<svelte:component this={section.icon} />
+				{/if}
+			{/if}
+			<div>{section.title}</div>
 	</ChannelItem>
 {:else if section.type == 'header'}
 	<h1>{section.title}</h1>
@@ -19,7 +26,8 @@
 <style lang="scss">
 	h1 {
 		text-transform: uppercase;
-		font-size: large;
-		margin: 8px 0;
+		font-size: x-small;
+		color: var(--tertiary-foreground);
+		margin: 8px 4px;
 	}
 </style>
