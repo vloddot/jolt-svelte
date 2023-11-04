@@ -4,13 +4,13 @@
 	import MessageReply from '@components/Chat/MessageReply.svelte';
 	import { selectedServerIDKey } from '@routes/(app)/context';
 	import { decodeTime } from 'ulid';
-	import { getUser, membersKey, messagesKey, usersKey } from '.';
+	import { getUser, membersKey, messagesKey, repliesKey, usersKey } from '.';
 	import GenericUserCircleIcon from '@components/Icons/GenericUserCircleIcon.svelte';
 	import { clientKey, settingsKey } from '@routes/context';
-	// import TrashIcon from '@components/Icons/TrashIcon.svelte';
-	// import PencilSquareIcon from '@components/Icons/PencilSquareIcon.svelte';
-	// import ArrowUturnLeftIcon from '@components/Icons/ArrowUturnLeftIcon.svelte';
-	// import type { ComponentType } from 'svelte';
+	import TrashIcon from '@components/Icons/TrashIcon.svelte';
+	import PencilSquareIcon from '@components/Icons/PencilSquareIcon.svelte';
+	import ArrowUturnLeftIcon from '@components/Icons/ArrowUturnLeftIcon.svelte';
+	import type { ComponentType } from 'svelte';
 	import SystemMessageComponent from './SystemMessage.svelte';
 	import AttachmentComponent from './Attachment.svelte';
 	import EmbedComponent from './Embed.svelte';
@@ -28,7 +28,6 @@
 	 * Message to show.
 	 */
 	export let message: Message;
-
 	export let messageIndex: number;
 
 	let messageContentToEdit: string | undefined = undefined;
@@ -42,45 +41,45 @@
 	const messages = getContext(messagesKey);
 	const users = getContext(usersKey);
 	const members = getContext(membersKey);
-	// const replies = getContext(repliesKey);
+	const replies = getContext(repliesKey);
 
-	// interface MessageControls {
-	// 	src: ComponentType | string;
-	// 	name: string;
-	// 	showIf?: (message: Message) => boolean;
-	// 	onclick: (message: Message) => unknown;
-	// }
+	interface MessageControls {
+		src: ComponentType | string;
+		name: string;
+		showIf?: (message: Message) => boolean;
+		onclick: (message: Message) => unknown;
+	}
 
-	// const controls: MessageControls[] = [
-	// 	{
-	// 		src: ArrowUturnLeftIcon,
-	// 		name: 'Reply',
-	// 		onclick() {
-	// 			if ($replies?.some((reply) => reply.message._id == message._id)) {
-	// 				return;
-	// 			}
+	const controls: MessageControls[] = [
+		{
+			src: ArrowUturnLeftIcon,
+			name: 'Reply',
+			onclick() {
+				if ($replies?.some((reply) => reply.message._id == message._id)) {
+					return;
+				}
 
-	// 			replies?.update((replies) => {
-	// 				replies.push({ message, mention: true });
-	// 				return replies;
-	// 			});
-	// 		}
-	// 	},
-	// 	{
-	// 		src: PencilSquareIcon,
-	// 		name: 'Edit',
-	// 		showIf: (message) => message.author == client.user?._id,
-	// 		onclick: (message) =>
-	// 			(messageContentToEdit =
-	// 				messageContentToEdit == undefined ? message.content ?? '' : undefined)
-	// 	},
-	// 	{
-	// 		src: TrashIcon,
-	// 		name: 'Delete',
-	// 		showIf: (message) => message.author == client.user?._id, // TODO: check permissions for message deleting
-	// 		onclick: (message) => client.api.deleteMessage(message.channel, message._id)
-	// 	}
-	// ];
+				replies?.update((replies) => {
+					replies.push({ message, mention: true });
+					return replies;
+				});
+			}
+		},
+		{
+			src: PencilSquareIcon,
+			name: 'Edit',
+			showIf: (message) => message.author == client.user?._id,
+			onclick: (message) =>
+				(messageContentToEdit =
+					messageContentToEdit == undefined ? message.content ?? '' : undefined)
+		},
+		{
+			src: TrashIcon,
+			name: 'Delete',
+			showIf: (message) => message.author == client.user?._id, // TODO: check permissions for message deleting
+			onclick: (message) => client.api.deleteMessage(message.channel, message._id)
+		}
+	];
 
 	async function updateMember(server_id: string, user_id: string) {
 		member = $members?.find(
@@ -131,6 +130,26 @@
 </script>
 
 <div id="MESSAGE-{message._id}" class="message-container">
+	<div class="message-controls">
+		{#each controls as { name, onclick, src, showIf }}
+			{#if showIf?.(message) ?? true}
+				<button
+					on:click={() => onclick(message)}
+					use:tippy={{
+						content: name,
+						theme: 'top-tooltip'
+					}}
+				>
+					{#if typeof src == 'string'}
+						<img {src} alt={name} />
+					{:else}
+						<svelte:component this={src} />
+					{/if}
+				</button>
+			{/if}
+		{/each}
+	</div>
+
 	{#if message.replies != undefined && message.replies.length != 0}
 		<div class="replies">
 			{#each message.replies as id}
@@ -215,9 +234,20 @@
 		display: flex;
 		flex-direction: column;
 		padding: 4px 24px;
+		position: relative;
+
+		.message-controls {
+			display: none;
+			position: absolute;
+			right: 1%;
+			top: 5%;
+		}
 
 		&:hover {
 			background-color: var(--hover);
+			.message-controls {
+				display: flex;
+			}
 		}
 
 		.replies {

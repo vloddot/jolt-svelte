@@ -5,19 +5,43 @@
 
 	const client = getContext(clientKey)!;
 	const session = getContext(sessionKey)!;
+
+	let sessions = new Array<SessionInfo>();
+
+	async function updateSessions(promise: Promise<SessionInfo[]>) {
+		sessions = await promise;
+	}
+
+	$: sessionFetchPromise = client.api.fetchSessions();
+	$: updateSessions(sessionFetchPromise);
 </script>
 
 <div class="mr-2">
 	<div class="my-4">
 		{#if $session != null}
-			<SessionView session={$session} />
+			<SessionView
+				session={$session}
+				on:click={() => {
+					client.destroy();
+					session.set(null);
+				}}
+				isThisDevice
+			/>
 		{/if}
 	</div>
 
-	{#await client.api.fetchSessions() then sessions}
+	{#await sessionFetchPromise}
+		<p>Loading...</p>
+	{:then}
 		{#each sessions as sessionInfo}
 			{#if sessionInfo._id != $session?._id}
-				<SessionView session={sessionInfo} />
+				<SessionView
+					session={sessionInfo}
+					on:click={() => {
+						client.api.revokeSession(sessionInfo._id);
+						sessions = sessions.filter((session) => session._id != sessionInfo._id);
+					}}
+				/>
 			{/if}
 		{/each}
 	{/await}

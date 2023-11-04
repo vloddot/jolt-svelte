@@ -37,6 +37,11 @@
 		for (const [c, frequency] of Object.entries(wordFrequency)) {
 			const searchFrequency = searchWordFrequency[c];
 			if (searchFrequency != undefined) {
+				if (searchFrequency > frequency) {
+					numberOfMatches = 0;
+					continue;
+				}
+
 				numberOfMatches += Math.min(searchFrequency, frequency);
 			}
 		}
@@ -47,7 +52,7 @@
 	$: if (searchInput.length == 0) {
 		emojis = Array.from(client.api.cache.emojis.values());
 	} else {
-		emojis = emojis
+		emojis = Array.from(client.api.cache.emojis.values())
 			.flatMap((emoji) => {
 				const score = calculateScore(emoji.name);
 

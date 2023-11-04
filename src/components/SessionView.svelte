@@ -1,19 +1,18 @@
 <script lang="ts">
-	import { getContext } from '$lib/context';
-	import { clientKey, sessionKey } from '@routes/context';
 	import { decodeTime } from 'ulid';
 	import dayjs from 'dayjs';
 	import calendar from 'dayjs/plugin/calendar';
+	import relativeTime from 'dayjs/plugin/relativeTime';
 
 	dayjs.extend(calendar);
+	dayjs.extend(relativeTime);
 
 	let sessionToView: SessionInfo;
 	export { sessionToView as session };
 
-	const client = getContext(clientKey)!;
-	const session = getContext(sessionKey)!;
+	export let isThisDevice = false;
 
-	$: isThisDevice = sessionToView._id == $session?._id;
+	$: timestamp = dayjs(decodeTime(sessionToView._id));
 </script>
 
 <div class="container" data-this-device={isThisDevice}>
@@ -25,22 +24,14 @@
 		<div class="session-info">
 			<h3 class="header">{sessionToView.name}</h3>
 			<p class="indented">
-				Created <time>{dayjs(decodeTime(sessionToView._id)).calendar()}</time>.
+				Created <time>{timestamp.calendar()}</time> ({timestamp.fromNow()}).
 			</p>
 		</div>
 
 		<div class="flex-divider" />
 
 		<button
-			on:click={() => {
-				if (isThisDevice) {
-					client.destroy();
-					session.set(null);
-					return;
-				}
-
-				client.api.revokeSession(sessionToView._id);
-			}}
+			on:click
 		>
 			Revoke
 		</button>
