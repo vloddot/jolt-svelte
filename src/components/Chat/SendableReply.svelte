@@ -14,19 +14,15 @@
 </script>
 
 <div class="container">
-	<p>
-		Replying to
-		<strong>
-			{#await client.api.fetchUser(reply.message.author) then user}
-				{@const displayName = getDisplayName(user)}
-				<img class="cover" src={getDisplayAvatar(user)} alt={displayName} />
-				{displayName}
-			{:catch}
-				<GenericUserCircleIcon />
-				&lt;UnknownUser&gt;
-			{/await}
-		</strong>
-	</p>
+	Replying to
+	{#await client.api.fetchUser(reply.message.author) then user}
+		{@const displayName = getDisplayName(user)}
+		<img class="cover" src={getDisplayAvatar(user)} alt={displayName} />
+		{displayName}
+	{:catch}
+		<GenericUserCircleIcon />
+		&lt;UnknownUser&gt;
+	{/await}
 
 	{#if reply.message.content}
 		<p class="message-content">{reply.message.content}</p>
@@ -34,45 +30,44 @@
 
 	<div class="flex-divider" />
 
-	<label class="mention-button" aria-label="Mention author {reply.mention ? 'ON' : 'OFF'}">
+	<label class="reply-button" aria-label="Mention author {reply.mention ? 'ON' : 'OFF'}">
 		<input id="mention" style="display: none;" type="checkbox" bind:checked={reply.mention} />
-		<AtSymbolIcon />
+		<AtSymbolIcon width="15" height="15" />
 		{reply.mention ? 'ON' : 'OFF'}
 	</label>
 
-	<div>
-		<button
-			on:click={() =>
-				replies.update((replies) => {
-					replies = replies.filter((r) => r.message._id != reply.message._id);
-					return replies;
-				})}
-		>
-			<XCircleIcon />
-		</button>
-	</div>
+	<button
+		class="reply-button default-button"
+		on:click={() =>
+			replies.update((replies) => {
+				replies = replies.filter((r) => r.message._id != reply.message._id);
+				return replies;
+			})}
+	>
+		<XCircleIcon />
+	</button>
 </div>
 
 <style lang="scss">
 	img.cover {
-		width: 24px;
-		height: 24px;
+		max-width: 24px;
+		max-height: 24px;
 	}
 
 	.container {
 		display: flex;
 		align-items: center;
 		background-color: var(--secondary-background);
-		margin: 0px 16px;
-		height: 24px;
-		padding: 8px;
+		max-height: 24px;
+		padding: 4px;
+		padding-left: 24px;
 		gap: 8px;
 		border-top-right-radius: var(--border-radius);
 		border-top-left-radius: var(--border-radius);
+		font-size: 0.8em;
 	}
 
 	.message-content {
-		padding-left: 4px;
 		color: var(--tertiary-foreground);
 		text-overflow: ellipsis;
 	}
@@ -82,7 +77,7 @@
 		height: 16px;
 	}
 
-	.mention-button {
+	.reply-button {
 		cursor: pointer;
 		color: var(--tertiary-foreground);
 		transition: color 150ms;

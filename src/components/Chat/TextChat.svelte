@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { getContext } from '$lib/context';
-	import { getDisplayAvatar, getDisplayName } from '$lib/util';
+	import { getDisplayName } from '$lib/util';
 	import { clientKey, settingsKey } from '@routes/context';
 	import { onDestroy, onMount, setContext, tick } from 'svelte';
-	import { writable } from 'svelte/store';
+	import { get, writable } from 'svelte/store';
 	import {
 		membersKey,
 		messagesKey,
@@ -13,20 +13,20 @@
 		channelKey,
 		nearbyMessageKey,
 		showEmojiMenuKey,
-
-		messageInputKey
-
+		messageInputKey,
+		type UserSentMessage,
+		userSentMessagesKey
 	} from '.';
 	import MessageComponent from './Message.svelte';
 	import XCircleIcon from '@components/Icons/XCircleIcon.svelte';
 	import FaceSmileIcon from '@components/Icons/FaceSmileIcon.svelte';
-	import GenericUserCircleIcon from '@components/Icons/GenericUserCircleIcon.svelte';
-	import SendMessageForm from './MessageForm.svelte';
+	import MessageForm from './MessageForm.svelte';
 	import SendableReplyComponent from './SendableReply.svelte';
 	import PlusIcon from '@components/Icons/PlusIcon.svelte';
 	import type { ServerMessage } from '$lib/client/WebSocketClient';
 	import { page } from '$app/stores';
 	import EmojiMenu from './EmojiMenu.svelte';
+	import { ulid } from 'ulid';
 
 	/**
 	 * Which channel to show messages from.
@@ -52,16 +52,18 @@
 	const users = writable(new Array<User>());
 	const showEmojiMenu = writable(false);
 	const replies = writable(initialReplies);
+	const userSentMessages = writable(new Array<UserSentMessage>());
 
 	setContext(messagesKey, messages);
 	setContext(membersKey, members);
 	setContext(usersKey, users);
 	setContext(repliesKey, replies);
 	setContext(showEmojiMenuKey, showEmojiMenu);
+	setContext(userSentMessagesKey, userSentMessages);
 	setContext(channelKey, channel);
 
 	let messagesListNode: HTMLDivElement;
-	let currentlyTypingUsers: User[] = [];
+	let currentlyTypingUsers = new Array<User>();
 	let channelName = 'Unknown Channel';
 	let messageLoadPromise = Promise.resolve();
 
@@ -135,21 +137,44 @@
 	$: listenToTypingEvents($settings['jolt:receive-typing-indicators']);
 
 	async function sendMessage() {
-		const attachments = await Promise.all(files.map((file) => client.autumn.uploadFile(file)));
+		const content = get(messageInput).trim();
 
-		files = [];
-
-		await client.api.sendMessage(channel._id, {
-			content: $messageInput.trim(),
-			replies: $replies.map(({ message: { _id }, mention }) => ({
-				id: _id,
-				mention
-			})),
-			attachments
-		});
-
-		replies.set([]);
 		messageInput.set('');
+
+		userSentMessages.update((messages) => {
+			messages.push({
+				// definitely not the actual ID of the message,
+				// just used to get the approximate timestamp of the message
+				_id: ulid(),
+				content,
+				replies: get(replies).map(({ message: { _id } }) => _id),
+				channel: channel._id,
+				author: client.user!._id,
+				promise: new Promise((resolve, reject) => {
+					Promise.all(files.map((file) => client.autumn.uploadFile(file)))
+						.then((attachments) => {
+							files = [];
+							client.api
+								.sendMessage(channel._id, {
+									content,
+									replies: get(replies).map(({ message: { _id }, mention }) => ({
+										id: _id,
+										mention
+									})),
+									attachments
+								})
+								.then((message) => {
+									replies.set([]);
+									resolve(message);
+								})
+								.catch(reject);
+						})
+						.catch(reject);
+				})
+			});
+
+			return messages;
+		});
 	}
 
 	function onMessage(message: Message) {
@@ -278,7 +303,7 @@
 
 	function getTypingUsersDisplay(currentlyTypingUsers: User[]): string {
 		if (currentlyTypingUsers.length == 0) {
-			throw new Error('function called with an array of length 0');
+			return '';
 		}
 
 		const users = currentlyTypingUsers.map((user) => getDisplayName(user));
@@ -328,6 +353,9 @@
 			{#each $messages as message, messageIndex}
 				<MessageComponent {message} {messageIndex} />
 			{/each}
+			{#each $userSentMessages as message, messageIndex}
+				<MessageComponent {message} {messageIndex} />
+			{/each}
 		{/await}
 	</div>
 
@@ -347,49 +375,34 @@
 			</button>
 		</div>
 	{/if}
-	{#each $replies as reply}
-		<SendableReplyComponent {reply} />
-	{/each}
-	<div class="typing-indicator" class:transparent-color={currentlyTypingUsers.length == 0}>
-		{#each currentlyTypingUsers as user}
-			{#if $settings['jolt:low-data-mode']}
-				<GenericUserCircleIcon />
-			{:else}
-				<img
-					class="cover"
-					src={getDisplayAvatar(user)}
-					width="16px"
-					height="16px"
-					alt={getDisplayName(user)}
-				/>
-			{/if}
-		{/each}
 
-		{#if currentlyTypingUsers.length != 0}
-			{getTypingUsersDisplay(currentlyTypingUsers)}
-		{/if}
-	</div>
-
+	
 	{#if $showEmojiMenu}
-		<div class="emoji-menu">
-			<EmojiMenu />
-		</div>
+	<div class="emoji-menu">
+		<EmojiMenu />
+	</div>
 	{/if}
-
-	<form class="message-form" id="send-message-form" on:submit={sendMessage}>
-		<button on:click={pushFile} class="default-button">
-			<PlusIcon />
-		</button>
-		<SendMessageForm
-			sendTypingEvents={$settings['jolt:send-typing-indicators']}
-			bind:value={$messageInput}
-			placeholder="Send message in {channelName}"
-		/>
-		<div class="flex-divider" />
-		<button type="button" on:click={() => showEmojiMenu.update(v => !v)} class="default-button">
-			<FaceSmileIcon />
-		</button>
-	</form>
+	
+	<div class="message-form-box">
+		{#each $replies as reply}
+			<SendableReplyComponent {reply} />
+		{/each}
+		<form class="message-form" id="send-message-form" on:submit={sendMessage}>
+			<button on:click={pushFile} class="default-button">
+				<PlusIcon />
+			</button>
+			<MessageForm
+				sendTypingEvents={$settings['jolt:send-typing-indicators']}
+				bind:value={$messageInput}
+				placeholder="Send message in {channelName}"
+			/>
+			<div class="flex-divider" />
+			<button type="button" on:click={() => showEmojiMenu.update((v) => !v)} class="default-button">
+				<FaceSmileIcon />
+			</button>
+		</form>
+		<span class="typing-indicator">{getTypingUsersDisplay(currentlyTypingUsers)}</span>
+	</div>
 </main>
 
 <style lang="scss">
@@ -398,13 +411,29 @@
 		flex-direction: column;
 	}
 
+	:global(.message-form-box) {
+		display: flex;
+		flex-direction: column;
+		margin: 0px 16px;
+		position: relative;
+	}
+
+	.typing-indicator {
+		display: flex;
+		position: absolute;
+		left: 16px;
+		bottom: 1px;
+		height: 24px;
+		align-items: center;
+	}
+
 	:global(.message-form) {
 		display: flex;
 		background-color: var(--message-box);
 		border-radius: var(--border-radius);
 		align-items: center;
-		margin: 0px 16px 16px 16px;
 		border-bottom: 2px solid var(--accent);
+		margin-bottom: 24px;
 	}
 
 	.messages-list {
@@ -414,25 +443,10 @@
 		height: 100%;
 		overflow-x: hidden;
 		overflow-y: scroll;
+		margin-bottom: 16px;
 	}
 
 	.emoji-menu {
 		position: relative;
-	}
-
-	.typing-indicator {
-		display: flex;
-		gap: 4px;
-		padding-left: 8px;
-		align-items: center;
-		margin: 0px 16px;
-		height: 36px;
-		background-color: var(--secondary-background);
-		border-top-right-radius: var(--border-radius);
-		border-top-left-radius: var(--border-radius);
-	}
-
-	.transparent-color {
-		background-color: transparent;
 	}
 </style>

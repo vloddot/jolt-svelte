@@ -27,11 +27,7 @@ export function getDisplayName(
 	member?: Member,
 	message?: Message
 ): string {
-	if (message?.system == undefined) {
-		return message?.masquerade?.name ?? member?.nickname ?? user?.display_name ?? user.username;
-	}
-
-	return 'System Message';
+	return message?.masquerade?.name ?? member?.nickname ?? user?.display_name ?? user.username;
 }
 
 export function getDisplayAvatar(

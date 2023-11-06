@@ -7,6 +7,15 @@ export interface SendableReply {
 	mention: boolean;
 }
 
+export type UserSentMessage = {
+	_id: Message['_id'];
+	content: Message['content'];
+	channel: string,
+	author: string,
+	replies: string[];
+	promise: Promise<Message>;
+};
+
 export async function getUser(
 	api: APIClient,
 	users: User[] | Map<string, User>,
@@ -38,3 +47,4 @@ export const repliesKey: ContextInjectionKey<Writable<SendableReply[]>> = Symbol
 export const nearbyMessageKey: ContextInjectionKey<string> = Symbol();
 export const showEmojiMenuKey: ContextInjectionKey<Writable<boolean>> = Symbol();
 export const messageInputKey: ContextInjectionKey<Writable<string>> = Symbol();
+export const userSentMessagesKey: ContextInjectionKey<Writable<UserSentMessage[]>> = Symbol();

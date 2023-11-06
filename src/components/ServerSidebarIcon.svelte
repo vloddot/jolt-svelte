@@ -41,10 +41,7 @@
 			content: tooltip,
 			theme: 'right-tooltip',
 			animation: 'scale-subtle',
-			duration: 100,
-			onShow() {
-				if (!tooltip) return false;
-			}
+			duration: 100
 		}}
 	>
 		<slot />
