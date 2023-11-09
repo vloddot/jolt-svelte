@@ -10,7 +10,6 @@
 		repliesKey,
 		usersKey,
 		type SendableReply,
-		channelKey,
 		nearbyMessageKey,
 		showEmojiMenuKey,
 		messageInputKey,
@@ -27,11 +26,7 @@
 	import { page } from '$app/stores';
 	import EmojiMenu from './EmojiMenu.svelte';
 	import { ulid } from 'ulid';
-
-	/**
-	 * Which channel to show messages from.
-	 */
-	export let channel: Exclude<Channel, { channel_type: 'VoiceChannel' }>;
+	import { selectedChannelKey } from '@routes/(app)/context';
 
 	let initialReplies: SendableReply[] = [];
 	export { initialReplies as replies };
@@ -47,6 +42,7 @@
 	const settings = getContext(settingsKey)!;
 	const client = getContext(clientKey)!;
 
+	const channel = getContext(selectedChannelKey)!;
 	const messages = writable(new Array<Message>());
 	const members = writable(new Array<Member>());
 	const users = writable(new Array<User>());
@@ -60,7 +56,6 @@
 	setContext(repliesKey, replies);
 	setContext(showEmojiMenuKey, showEmojiMenu);
 	setContext(userSentMessagesKey, userSentMessages);
-	setContext(channelKey, channel);
 
 	let messagesListNode: HTMLDivElement;
 	let currentlyTypingUsers = new Array<User>();
@@ -68,94 +63,111 @@
 	let messageLoadPromise = Promise.resolve();
 
 	$: {
-		const nearby = getContext(nearbyMessageKey);
-		messageLoadPromise = client.api
-			.queryMessages(channel._id, {
-				sort: 'Latest',
-				include_users: true,
-				limit: 100,
-				nearby
-			})
-			.then((response) => {
-				if (Array.isArray(response)) {
-					let messagesValue: Message[];
-					if (nearby == undefined) {
-						messagesValue = response.reverse();
+		if ($channel == undefined) {
+			messageLoadPromise = Promise.reject();
+		} else {
+			const nearby = getContext(nearbyMessageKey);
+			messageLoadPromise = client
+				.queryMessages($channel._id, {
+					sort: 'Latest',
+					include_users: true,
+					limit: 100,
+					nearby
+				})
+				.then((response) => {
+					if (Array.isArray(response)) {
+						let messagesValue: Message[];
+						if (nearby == undefined) {
+							messagesValue = response.reverse();
+						} else {
+							messagesValue = response.sort((a, b) => a._id.localeCompare(b._id));
+						}
+						messages.set(messagesValue);
 					} else {
-						messagesValue = response.sort((a, b) => a._id.localeCompare(b._id));
+						let messagesValue: Message[];
+						if (nearby == undefined) {
+							messagesValue = response.messages.reverse();
+						} else {
+							messagesValue = response.messages.sort((a, b) => a._id.localeCompare(b._id));
+						}
+						messages.set(messagesValue);
+						users.set(response.users);
+						members.set(response.members ?? []);
 					}
-					messages.set(messagesValue);
-				} else {
-					let messagesValue: Message[];
-					if (nearby == undefined) {
-						messagesValue = response.messages.reverse();
-					} else {
-						messagesValue = response.messages.sort((a, b) => a._id.localeCompare(b._id));
-					}
-					messages.set(messagesValue);
-					users.set(response.users);
-					members.set(response.members ?? []);
-				}
+				});
+
+			replies.set([]);
+			currentlyTypingUsers = [];
+
+			messageLoadPromise.then(() => {
+				tick().then(() => messagesListNode.scrollTo(0, messagesListNode.scrollHeight));
 			});
-
-		replies.set([]);
-		currentlyTypingUsers = [];
-
-		messageLoadPromise.then(() => {
-			tick().then(() => messagesListNode.scrollTo(0, messagesListNode.scrollHeight));
-		});
+		}
 	}
 
-	async function listenToTypingEvents(receive: boolean) {
-		if (!receive) {
-			client.removeAllListeners('ChannelStartTyping');
-			client.removeAllListeners('ChannelStopTyping');
+	async function channelStartTypingHandler({
+		id,
+		user
+	}: Extract<ServerMessage, { type: 'ChannelStartTyping' }>): Promise<void> {
+		if (user == client.user?._id || id != $channel?._id) {
 			return;
 		}
 
-		client.on('ChannelStartTyping', async ({ id, user }) => {
-			if (user == client.user?._id || id != channel._id) {
+		for (const { _id } of currentlyTypingUsers) {
+			if (user == _id) {
 				return;
 			}
+		}
 
-			for (const { _id } of currentlyTypingUsers) {
-				if (user == _id) {
-					return;
-				}
-			}
-
-			currentlyTypingUsers[currentlyTypingUsers.length] = await client.api.fetchUser(user);
-		});
-
-		client.on('ChannelStopTyping', ({ id, user }) => {
-			if (id == channel._id) {
-				currentlyTypingUsers = currentlyTypingUsers.filter((u) => u._id != user);
-			}
-		});
+		currentlyTypingUsers[currentlyTypingUsers.length] = await client.fetchUser(user);
 	}
 
-	$: listenToTypingEvents($settings['jolt:receive-typing-indicators']);
+	function channelStopTypingHandler({
+		id,
+		user
+	}: Extract<ServerMessage, { type: 'ChannelStopTyping' }>): void {
+		if (id == $channel?._id) {
+			currentlyTypingUsers = currentlyTypingUsers.filter((u) => u._id != user);
+		}
+	}
+
+	$: {
+		// reference so this code reruns :shrug:
+		channel;
+
+		client.removeListener('ChannelStartTyping', channelStartTypingHandler);
+		client.removeListener('ChannelStopTyping', channelStopTypingHandler);
+
+		if ($settings['jolt:receive-typing-indicators']) {
+			client.on('ChannelStartTyping', channelStartTypingHandler);
+			client.on('ChannelStopTyping', channelStopTypingHandler);
+		}
+	}
 
 	async function sendMessage() {
 		const content = get(messageInput).trim();
-
 		messageInput.set('');
 
 		userSentMessages.update((messages) => {
+			if ($channel == undefined) {
+				return messages;
+			}
+
+			const channelValue = $channel;
 			messages.push({
 				// definitely not the actual ID of the message,
 				// just used to get the approximate timestamp of the message
 				_id: ulid(),
 				content,
 				replies: get(replies).map(({ message: { _id } }) => _id),
-				channel: channel._id,
+				channel: $channel?._id,
 				author: client.user!._id,
 				promise: new Promise((resolve, reject) => {
 					Promise.all(files.map((file) => client.autumn.uploadFile(file)))
 						.then((attachments) => {
 							files = [];
-							client.api
-								.sendMessage(channel._id, {
+							client
+								.sendMessage(channelValue._id, {
 									content,
 									replies: get(replies).map(({ message: { _id }, mention }) => ({
 										id: _id,
@@ -178,7 +190,7 @@
 	}
 
 	function onMessage(message: Message) {
-		if (message.channel != channel._id) {
+		if (message.channel != $channel?._id) {
 			return;
 		}
 
@@ -187,7 +199,7 @@
 			messagesListNode.scrollHeight - 20;
 
 		if (document.hasFocus() && scrolledToBottom) {
-			client.api.ackMessage(channel._id, message._id);
+			client.ackMessage($channel._id, message._id);
 		}
 
 		messages.update((messages) => {
@@ -204,7 +216,7 @@
 		id,
 		channel: channel_id
 	}: Extract<ServerMessage, { type: 'MessageDelete' }>) {
-		if (channel_id != channel._id) {
+		if (channel_id != $channel?._id) {
 			return;
 		}
 
@@ -216,7 +228,7 @@
 		channel: channel_id,
 		data
 	}: Extract<ServerMessage, { type: 'MessageUpdate' }>) {
-		if (channel_id != channel._id) {
+		if (channel_id != $channel?._id) {
 			return;
 		}
 
@@ -260,7 +272,7 @@
 			files = files.concat(Array.from(event.target.files));
 		};
 
-		input.click();
+		input.click(); // click :3
 	}
 
 	onMount(() => {
@@ -277,8 +289,13 @@
 		document.removeEventListener('paste', handlePaste);
 	});
 
-	async function updateChannelName(channel: Exclude<Channel, { channel_type: 'VoiceChannel' }>) {
-		if (channel.channel_type == 'TextChannel' || channel.channel_type == 'Group') {
+	async function updateChannelName(channel: Channel | undefined) {
+		if (channel == undefined) {
+			channelName = '<Unknown Channel>';
+			return;
+		}
+
+		if (channel.channel_type != 'SavedMessages' && channel.channel_type != 'DirectMessage') {
 			channelName = `#${channel.name}`;
 			return;
 		}
@@ -290,7 +307,7 @@
 
 		try {
 			channelName = `@${getDisplayName(
-				await client.api.fetchUser(
+				await client.fetchUser(
 					channel.recipients[0] == client.user?._id ? channel.recipients[1] : channel.recipients[0]
 				)
 			)}`;
@@ -299,7 +316,7 @@
 		}
 	}
 
-	$: updateChannelName(channel);
+	$: updateChannelName($channel);
 
 	function getTypingUsersDisplay(currentlyTypingUsers: User[]): string {
 		if (currentlyTypingUsers.length == 0) {
@@ -376,13 +393,12 @@
 		</div>
 	{/if}
 
-	
 	{#if $showEmojiMenu}
-	<div class="emoji-menu">
-		<EmojiMenu />
-	</div>
+		<div class="emoji-menu">
+			<EmojiMenu />
+		</div>
 	{/if}
-	
+
 	<div class="message-form-box">
 		{#each $replies as reply}
 			<SendableReplyComponent {reply} />

@@ -1,32 +1,30 @@
 <script lang="ts">
 	import { getContext } from '$lib/context';
+	import { selectedChannelKey } from '@routes/(app)/context';
 	import { clientKey } from '@routes/context';
-	import { channelKey } from '.';
-	import { createEventDispatcher } from 'svelte';
 
 	const client = getContext(clientKey)!;
-	const channel = getContext(channelKey)!;
+	const channel = getContext(selectedChannelKey)!;
 
 	export let placeholder: string | undefined = undefined;
 	export let value = '';
 	export let sendTypingEvents: boolean;
-	const dispatch = createEventDispatcher();
 
 	function endTyping() {
-		if (!sendTypingEvents) return;
+		if (!sendTypingEvents || $channel == undefined) return;
 
-		client.websocket.send({ type: 'EndTyping', channel: channel._id });
+		client.websocket.send({ type: 'EndTyping', channel: $channel._id });
 	}
 
 	function startTyping() {
-		if (!sendTypingEvents) return;
+		if (!sendTypingEvents || $channel == undefined) return;
 
 		if (value == '') {
-			client.websocket.send({ type: 'EndTyping', channel: channel._id });
+			endTyping();
 			return;
 		}
 
-		client.websocket.send({ type: 'BeginTyping', channel: channel._id });
+		client.websocket.send({ type: 'BeginTyping', channel: $channel._id });
 	}
 </script>
 
@@ -34,7 +32,6 @@
 	on:blur={endTyping}
 	on:input={startTyping}
 	on:keydown={(event) => {
-		dispatch('keydown', event);
 		if (event.shiftKey || event.key != 'Enter') {
 			return;
 		}

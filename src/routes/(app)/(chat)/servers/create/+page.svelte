@@ -19,7 +19,7 @@
 			return;
 		}
 
-		const { server, channels } = await client.api.createServer({
+		const { server, channels } = await client.createServer({
 			name,
 			description: description == '' ? undefined : description,
 			nsfw

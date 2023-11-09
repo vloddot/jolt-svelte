@@ -14,7 +14,7 @@
 	<form
 		id="change-username-form"
 		on:submit|preventDefault={() =>
-			(changeUsernamePromise = client.api.changeUsername(username, password))}
+			(changeUsernamePromise = client.changeUsername(username, password))}
 	>
 		<InputSetting
 			type="text"

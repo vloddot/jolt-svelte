@@ -2,9 +2,8 @@
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { getContext, setContext } from '$lib/context';
-	import { getAutumnURL, getDisplayAvatar } from '$lib/util';
+	import { getAutumnURL } from '$lib/util';
 	import ServerSidebarIcon from '@components/ServerSidebarIcon.svelte';
-	import { selectedServerIDKey } from '@routes/(app)/context';
 	import { clientKey, settingsKey } from '@routes/context';
 	import { onMount } from 'svelte';
 	import { get, writable } from 'svelte/store';
@@ -12,14 +11,33 @@
 	import PlusIcon from '@components/Icons/PlusIcon.svelte';
 	import Cog6ToothIcon from '@components/Icons/Cog6ToothIcon.svelte';
 	import { page } from '$app/stores';
+	import { selectedServerKey, selectedChannelKey } from './context';
+	import type { LayoutParams } from './$types';
 
 	const settings = getContext(settingsKey)!;
 	const client = getContext(clientKey)!;
 
-	const selectedServerID = writable<string | undefined>();
-	setContext(selectedServerIDKey, selectedServerID);
+	let selectedChannel = writable<Channel | undefined>();
+	setContext(selectedChannelKey, selectedChannel);
 
-	let servers = Array.from(client.api.cache.servers.values());
+	let selectedServer = writable<Server | undefined>();
+	setContext(selectedServerKey, selectedServer);
+
+	$: pageParams = $page.params as LayoutParams;
+
+	$: if (pageParams.cid == undefined) {
+		selectedChannel.set(undefined);
+	} else {
+		client.fetchChannel(pageParams.cid).then((value) => selectedChannel.set(value));
+	}
+
+	$: if (pageParams.sid == undefined) {
+		selectedServer.set(undefined);
+	} else {
+		client.fetchServer(pageParams.sid).then((value) => selectedServer.set(value));
+	}
+
+	let servers = Array.from(client.cache.servers.values());
 
 	function sortServers(servers: Server[], ordering: string[]) {
 		return servers.sort((a, b) => {
@@ -45,18 +63,18 @@
 
 	client.on('ServerCreate', () => {
 		servers = sortServers(
-			Array.from(client.api.cache.servers.values()),
+			Array.from(client.cache.servers.values()),
 			$settings.ordering.servers ?? []
 		);
 	});
 
 	client.on('ServerDelete', ({ id }) => {
 		servers = sortServers(
-			Array.from(client.api.cache.servers.values()),
+			Array.from(client.cache.servers.values()),
 			$settings.ordering.servers ?? []
 		);
 
-		if ($selectedServerID == id) {
+		if ($selectedServer?._id == id) {
 			goto(`${base}/`);
 		}
 	});
@@ -75,7 +93,7 @@
 			}
 		}
 
-		const serverSettings = await client.api.fetchSettings(Object.keys(settingsValue));
+		const serverSettings = await client.fetchSettings(Object.keys(settingsValue));
 		const serverSettingsUpdate: Partial<Settings> = {};
 
 		for (const [key, localValue] of Object.entries(settingsValue) as [
@@ -107,7 +125,7 @@
 		}
 
 		if (Object.keys(serverSettingsUpdate).length != 0) {
-			client.api.setSettings(serverSettingsUpdate);
+			client.setSettings(serverSettingsUpdate);
 		}
 
 		settings.set(settingsValue);
@@ -148,38 +166,24 @@
 
 <div class="app-container">
 	<div class="server-sidebar-container">
-		{#if $settings['jolt:low-data-mode']}
-			<ServerSidebarIcon
-				selected={$page.route.id?.startsWith('/(app)/(home)') ?? false}
-				href="{base}/"
-				tooltip="Home"
-			>
-				<HomeIcon />
-			</ServerSidebarIcon>
-			<hr />
-		{:else}
-			{#await client.user ?? client.api.fetchUser('@me') then user}
-				<ServerSidebarIcon
-					href="{base}/"
-					selected={$page.route.id?.startsWith('/(app)/(home)') ?? false}
-					ariaLabel="Home"
-					tooltip="{user.username}#{user.discriminator}"
-				>
-					<img class="cover" src={getDisplayAvatar(user)} alt="Home" width="42px" height="42px" />
-				</ServerSidebarIcon>
+		<ServerSidebarIcon
+			selected={$page.route.id?.startsWith('/(app)/(chat)/(home)') ?? false}
+			href="{base}/"
+			tooltip="Home"
+		>
+			<HomeIcon />
+		</ServerSidebarIcon>
 
-				<hr />
-			{/await}
-		{/if}
+		<hr />
 
-		{#each servers as server}
+		{#each servers as { channels, _id: id, name, icon }}
 			<ServerSidebarIcon
-				href="{base}/servers/{server._id}/channels/{server.channels[0]}"
-				tooltip={server.name}
-				selected={$selectedServerID == server._id}
+				href="{base}/servers/{id}/channels/{channels[0]}"
+				tooltip={name}
+				selected={$selectedServer?._id == id}
 			>
-				{#if server.icon == undefined || $settings['jolt:low-data-mode']}
-					{@const words = server.name.split(' ')}
+				{#if icon == undefined || $settings['jolt:low-data-mode']}
+					{@const words = name.split(' ')}
 					{#if words.length > 3}
 						{words
 							.slice(0, 3)
@@ -191,8 +195,8 @@
 				{:else}
 					<img
 						class="cover"
-						src={getAutumnURL(server.icon, { max_side: '256' })}
-						alt={server.name}
+						src={getAutumnURL(icon, { max_side: '256' })}
+						alt={name}
 						width="42px"
 						height="42px"
 					/>

@@ -15,7 +15,7 @@
 
 <div class="container">
 	Replying to
-	{#await client.api.fetchUser(reply.message.author) then user}
+	{#await client.fetchUser(reply.message.author) then user}
 		{@const displayName = getDisplayName(user)}
 		<img class="cover" src={getDisplayAvatar(user)} alt={displayName} />
 		{displayName}

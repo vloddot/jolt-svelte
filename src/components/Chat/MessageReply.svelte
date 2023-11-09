@@ -2,16 +2,15 @@
 	import { base } from '$app/paths';
 	import { getContext } from '$lib/context';
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
-	import { selectedServerIDKey } from '@routes/(app)/context';
-	import { selectedChannelIDKey } from '@routes/(app)/(chat)/context';
 	import { clientKey, settingsKey } from '@routes/context';
 	import { getUser, messagesKey, usersKey } from '.';
 	import GenericUserCircleIcon from '@components/Icons/GenericUserCircleIcon.svelte';
+	import { selectedChannelKey, selectedServerKey } from '@routes/(app)/context';
 
 	const client = getContext(clientKey)!;
 	const settings = getContext(settingsKey)!;
-	const selectedServerID = getContext(selectedServerIDKey);
-	const selectedChannelID = getContext(selectedChannelIDKey);
+	const channel = getContext(selectedChannelKey)!;
+	const server = getContext(selectedServerKey);
 	const messages = getContext(messagesKey);
 	const users = getContext(usersKey);
 
@@ -19,35 +18,41 @@
 </script>
 
 <a
-	href="{base}/{$selectedServerID == undefined
-		? `channels/${$selectedChannelID}/${id}`
-		: `servers/${$selectedServerID}/channels/${$selectedChannelID}/${id}`}"
+	href="{base}/{$server == undefined
+		? `channels/${$channel?._id}/${id}`
+		: `servers/${$server?._id}/channels/${$channel?._id}/${id}`}"
 >
-	{#if $selectedChannelID != undefined}
-		{#await $messages?.find(({ _id }) => id == _id) ?? client.api.fetchMessage($selectedChannelID, id) then message}
-			{#if !$settings['jolt:low-data-mode']}
-				{#await getUser(client.api, $users ?? client.api.cache.users, message.author)}
-					&lt;Unknown User&gt;
-				{:then author}
-					{#if author != undefined}
-						{@const displayName = getDisplayName(author)}
-						<img
-							class="cover"
-							src={getDisplayAvatar(author)}
-							alt={displayName}
-							width="24px"
-							height="24px"
-						/>
-						{displayName}
-					{:else}
+	{#if $channel != undefined}
+		{#await $messages?.find(({ _id: mid }) => id == mid) then message}
+			{#if message == undefined}
+				Could not resolve message.
+			{:else}
+				{#if !$settings['jolt:low-data-mode']}
+					{#await getUser( $users ?? client.cache.users, message.author, (id) => client.fetchUser(id) )}
 						<GenericUserCircleIcon />
 
-						Unknown User
-					{/if}
-				{/await}
-			{/if}
-			{#if message.content != undefined}
-				<span class="message-content">{message.content}</span>
+						&lt;Unknown User&gt;
+					{:then author}
+						{#if author != undefined}
+							{@const displayName = getDisplayName(author)}
+							<img
+								class="cover"
+								src={getDisplayAvatar(author)}
+								alt={displayName}
+								width="24px"
+								height="24px"
+							/>
+							{displayName}
+						{:else}
+							<GenericUserCircleIcon />
+
+							&lt;Unknown User&gt;
+						{/if}
+					{/await}
+				{/if}
+				{#if message.content != undefined}
+					<span class="message-content">{message.content}</span>
+				{/if}
 			{/if}
 		{/await}
 	{/if}

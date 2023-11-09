@@ -92,6 +92,10 @@ type FieldsServer = components['schemas']['FieldsServer'];
 type DataCreateChannel = components['schemas']['DataCreateChannel'];
 type ChannelType = components['schemas']['ChannelType'];
 type AllMemberResponse = components['schemas']['AllMemberResponse'];
+type AllMemberResponseMap = {
+	members: Member[];
+	users: Map<User['_id'], User>;
+};
 type DataMemberEdit = components['schemas']['DataMemberEdit'];
 type FieldsMember = components['schemas']['FieldsMember'];
 type MemberQueryResponse = components['schemas']['MemberQueryResponse'];

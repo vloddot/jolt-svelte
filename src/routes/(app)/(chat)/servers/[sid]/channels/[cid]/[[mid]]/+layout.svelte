@@ -3,55 +3,32 @@
 	import { getContext, setContext } from '$lib/context';
 	import ChannelCategory from '@components/ChannelBar/Category.svelte';
 	import ChannelComponent from '@components/ChannelBar/Channel.svelte';
-	import { selectedChannelIDKey } from '@routes/(app)/(chat)/context';
 	import { clientKey } from '@routes/context';
-	import { redirect } from '@sveltejs/kit';
 	import { appWindow } from '@tauri-apps/api/window';
-	import { writable } from 'svelte/store';
 	import type { RouteParams } from './$types';
-	import { channelKey } from './context';
-	import { serverKey } from '@routes/(app)/(chat)/servers/[sid]/context';
-	import { onDestroy } from 'svelte';
 	import { nearbyMessageKey } from '@components/Chat';
-	import MembersList from '@components/MembersList.svelte';
+	import { selectedChannelKey, selectedServerKey } from '@routes/(app)/context';
+	import UserButton from '@components/User/UserButton.svelte';
 
 	const client = getContext(clientKey)!;
-	const server = getContext(serverKey);
+	const channel = getContext(selectedChannelKey)!;
+	const selectedServer = getContext(selectedServerKey);
 
 	$: pageParams = $page.params as RouteParams;
-
-	const channel = writable<
-		Extract<Channel, { channel_type: 'TextChannel' | 'VoiceChannel' }> | undefined
-	>();
-
-	setContext(channelKey, channel);
-
-	const selectedChannelID = getContext(selectedChannelIDKey) ?? writable(pageParams.cid);
-
-	$: selectedChannelID.set(pageParams.cid);
-
-	async function updateChannel(cid: string) {
-		const result = await client.api.fetchChannel(cid);
-
-		if (result.channel_type != 'TextChannel' && result.channel_type != 'VoiceChannel') {
-			throw redirect(302, `/channels/${cid}`);
-		}
-
-		channel.set(result);
-	}
-
-	$: if ($selectedChannelID) updateChannel($selectedChannelID);
-
 	$: {
 		let title = 'Jolt - ';
 
-		if ($server == undefined) {
+		if ($selectedServer == undefined) {
 			title += 'Server';
 		} else {
-			title += $server.name;
+			title += $selectedServer.name;
 		}
 
-		if ($channel != undefined) {
+		if (
+			$channel != undefined &&
+			$channel.channel_type != 'DirectMessage' &&
+			$channel.channel_type != 'SavedMessages'
+		) {
 			title += ` | #${$channel.name}`;
 		}
 
@@ -83,16 +60,12 @@
 			);
 		}
 	}
-
-	onDestroy(() => {
-		selectedChannelID.set(undefined);
-	});
 </script>
 
-{#if $server != undefined}
-	{@const categories = $server.categories ?? []}
+{#if $selectedServer != undefined}
+	{@const categories = $selectedServer.categories ?? []}
 	{@const unsortedChannels =
-		$server.channels.filter(
+		$selectedServer.channels.filter(
 			(channel) =>
 				categories.find(
 					(category) => channel != undefined && category.channels.includes(channel)
@@ -101,7 +74,7 @@
 
 	<div class="channel-bar-container">
 		{#each unsortedChannels as id}
-			{#await client.api.fetchChannel(id) then channel}
+			{#await client.fetchChannel(id) then channel}
 				<ChannelComponent {channel} />
 			{/await}
 		{/each}
@@ -118,6 +91,18 @@
 
 <slot />
 
-{#if $server != undefined}
-	<MembersList server={$server} />
+{#if $selectedServer != undefined}
+	<div class="members-list-container">
+		{#await client.fetchMembers($selectedServer._id)}
+			Loading...
+		{:then response}
+			{#each response.members as member}
+				{@const user = response.users.get(member._id.user)}
+
+				{#if user != undefined}
+					<UserButton {user} {member} />
+				{/if}
+			{/each}
+		{/await}
+	</div>
 {/if}

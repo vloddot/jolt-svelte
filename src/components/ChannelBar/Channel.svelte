@@ -2,8 +2,6 @@
 	import { base } from '$app/paths';
 	import { getContext } from '$lib/context';
 	import { getAutumnURL, getDisplayAvatar, getDisplayName } from '$lib/util';
-	import { selectedServerIDKey } from '@routes/(app)/context';
-	import { selectedChannelIDKey } from '@routes/(app)/(chat)/context';
 	import { clientKey, settingsKey } from '@routes/context';
 	import PencilSquare from '@components/Icons/PencilSquareIcon.svelte';
 	import UserGroup from '@components/Icons/UserGroupIcon.svelte';
@@ -12,12 +10,13 @@
 	import ChannelItem from './ChannelItem.svelte';
 	import type { ComponentType } from 'svelte';
 	import GenericUserCircleIcon from '@components/Icons/GenericUserCircleIcon.svelte';
+	import { selectedChannelKey, selectedServerKey } from '@routes/(app)/context';
 
 	const settings = getContext(settingsKey)!;
 	const client = getContext(clientKey)!;
 
-	const selectedChannelID = getContext(selectedChannelIDKey);
-	const selectedServerID = getContext(selectedServerIDKey);
+	const server = getContext(selectedServerKey);
+	const selectedChannel = getContext(selectedChannelKey);
 
 	function getChannelIcon(
 		channel: Exclude<Channel, { channel_type: 'DirectMessage' }>
@@ -44,26 +43,30 @@
 
 	function getChannelHref(id: string): string {
 		return `${base}/${
-			$selectedServerID == undefined
-				? `channels/${id}`
-				: `servers/${$selectedServerID}/channels/${id}`
+			$server == undefined ? `channels/${id}` : `servers/${$server._id}/channels/${id}`
 		}`;
 	}
 </script>
 
 {#if channel.channel_type == 'DirectMessage'}
 	{#if channel.active}
-		{@const user = client.api.cache.users.get(
+		{@const user = client.cache.users.get(
 			channel.recipients[0] == client.user?._id ? channel.recipients[1] : channel.recipients[0]
 		)}
 		{#if user == undefined}
-			<ChannelItem href={getChannelHref(channel._id)} selected={$selectedChannelID == channel._id}>
+			<ChannelItem
+				href={getChannelHref(channel._id)}
+				selected={$selectedChannel?._id == channel._id}
+			>
 				<GenericUserCircleIcon />
 
 				<span class="channel-name">Unknown User</span>
 			</ChannelItem>
 		{:else}
-			<ChannelItem href={getChannelHref(channel._id)} selected={$selectedChannelID == channel._id}>
+			<ChannelItem
+				href={getChannelHref(channel._id)}
+				selected={$selectedChannel?._id == channel._id}
+			>
 				{@const name = getDisplayName(user)}
 
 				{#if $settings['jolt:low-data-mode']}
@@ -77,7 +80,7 @@
 		{/if}
 	{/if}
 {:else if channel.channel_type == 'TextChannel' || channel.channel_type == 'VoiceChannel' || channel.channel_type == 'Group' || channel.channel_type == 'SavedMessages'}
-	<ChannelItem href={getChannelHref(channel._id)} selected={$selectedChannelID == channel._id}>
+	<ChannelItem href={getChannelHref(channel._id)} selected={$selectedChannel?._id == channel._id}>
 		{@const icon = getChannelIcon(channel)}
 		{@const name = channel.channel_type == 'SavedMessages' ? 'Saved Notes' : channel.name}
 

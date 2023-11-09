@@ -2,7 +2,6 @@
 	import { getContext } from '$lib/context';
 	import { getDisplayAvatar, getDisplayName } from '$lib/util';
 	import MessageReply from '@components/Chat/MessageReply.svelte';
-	import { selectedServerIDKey } from '@routes/(app)/context';
 	import { decodeTime } from 'ulid';
 	import {
 		getUser,
@@ -29,6 +28,7 @@
 	import { get } from 'svelte/store';
 	import dayjs from 'dayjs';
 	import calendar from 'dayjs/plugin/calendar';
+	import { selectedServerKey } from '@routes/(app)/context';
 
 	dayjs.extend(calendar);
 
@@ -44,7 +44,7 @@
 
 	const settings = getContext(settingsKey)!;
 	const client = getContext(clientKey)!;
-	const selectedServerID = getContext(selectedServerIDKey);
+	const selectedServer = getContext(selectedServerKey);
 
 	const messages = getContext(messagesKey);
 	const userSentMessages = getContext(userSentMessagesKey);
@@ -101,7 +101,7 @@
 			src: TrashIcon,
 			name: 'Delete',
 			showIf: (message) => message.author == client.user?._id, // TODO: check permissions for message deleting
-			onclick: (message) => client.api.deleteMessage(message.channel, message._id)
+			onclick: (message) => client.deleteMessage(message.channel, message._id)
 		}
 	];
 
@@ -112,7 +112,7 @@
 	}
 
 	async function editMessage() {
-		const editedMessage = await client.api.editMessage(message.channel, message._id, {
+		const editedMessage = await client.editMessage(message.channel, message._id, {
 			content: messageContentToEdit
 		});
 
@@ -145,10 +145,14 @@
 		);
 	}
 
-	$: getUser(client.api, $users ?? client.api.cache.users, message.author).then(
+	$: getUser($users ?? client.cache.users, message.author, (id) => client.fetchUser(id)).then(
 		(user) => (author = user)
 	);
-	$: $selectedServerID == undefined ? undefined : updateMember($selectedServerID, message.author);
+
+	$: if ($selectedServer != undefined) {
+		updateMember($selectedServer?._id, message.author);
+	}
+
 	$: displayName =
 		author == undefined
 			? 'Unknown User'

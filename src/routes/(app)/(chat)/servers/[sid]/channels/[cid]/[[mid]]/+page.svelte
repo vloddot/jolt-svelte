@@ -2,15 +2,15 @@
 	import { getContext } from '$lib/context';
 	import TextChat from '@components/Chat/TextChat.svelte';
 	import VoiceChat from '@components/Chat/VoiceChat.svelte';
-	import { channelKey } from './context';
+	import { selectedChannelKey } from '@routes/(app)/context';
 
-	const channel = getContext(channelKey);
+	const channel = getContext(selectedChannelKey);
 </script>
 
 {#if $channel != undefined}
 	{#if $channel.channel_type == 'VoiceChannel'}
-		<VoiceChat channel={$channel} />
+		<VoiceChat />
 	{:else}
-		<TextChat channel={$channel} />
+		<TextChat />
 	{/if}
 {/if}

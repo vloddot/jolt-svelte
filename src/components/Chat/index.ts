@@ -1,4 +1,3 @@
-import type { APIClient } from '$lib/client';
 import type { ContextInjectionKey } from '$lib/context';
 import type { Writable } from 'svelte/store';
 
@@ -10,16 +9,16 @@ export interface SendableReply {
 export type UserSentMessage = {
 	_id: Message['_id'];
 	content: Message['content'];
-	channel: string,
-	author: string,
+	channel: string;
+	author: string;
 	replies: string[];
 	promise: Promise<Message>;
 };
 
 export async function getUser(
-	api: APIClient,
 	users: User[] | Map<string, User>,
-	id: string
+	id: string,
+	fallback: (id: string) => User | Promise<User>,
 ): Promise<User | undefined> {
 	if (id == '0'.repeat(26)) {
 		return;
@@ -33,13 +32,12 @@ export async function getUser(
 	}
 
 	if (user == undefined) {
-		return await api.fetchUser(id);
+		return await fallback(id);
 	}
 
 	return user;
 }
-export const channelKey: ContextInjectionKey<Exclude<Channel, { channel_type: 'VoiceChannel' }>> =
-	Symbol();
+
 export const messagesKey: ContextInjectionKey<Writable<Message[]>> = Symbol();
 export const membersKey: ContextInjectionKey<Writable<Member[]>> = Symbol();
 export const usersKey: ContextInjectionKey<Writable<User[]>> = Symbol();

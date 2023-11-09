@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { getContext } from '$lib/context';
 	import InputSetting from '@components/Settings/InputSetting.svelte';
-	import { serverKey } from '@routes/(app)/(chat)/servers/[sid]/context';
+	import { selectedServerKey } from '@routes/(app)/context';
 	import { clientKey } from '@routes/context';
 
-	const server = getContext(serverKey)!;
+	const selectedServer = getContext(selectedServerKey)!;
 	const client = getContext(clientKey)!;
 
 	let name: string;
 	let description: string;
 
-	server.subscribe((server) => {
+	selectedServer.subscribe((server) => {
 		if (server == undefined) {
 			return;
 		}
@@ -20,11 +20,11 @@
 	});
 
 	function submit() {
-		if ($server == undefined) {
+		if ($selectedServer == undefined) {
 			return;
 		}
 
-		client.api.editServer($server._id, {
+		client.editServer($selectedServer._id, {
 			name,
 			description
 		});
@@ -40,7 +40,7 @@
 	<InputSetting
 		type="textarea"
 		bind:value={description}
-		placeholder="Write something about {$server?.name ?? 'this server'}..."
+		placeholder="Write something about {$selectedServer?.name ?? 'this server'}..."
 	/>
 
 	<button type="submit">Submit</button>

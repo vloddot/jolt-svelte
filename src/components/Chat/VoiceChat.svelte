@@ -3,9 +3,10 @@
 	import { getDisplayName } from '$lib/util';
 	import PhoneIcon from '@components/Icons/PhoneIcon.svelte';
 	import type { VoiceParticipant } from '@revkit/voice';
+	import { selectedChannelKey } from '@routes/(app)/context';
 	import { voiceClientKey } from '@routes/context';
 
-	export let channel: Extract<Channel, { channel_type: 'VoiceChannel' }>;
+	const channel = getContext(selectedChannelKey)!;
 
 	const voice = getContext(voiceClientKey)!;
 
@@ -14,11 +15,15 @@
 	$voice.participants.onUpdate(() => (participants = $voice.participants));
 
 	function connect() {
+		if ($channel == undefined) {
+			return;
+		}
+
 		Promise.all([
 			navigator.mediaDevices.getUserMedia({
 				audio: true
 			}),
-			$voice.connect(channel._id)
+			$voice.connect($channel?._id)
 		]).then(([stream]) => {
 			const track = stream.getAudioTracks()[0];
 			$voice.play('audio', track);

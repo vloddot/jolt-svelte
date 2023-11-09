@@ -11,7 +11,7 @@
 	{#if system.type == 'text'}
 		{system.content}
 	{:else if system.type == 'channel_description_changed' || system.type == 'channel_icon_changed' || system.type == 'channel_renamed' || system.type == 'user_added' || system.type == 'user_remove'}
-		{#await client.api.fetchUser(system.by) then user}
+		{#await client.fetchUser(system.by) then user}
 			{@const displayName = getDisplayName(user)}
 			<img
 				class="cover"
@@ -28,7 +28,7 @@
 			{:else if system.type == 'channel_renamed'}
 				renamed this channel to {system.name}.
 			{:else if system.type == 'user_added' || system.type == 'user_remove'}
-				{#await client.api.fetchUser(system.id) then user}
+				{#await client.fetchUser(system.id) then user}
 					{#if system.type == 'user_added'}
 						added
 					{:else if system.type == 'user_remove'}
@@ -39,11 +39,11 @@
 			{/if}
 		{/await}
 	{:else if system.type == 'channel_ownership_changed'}
-		{#await Promise.all([system.from, system.to].map( (id) => client.api.fetchUser(id) )) then [from, to]}
+		{#await Promise.all([system.from, system.to].map((id) => client.fetchUser(id))) then [from, to]}
 			Channel ownership changed from {getDisplayName(from)} to {getDisplayName(to)}.
 		{/await}
 	{:else if system.type == 'user_banned' || system.type == 'user_joined' || system.type == 'user_kicked' || system.type == 'user_left'}
-		{#await client.api.fetchUser(system.id) then user}
+		{#await client.fetchUser(system.id) then user}
 			{@const displayName = getDisplayName(user)}
 			<img
 				class="cover"

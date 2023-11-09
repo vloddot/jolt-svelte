@@ -80,7 +80,7 @@
 		}
 
 		const friendly_name = getFriendlyName();
-		const credentialLoginResponse = await client.api
+		const credentialLoginResponse = await client
 			.login({
 				email,
 				password,
@@ -95,7 +95,7 @@
 		}
 
 		if (credentialLoginResponse.result == 'MFA') {
-			const mfaLoginResponse = await client.api
+			const mfaLoginResponse = await client
 				.login({
 					mfa_ticket: credentialLoginResponse.ticket,
 					mfa_response,

@@ -3,7 +3,7 @@
 	import UserIcon from './UserIcon.svelte';
 
 	export let user: User;
-	export let member: Member;
+	export let member: Member | undefined = undefined;
 
 	$: name = getDisplayName(user, member);
 </script>

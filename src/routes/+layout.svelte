@@ -151,7 +151,8 @@
 		padding: 0;
 		outline: none;
 
-		&:focus, &:hover {
+		&:focus,
+		&:hover {
 			outline: none;
 			background-color: transparent;
 		}
@@ -190,6 +191,18 @@
 		display: flex;
 		height: 100vh;
 		align-items: center;
+	}
+
+	:global(details) {
+		margin-top: 8px;
+		:global(> summary) {
+			user-select: none;
+			margin-left: 8px;
+			cursor: pointer;
+			font-size: 10px;
+			font-weight: 600;
+			cursor: pointer;
+		}
 	}
 
 	:global(.modal-base) {

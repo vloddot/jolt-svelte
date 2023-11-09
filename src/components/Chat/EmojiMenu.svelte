@@ -24,7 +24,7 @@
 		return frequencies;
 	}
 
-	let emojis = Array.from(client.api.cache.emojis.values());
+	let emojis = Array.from(client.cache.emojis.values());
 
 	function calculateScore(name: string) {
 		if (searchInput.length == 0) {
@@ -50,9 +50,9 @@
 	}
 
 	$: if (searchInput.length == 0) {
-		emojis = Array.from(client.api.cache.emojis.values());
+		emojis = Array.from(client.cache.emojis.values());
 	} else {
-		emojis = Array.from(client.api.cache.emojis.values())
+		emojis = Array.from(client.cache.emojis.values())
 			.flatMap((emoji) => {
 				const score = calculateScore(emoji.name);
 

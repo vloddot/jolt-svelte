@@ -12,7 +12,7 @@
 		sessions = await promise;
 	}
 
-	$: sessionFetchPromise = client.api.fetchSessions();
+	$: sessionFetchPromise = client.fetchSessions();
 	$: updateSessions(sessionFetchPromise);
 </script>
 
@@ -38,7 +38,7 @@
 				<SessionView
 					session={sessionInfo}
 					on:click={() => {
-						client.api.revokeSession(sessionInfo._id);
+						client.revokeSession(sessionInfo._id);
 						sessions = sessions.filter((session) => session._id != sessionInfo._id);
 					}}
 				/>
@@ -46,5 +46,5 @@
 		{/each}
 	{/await}
 
-	<button on:click={() => client.api.revokeAllSessions(false)}>Revoke all other sessions</button>
+	<button on:click={() => client.revokeAllSessions(false)}>Revoke all other sessions</button>
 </div>

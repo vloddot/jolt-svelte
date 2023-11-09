@@ -9,7 +9,7 @@
 	let profile: UserProfile | undefined;
 
 	$: name = getDisplayName(user);
-	$: client.api.fetchUserProfile(user._id).then((result) => (profile = result));
+	$: client.fetchUserProfile(user._id).then((result) => (profile = result));
 </script>
 
 <div
@@ -26,7 +26,7 @@
 </div>
 
 <div class="profile">
-	{#await client.api.fetchUserProfile(user._id) then profile}
+	{#await client.fetchUserProfile(user._id) then profile}
 		{#if profile?.content != undefined}
 			<p class="profile-content">{profile.content}</p>
 		{/if}

@@ -10,7 +10,7 @@
 	import { clientKey } from '@routes/context';
 
 	const client = getContext(clientKey)!;
-	let list = Array.from(client.api.cache.users.values()).filter(
+	let list = Array.from(client.cache.users.values()).filter(
 		(user) =>
 			user.relationship != undefined &&
 			['Outgoing', 'Incoming', 'Blocked', 'BlockedOther', 'Friend'].includes(user.relationship)
@@ -43,44 +43,70 @@
 <main class="main-content-container">
 	{#each categories as { title, list }}
 		{#if list.length != 0}
-			<h1 class="uppercase">{title} -- {list.length}</h1>
+			<details open>
+				<summary>{title} -- {list.length}</summary>
 
-			{#each list as user}
-				{@const name = getDisplayName(user)}
-				{@const avatar = getDisplayAvatar(user)}
-				<div class="flex">
-					<div class="p-2">
+				{#each list as user}
+					{@const name = getDisplayName(user)}
+					{@const avatar = getDisplayAvatar(user)}
+
+					<div class="friend-item">
 						{#if avatar != undefined}
-							<img class="cover" alt={name} src={avatar} width="64px" height="64px" />
+							<img class="cover" alt={name} src={avatar} width="32px" height="32px" />
 						{:else}
 							<GenericUserCircleIcon />
 						{/if}
 
 						{name}
-					</div>
 
-					{#if user.relationship == 'Friend'}
-						<button
-							on:click={async () => {
-								const { _id } = await client.api.openDM(user._id);
-								await goto(`${base}/channels/${_id}`);
-							}}
-						>
-							<EnvelopeIcon />
-						</button>
-					{/if}
-					{#if user.relationship == 'Incoming'}
-						<button on:click={() => client.api.acceptFriend(user._id)}>
-							<CheckIcon />
-						</button>
-					{/if}
-					{#if user.relationship == 'Outgoing' || user.relationship == 'Friend' || user.relationship == 'Incoming'}
-						<button on:click={() => client.api.removeFriend(user._id)}>
-							<XMarkIcon />
-						</button>
-					{/if}
-				</div>
-			{/each}
+						<div class="flex-divider" />
+
+						{#if user.relationship == 'Friend'}
+							<button
+								on:click={async () => {
+									const { _id } = await client.openDM(user._id);
+									await goto(`${base}/channels/${_id}`);
+								}}
+							>
+								<EnvelopeIcon />
+							</button>
+						{/if}
+						{#if user.relationship == 'Incoming'}
+							<button on:click={() => client.acceptFriend(user._id)}>
+								<CheckIcon />
+							</button>
+						{/if}
+						{#if user.relationship == 'Outgoing' || user.relationship == 'Friend' || user.relationship == 'Incoming'}
+							<button on:click={() => client.removeFriend(user._id)}>
+								<XMarkIcon />
+							</button>
+						{/if}
+					</div>
+				{/each}
+			</details>
 		{/if}
 	{/each}
 </main>
+
+<style lang="scss">
+	.friend-item {
+		display: flex;
+		gap: 8px;
+		align-items: center;
+		margin: 0px 8px;
+		padding: 4px 8px;
+		border-radius: var(--border-radius);
+		cursor: pointer;
+		transition: background-color 100ms;
+
+		&:hover {
+			background-color: var(--secondary-background);
+		}
+
+		button {
+			border-radius: 100%;
+			display: flex;
+			align-items: center;
+		}
+	}
+</style>

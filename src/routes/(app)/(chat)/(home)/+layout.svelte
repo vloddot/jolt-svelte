@@ -2,30 +2,25 @@
 	import { page } from '$app/stores';
 	import { getContext } from '$lib/context';
 	import ChannelComponent from '@components/ChannelBar/Channel.svelte';
-	import { selectedServerIDKey } from '@routes/(app)/context';
 	import { clientKey } from '@routes/context';
 	import { onMount } from 'svelte';
-	import { writable } from 'svelte/store';
 	import ChannelItem from '@components/ChannelBar/ChannelItem.svelte';
 	import { base } from '$app/paths';
 	import GenericUserCircleIcon from '@components/Icons/GenericUserCircleIcon.svelte';
 
 	const client = getContext(clientKey)!;
-	const selectedServerID = getContext(selectedServerIDKey) ?? writable();
-
-	$: selectedServerID.set(undefined);
 
 	let dms: Exclude<Channel, { channel_type: 'TextChannel' | 'VoiceChannel' }>[] = [];
 
 	$: savedMessagesChannel = dms?.find((channel) => channel.channel_type == 'SavedMessages');
 
 	function updateDMs() {
-		dms = Array.from(client.api.cache.channels.values()).filter((channel) =>
+		dms = Array.from(client.cache.channels.values()).filter((channel) =>
 			['DirectMessage', 'Group', 'SavedMessages'].includes(channel.channel_type)
 		) as typeof dms;
 
 		if ((dms.length ?? 0) == 0 && client.ready) {
-			client.api.fetchDirectMessages().then((result) => (dms = result));
+			client.fetchDirectMessages().then((result) => (dms = result));
 		}
 	}
 
