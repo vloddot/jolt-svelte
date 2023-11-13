@@ -139,7 +139,11 @@
 
 		return (
 			message.author != lastMessage.author ||
-			('masquerade' in message ? message.masquerade != lastMessage.masquerade : false) ||
+			('masquerade' in message
+				? message.masquerade?.name != lastMessage.masquerade?.name ||
+				  message.masquerade?.avatar != lastMessage.masquerade?.avatar ||
+				  message.masquerade?.colour != lastMessage.masquerade?.colour
+				: false) ||
 			decodeTime(message._id) - decodeTime(lastMessage._id) >= 7 * 60 * 1000 ||
 			(message.replies?.length ?? 0) != 0
 		);

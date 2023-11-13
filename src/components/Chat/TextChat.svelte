@@ -27,12 +27,17 @@
 	import EmojiMenu from './EmojiMenu.svelte';
 	import { ulid } from 'ulid';
 	import { selectedChannelKey } from '@routes/(app)/context';
+	import ChatBubbleBottomCenterTextIcon from '@components/Icons/ChatBubbleBottomCenterTextIcon.svelte';
 
 	let initialReplies: SendableReply[] = [];
 	export { initialReplies as replies };
 
 	let initialMessageInput = '';
 	export { initialMessageInput as messageInput };
+
+	let masqueradeName: string;
+	let masqueradeAvatar: string;
+	let showMasqueradeControls = false;
 
 	const messageInput = writable(initialMessageInput);
 	setContext(messageInputKey, messageInput);
@@ -173,6 +178,10 @@
 										id: _id,
 										mention
 									})),
+									masquerade: {
+										name: masqueradeName,
+										avatar: masqueradeAvatar
+									},
 									attachments
 								})
 								.then((message) => {
@@ -413,6 +422,16 @@
 				placeholder="Send message in {channelName}"
 			/>
 			<div class="flex-divider" />
+
+			{#if showMasqueradeControls}
+				<input style="border-radius: 0;margin-right: 2px" placeholder="Masquerade Name" bind:value={masqueradeName} />
+				<input style="border-radius: 0;" placeholder="Masquerade Avatar" bind:value={masqueradeAvatar} />
+			{/if}
+
+			<button class="default-button" on:click={() => (showMasqueradeControls = !showMasqueradeControls)}>
+				<ChatBubbleBottomCenterTextIcon />
+			</button>
+
 			<button type="button" on:click={() => showEmojiMenu.update((v) => !v)} class="default-button">
 				<FaceSmileIcon />
 			</button>
