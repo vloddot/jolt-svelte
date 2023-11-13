@@ -179,8 +179,8 @@
 										mention
 									})),
 									masquerade: {
-										name: masqueradeName,
-										avatar: masqueradeAvatar
+										name: masqueradeName == '' ? undefined : masqueradeName,
+										avatar: masqueradeAvatar == '' ? undefined : masqueradeAvatar
 									},
 									attachments
 								})
