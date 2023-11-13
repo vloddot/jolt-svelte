@@ -178,10 +178,13 @@
 										id: _id,
 										mention
 									})),
-									masquerade: {
-										name: masqueradeName == '' ? undefined : masqueradeName,
-										avatar: masqueradeAvatar == '' ? undefined : masqueradeAvatar
-									},
+									masquerade:
+										masqueradeName == '' && masqueradeAvatar == ''
+											? undefined
+											: {
+													name: masqueradeName == '' ? undefined : masqueradeName,
+													avatar: masqueradeAvatar == '' ? undefined : masqueradeAvatar
+											  },
 									attachments
 								})
 								.then((message) => {
@@ -424,15 +427,31 @@
 			<div class="flex-divider" />
 
 			{#if showMasqueradeControls}
-				<input style="border-radius: 0;margin-right: 2px" placeholder="Masquerade Name" bind:value={masqueradeName} />
-				<input style="border-radius: 0;" placeholder="Masquerade Avatar" bind:value={masqueradeAvatar} />
+				<input
+					style="border-radius: 0;margin-right: 2px"
+					placeholder="Masquerade Name"
+					bind:value={masqueradeName}
+				/>
+				<input
+					style="border-radius: 0;"
+					placeholder="Masquerade Avatar"
+					bind:value={masqueradeAvatar}
+				/>
 			{/if}
 
-			<button class="default-button" on:click={() => (showMasqueradeControls = !showMasqueradeControls)}>
+			<button
+				class="default-button"
+				on:click={() => (showMasqueradeControls = !showMasqueradeControls)}
+			>
 				<ChatBubbleBottomCenterTextIcon />
 			</button>
 
-			<button style="margin-left: 0;" type="button" on:click={() => showEmojiMenu.update((v) => !v)} class="default-button">
+			<button
+				style="margin-left: 0;"
+				type="button"
+				on:click={() => showEmojiMenu.update((v) => !v)}
+				class="default-button"
+			>
 				<FaceSmileIcon />
 			</button>
 		</form>
