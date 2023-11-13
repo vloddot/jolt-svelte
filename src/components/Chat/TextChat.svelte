@@ -432,7 +432,7 @@
 				<ChatBubbleBottomCenterTextIcon />
 			</button>
 
-			<button type="button" on:click={() => showEmojiMenu.update((v) => !v)} class="default-button">
+			<button style="margin-left: 0;" type="button" on:click={() => showEmojiMenu.update((v) => !v)} class="default-button">
 				<FaceSmileIcon />
 			</button>
 		</form>
