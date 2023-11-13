@@ -1,1 +1,0 @@
-async function t(n,a,e){if(e=="0".repeat(26))return;let s;return Array.isArray(a)?s=a.find(o=>o._id==e):s=a.get(e),s??await n.fetchUser(e)}const y=Symbol(),r=Symbol(),m=Symbol(),c=Symbol(),l=Symbol(),b=Symbol(),S=Symbol(),K=Symbol(),i=Symbol();export{i as a,m as b,y as c,K as d,t as g,r as m,b as n,l as r,S as s,c as u};
