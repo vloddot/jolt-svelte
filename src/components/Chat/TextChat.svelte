@@ -35,8 +35,8 @@
 	let initialMessageInput = '';
 	export { initialMessageInput as messageInput };
 
-	let masqueradeName: string;
-	let masqueradeAvatar: string;
+	let masqueradeName = '';
+	let masqueradeAvatar = '';
 	let showMasqueradeControls = false;
 
 	const messageInput = writable(initialMessageInput);
@@ -171,22 +171,36 @@
 					Promise.all(files.map((file) => client.autumn.uploadFile(file)))
 						.then((attachments) => {
 							files = [];
+
+							const repliesValue = get(replies);
+							const dataMessageSend: DataMessageSend = {};
+							dataMessageSend.content = content;
+
+							if (repliesValue.length != 0) {
+								dataMessageSend.replies = repliesValue.map(({ message: { _id }, mention }) => ({
+									id: _id,
+									mention
+								}));
+							}
+
+							console.log({ masqueradeName, masqueradeAvatar });
+							if (masqueradeName != '' || masqueradeAvatar != '') {
+								dataMessageSend.masquerade = {};
+								if (masqueradeName != '') {
+									dataMessageSend.masquerade.name = masqueradeName;
+								}
+
+								if (masqueradeAvatar != '') {
+									dataMessageSend.masquerade.avatar = masqueradeAvatar;
+								}
+							}
+
+							if (attachments.length != 0) {
+								dataMessageSend.attachments = attachments;
+							}
+
 							client
-								.sendMessage(channelValue._id, {
-									content,
-									replies: get(replies).map(({ message: { _id }, mention }) => ({
-										id: _id,
-										mention
-									})),
-									masquerade:
-										masqueradeName == '' && masqueradeAvatar == ''
-											? undefined
-											: {
-													name: masqueradeName == '' ? undefined : masqueradeName,
-													avatar: masqueradeAvatar == '' ? undefined : masqueradeAvatar
-											  },
-									attachments
-								})
+								.sendMessage(channelValue._id, dataMessageSend)
 								.then((message) => {
 									replies.set([]);
 									resolve(message);
