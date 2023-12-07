@@ -6,7 +6,7 @@ In physics, [jolt](<https://en.m.wikipedia.org/wiki/Jerk_(physics)>) is the rate
 
 Custom [Revolt](https://www.github.com/revoltchat) client for desktop made in [Tauri](https://tauri.app) and [SvelteKit](https://kit.svelte.dev).
 
-> Note: This client will likely be deprecated soon in favor of [vloddot/jolt-solidjs](https://github.com/vloddot/jolt-solidjs).
+> Note: This client is deprecated in favor of [vloddot/jolt-solidjs](https://github.com/vloddot/jolt-solidjs).
 
 <!-- omit in toc -->
 
